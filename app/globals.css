@@ -1,0 +1,221 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: "DM Sans", system-ui, sans-serif;
+  --font-display: "Fraunces", Georgia, serif;
+  --font-mono: "DM Mono", "Courier New", monospace;
+  
+  --color-background: oklch(0.97 0.012 85);
+  --color-foreground: oklch(0.28 0.02 50);
+  --color-card: oklch(0.99 0.008 85);
+  --color-card-foreground: oklch(0.28 0.02 50);
+  --color-popover: oklch(0.99 0.008 85);
+  --color-popover-foreground: oklch(0.28 0.02 50);
+  --color-primary: oklch(0.58 0.11 35);
+  --color-primary-foreground: oklch(0.99 0.005 85);
+  --color-secondary: oklch(0.94 0.015 85);
+  --color-secondary-foreground: oklch(0.28 0.02 50);
+  --color-muted: oklch(0.92 0.012 85);
+  --color-muted-foreground: oklch(0.48 0.02 50);
+  --color-accent: oklch(0.55 0.10 35);
+  --color-accent-foreground: oklch(0.97 0.01 85);
+  --color-destructive: oklch(0.55 0.15 25);
+  --color-destructive-foreground: oklch(0.99 0 0);
+  --color-border: oklch(0.88 0.015 85);
+  --color-input: oklch(0.88 0.015 85);
+  --color-ring: oklch(0.58 0.11 35);
+  --color-success: oklch(0.62 0.12 145);
+  --color-success-foreground: oklch(0.99 0 0);
+  --color-warning: oklch(0.75 0.12 85);
+  --color-warning-foreground: oklch(0.28 0.02 50);
+  --color-chart-1: oklch(0.58 0.11 35);
+  --color-chart-2: oklch(0.62 0.12 145);
+  --color-chart-3: oklch(0.75 0.12 85);
+  --color-chart-4: oklch(0.65 0.08 25);
+  --color-chart-5: oklch(0.55 0.06 145);
+  
+  --radius-sm: 0.5rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  
+  --color-sidebar: oklch(0.99 0.008 85);
+  --color-sidebar-foreground: oklch(0.28 0.02 50);
+  --color-sidebar-primary: oklch(0.58 0.11 35);
+  --color-sidebar-primary-foreground: oklch(0.99 0.005 85);
+  --color-sidebar-accent: oklch(0.94 0.015 85);
+  --color-sidebar-accent-foreground: oklch(0.28 0.02 50);
+  --color-sidebar-border: oklch(0.88 0.015 85);
+  --color-sidebar-ring: oklch(0.58 0.11 35);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  h1, h2, h3, h4 {
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+  
+  h1 {
+    @apply font-display text-3xl sm:text-4xl lg:text-5xl leading-tight;
+  }
+  
+  h2 {
+    @apply text-base leading-tight;
+  }
+  
+  h3 {
+    @apply text-sm leading-snug;
+  }
+  
+  h4 {
+    @apply text-lg sm:text-xl leading-snug;
+  }
+  
+  p {
+    @apply leading-relaxed;
+  }
+  
+  a {
+    @apply transition-colors duration-200;
+  }
+  
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+  
+  ::selection {
+    @apply bg-primary/20 text-foreground;
+  }
+
+  @supports (padding: env(safe-area-inset-bottom)) {
+    .safe-area-inset-bottom {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: "Fraunces", Georgia, serif;
+  }
+  
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  .text-pretty {
+    text-wrap: pretty;
+  }
+  
+  .transition-smooth {
+    @apply transition-all duration-300 ease-out;
+  }
+  
+  .hover-lift {
+    @apply transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg;
+  }
+  
+  .bg-warm-pattern {
+    background-image: radial-gradient(circle at 1px 1px, oklch(0.88 0.015 85) 1px, transparent 0);
+    background-size: 24px 24px;
+  }
+  
+  .text-gradient-warm {
+    @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent;
+  }
+  
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .container-query {
+    container-type: inline-size;
+  }
+}
+
+/* Liquid Glass UI Effect - Outside @layer to avoid Tailwind processing */
+.glass {
+  background: rgba(255, 255, 255, 0.75);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+}
+
+.glass-dark {
+  background: rgba(0, 0, 0, 0.15);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15);
+}
+
+.glass-button {
+  background: rgba(255, 255, 255, 0.85);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease-out;
+}
+
+.glass-button:hover {
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 8px 24px 0 rgba(0, 0, 0, 0.1);
+}
+
+/* Consistent page container for logged-in pages */
+.page-container {
+  @apply mx-auto max-w-4xl px-4 sm:px-6 lg:px-8;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-scroll {
+  animation: scroll 30s linear infinite;
+}
+
+.animate-scroll:hover {
+  animation-play-state: paused;
+}

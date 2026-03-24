@@ -1,0 +1,488 @@
+"use client"
+
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Badge } from "@/components/ui/badge"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useAuth } from "@/lib/auth-context"
+import { mockProviders } from "@/lib/mock-data"
+import { getAllLocations, addCustomLocation, isValidCityName } from "@/lib/locations"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Plus, ChevronRight, AlertCircle, Briefcase, Star, CheckCircle, Calendar, MoreVertical, KeyRound, LogOut, Trash, FileText } from "lucide-react"
+import { ProfileAvatarUpload } from "@/components/profile-avatar-upload"
+
+export default function RepairerProfilePage() {
+  const { user, updateUser, logout } = useAuth()
+  const provider = mockProviders.find((p) => p.userId === user?.id)
+  const locations = getAllLocations()
+
+  const [name, setName] = useState(provider?.name || "")
+  const [bio, setBio] = useState(provider?.bio || "")
+  const [phone, setPhone] = useState(provider?.phone || "")
+  const [location, setLocation] = useState("naperville")
+  const [customLocation, setCustomLocation] = useState("")
+  const [showCustomLocation, setShowCustomLocation] = useState(false)
+  const [locationError, setLocationError] = useState("")
+  const [specialty, setSpecialty] = useState<string[]>(provider?.specialty || [])
+  const [newSpecialty, setNewSpecialty] = useState("")
+  const [availability, setAvailability] = useState(provider?.availability || "")
+
+  // Dirty tracking for Save button
+  const initialValues = {
+    name: provider?.name || "",
+    bio: provider?.bio || "",
+    phone: provider?.phone || "",
+    availability: provider?.availability || "",
+  }
+  const isDirty = name !== initialValues.name || bio !== initialValues.bio || phone !== initialValues.phone || availability !== initialValues.availability || location !== "naperville" || specialty.join(",") !== (provider?.specialty || []).join(",")
+
+  // Add service modal state
+  const [addServiceOpen, setAddServiceOpen] = useState(false)
+  const [newServiceName, setNewServiceName] = useState("")
+  const [newServiceCategory, setNewServiceCategory] = useState("")
+  const [newServiceDescription, setNewServiceDescription] = useState("")
+  const [newServicePricing, setNewServicePricing] = useState("")
+  const [newServiceLocation, setNewServiceLocation] = useState("")
+  const [services, setServices] = useState(provider?.services || [])
+
+  const handleAddService = () => {
+    if (!newServiceName.trim() || !newServicePricing.trim()) return
+    const newService = {
+      id: `service-${Date.now()}`,
+      name: newServiceName.trim(),
+      category: newServiceCategory || "repair",
+      description: newServiceDescription.trim(),
+      pricing: newServicePricing.trim(),
+      location: newServiceLocation || "Drop-off",
+    }
+    setServices((prev) => [...prev, newService])
+    setNewServiceName("")
+    setNewServiceCategory("")
+    setNewServiceDescription("")
+    setNewServicePricing("")
+    setNewServiceLocation("")
+    setAddServiceOpen(false)
+  }
+
+  const handleLocationChange = (value: string) => {
+    setLocationError("")
+    if (value === "other") {
+      setShowCustomLocation(true)
+      setLocation("other")
+    } else {
+      setShowCustomLocation(false)
+      setLocation(value)
+      setCustomLocation("")
+    }
+  }
+
+  const handleAddSpecialty = () => {
+    if (newSpecialty.trim() && !specialty.includes(newSpecialty.trim())) {
+      setSpecialty([...specialty, newSpecialty.trim()])
+      setNewSpecialty("")
+    }
+  }
+
+  const handleRemoveSpecialty = (spec: string) => {
+    setSpecialty(specialty.filter((s) => s !== spec))
+  }
+
+  const handleSave = () => {
+    if (showCustomLocation && customLocation.trim()) {
+      const validation = isValidCityName(customLocation)
+      if (!validation.valid) {
+        setLocationError(validation.reason || "Invalid location")
+        return
+      }
+      const result = addCustomLocation(customLocation)
+      if (!result.success) {
+        setLocationError(result.reason || "Failed to add location")
+        return
+      }
+    }
+    alert("Profile updated successfully!")
+  }
+
+  return (
+    <div className="min-h-screen bg-background pb-20 sm:pb-12">
+      <div className="page-container pt-6">
+        {/* Header */}
+        <div className="mb-8 flex items-center justify-between">
+          <div className="flex items-center gap-5">
+            <ProfileAvatarUpload
+              src={user?.avatar || provider?.avatar}
+              name={user?.name || provider?.name || ""}
+              size="lg"
+              editable
+              onAvatarChange={(dataUrl) => updateUser({ avatar: dataUrl })}
+            />
+            <div>
+              <h1 className="mb-1 font-display text-2xl font-medium text-foreground">Repair Service Profile</h1>
+              <p className="text-sm text-muted-foreground">Manage your repair business information</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button onClick={handleSave} className="shrink-0" disabled={!isDirty}>
+              Save Changes
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full">
+                  <MoreVertical className="h-5 w-5" />
+                  <span className="sr-only">Account options</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem className="gap-2 cursor-pointer">
+                  <KeyRound className="h-4 w-4" />
+                  Change Password
+                </DropdownMenuItem>
+                <DropdownMenuItem className="gap-2 cursor-pointer" onClick={logout}>
+                  <LogOut className="h-4 w-4" />
+                  Sign Out
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="gap-2 cursor-pointer text-destructive focus:text-destructive">
+                  <Trash className="h-4 w-4" />
+                  Delete Account
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+
+        {/* Two Column Layout */}
+        <div className="grid gap-6 md:grid-cols-2">
+          {/* Left Column */}
+          <div className="space-y-6">
+            {/* Basic Information */}
+            <Card className="p-5">
+              <h2 className="font-semibold mb-5">Basic Information</h2>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm text-muted-foreground mb-1.5">Business Name</label>
+                  <Input
+                    id="name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="h-11"
+                    placeholder="Enter your business name"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm text-muted-foreground mb-1.5">About Your Services</label>
+                  <Textarea
+                    id="bio"
+                    value={bio}
+                    onChange={(e) => setBio(e.target.value)}
+                    rows={4}
+                    placeholder="Tell clients about your repair expertise, specialties, and experience..."
+                    className="resize-none"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">{bio.length}/500 characters</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm text-muted-foreground mb-1.5">Phone</label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="h-11"
+                    placeholder="(555) 123-4567"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm text-muted-foreground mb-1.5">Service Area</label>
+                  <Select value={location} onValueChange={handleLocationChange}>
+                    <SelectTrigger className="h-11">
+                      <SelectValue placeholder="Select your location" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {locations.map((loc) => (
+                        <SelectItem key={loc.value} value={loc.value}>
+                          {loc.label}
+                        </SelectItem>
+                      ))}
+                      <SelectItem value="other">Other (Add new location)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {showCustomLocation && (
+                    <div className="space-y-2 mt-2">
+                      <Input
+                        type="text"
+                        placeholder="Enter city, state (e.g., Springfield, IL)"
+                        value={customLocation}
+                        onChange={(e) => {
+                          setCustomLocation(e.target.value)
+                          setLocationError("")
+                        }}
+                        className="h-11"
+                      />
+                      {locationError && (
+                        <div className="flex items-center gap-2 text-destructive text-sm">
+                          <AlertCircle className="h-4 w-4" />
+                          {locationError}
+                        </div>
+                      )}
+                      <p className="text-xs text-muted-foreground">
+                        New valid locations will be added to the system for all users to find you.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </Card>
+
+            {/* Trust & History */}
+            <Card className="p-5">
+              <h2 className="font-semibold mb-5">Trust & History</h2>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Verification</span>
+                  <span className="inline-flex items-center gap-1 text-sm text-green-700 bg-green-100 px-2 py-0.5 rounded-full">
+                    <CheckCircle className="h-3.5 w-3.5" />
+                    Verified
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground flex items-center gap-2">
+                    <FileText className="h-4 w-4" />
+                    Terms & Conditions
+                  </span>
+                  <button type="button" className="text-sm font-medium text-primary hover:underline">
+                    View
+                  </button>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground flex items-center gap-2">
+                    <Briefcase className="h-4 w-4" />
+                    Services offered
+                  </span>
+                  <span className="text-sm font-medium">{provider?.services.length || 0}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground flex items-center gap-2">
+                    <Star className="h-4 w-4" />
+                    Average rating
+                  </span>
+                  <span className="text-sm font-medium flex items-center gap-1">
+                    <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                    {provider?.rating || "N/A"}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    Joined
+                  </span>
+                  <span className="text-sm font-medium">Jun 2024</span>
+                </div>
+              </div>
+            </Card>
+
+          </div>
+
+          {/* Right Column */}
+          <div className="space-y-6">
+            {/* Availability */}
+            <Card className="p-5">
+              <h2 className="font-semibold mb-5">Shop Hours</h2>
+              <div>
+                <label className="block text-sm text-muted-foreground mb-1.5">Available Hours</label>
+                <Input
+                  id="availability"
+                  value={availability}
+                  onChange={(e) => setAvailability(e.target.value)}
+                  placeholder="e.g., Mon-Fri 9am-5pm, Sat by appointment"
+                  className="h-11"
+                />
+              </div>
+            </Card>
+
+            {/* Services Offered */}
+            <Card className="p-5">
+              <div className="flex items-center justify-between mb-5">
+                <h2 className="font-semibold">Repair Services</h2>
+                <Badge variant="secondary">{services.length}</Badge>
+              </div>
+
+              <div className="space-y-2 mb-4">
+                {services.map((service) => (
+                  <button
+                    key={service.id}
+                    type="button"
+                    className="w-full flex items-center gap-3 p-3 rounded-xl border bg-secondary/30 hover:bg-secondary/50 transition-colors"
+                  >
+                    <div className="flex-1 text-left min-w-0">
+                      <h4 className="font-medium text-sm mb-1">{service.name}</h4>
+                      <div className="flex gap-2 flex-wrap">
+                        <span className="text-xs text-muted-foreground">{service.category}</span>
+                        <span className="text-xs text-muted-foreground">{"·"}</span>
+                        <span className="text-xs font-medium text-primary">{service.pricing}</span>
+                      </div>
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
+                  </button>
+                ))}
+              </div>
+
+              <Button variant="outline" className="w-full border-dashed bg-transparent" onClick={() => setAddServiceOpen(true)}>
+                <Plus className="mr-2 h-5 w-5" />
+                Add New Service
+              </Button>
+            </Card>
+
+            {/* Your Specialties */}
+            <Card className="p-5">
+              <h2 className="font-semibold mb-2">Your Specialties</h2>
+              <p className="text-sm text-muted-foreground mb-5">
+                Add the instruments and repairs you specialize in
+              </p>
+
+              <div className="flex flex-wrap gap-2 mb-4">
+                {specialty.map((spec) => (
+                  <button
+                    key={spec}
+                    type="button"
+                    onClick={() => handleRemoveSpecialty(spec)}
+                    className="rounded-full border border-primary bg-primary text-primary-foreground px-3 py-1.5 text-sm font-medium transition-all duration-200"
+                  >
+                    {spec}
+                  </button>
+                ))}
+                {specialty.length === 0 && <p className="text-sm text-muted-foreground">No specialties added yet</p>}
+              </div>
+
+              <div className="flex gap-2">
+                <Input
+                  placeholder="e.g., Violin Repair, Bow Rehair, Guitar Setup"
+                  value={newSpecialty}
+                  onChange={(e) => setNewSpecialty(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault()
+                      handleAddSpecialty()
+                    }
+                  }}
+                  className="h-11"
+                />
+                <Button
+                  type="button"
+                  onClick={handleAddSpecialty}
+                  className="h-11 px-5 shrink-0"
+                  disabled={!newSpecialty.trim()}
+                >
+                  <Plus className="h-5 w-5" />
+                </Button>
+              </div>
+            </Card>
+          </div>
+        </div>
+      </div>
+
+      {/* Add Service Modal */}
+      <Dialog open={addServiceOpen} onOpenChange={setAddServiceOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add New Service</DialogTitle>
+            <DialogDescription>
+              Create a new repair service listing for clients to book.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div>
+              <label className="block text-sm font-medium mb-1.5">Service Name</label>
+              <Input
+                value={newServiceName}
+                onChange={(e) => setNewServiceName(e.target.value)}
+                placeholder="e.g., String Instrument Repair, Bow Rehair"
+                className="h-11"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1.5">Category</label>
+              <Select value={newServiceCategory} onValueChange={setNewServiceCategory}>
+                <SelectTrigger className="h-11">
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="repair">Repair</SelectItem>
+                  <SelectItem value="restoration">Restoration</SelectItem>
+                  <SelectItem value="maintenance">Maintenance</SelectItem>
+                  <SelectItem value="setup">Setup & Adjustment</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1.5">Description</label>
+              <Textarea
+                value={newServiceDescription}
+                onChange={(e) => setNewServiceDescription(e.target.value)}
+                placeholder="Describe what this repair service includes..."
+                rows={3}
+                className="resize-none"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1.5">Pricing</label>
+              <Input
+                value={newServicePricing}
+                onChange={(e) => setNewServicePricing(e.target.value)}
+                placeholder="e.g., $50-500+"
+                className="h-11"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1.5">Service Type</label>
+              <Select value={newServiceLocation} onValueChange={setNewServiceLocation}>
+                <SelectTrigger className="h-11">
+                  <SelectValue placeholder="Select service type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Drop-off">Drop-off</SelectItem>
+                  <SelectItem value="Pick-up & Drop-off">Pick-up & Drop-off</SelectItem>
+                  <SelectItem value="On-site">On-site</SelectItem>
+                  <SelectItem value="Mail-in">Mail-in</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="ghost" onClick={() => setAddServiceOpen(false)} className="rounded-full">
+              Cancel
+            </Button>
+            <Button
+              onClick={handleAddService}
+              disabled={!newServiceName.trim() || !newServicePricing.trim()}
+              className="rounded-full"
+            >
+              Add Service
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  )
+}
