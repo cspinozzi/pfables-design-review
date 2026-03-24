@@ -25,7 +25,7 @@ export function ReviewDisplay({ review, serviceName }: ReviewDisplayProps) {
   return (
     <>
       <div
-        className="flex items-center justify-between px-4 sm:px-6 py-3 bg-muted/50 rounded-b-xl cursor-pointer group transition-colors hover:bg-muted/80"
+        className="flex items-center justify-between px-4 sm:px-6 py-3 bg-rose-50 rounded-b-xl cursor-pointer group transition-colors hover:bg-rose-100"
         onClick={(e) => {
           e.stopPropagation()
           setIsOpen(true)
@@ -48,20 +48,20 @@ export function ReviewDisplay({ review, serviceName }: ReviewDisplayProps) {
                 className={`h-4 w-4 ${
                   star <= review.rating
                     ? "fill-amber-400 text-amber-400"
-                    : "text-muted-foreground/30"
+                    : "text-rose-200"
                 }`}
               />
             ))}
           </div>
           {review.comment && (
-            <p className="text-sm text-muted-foreground truncate ml-2">
+            <p className="text-sm text-rose-900/70 truncate ml-2">
               "{review.comment.substring(0, 35)}{review.comment.length > 35 ? "…" : ""}"
             </p>
           )}
         </div>
 
         {/* View Review link — right */}
-        <span className="text-sm text-muted-foreground group-hover:text-foreground shrink-0 ml-4 transition-colors">
+        <span className="text-sm text-rose-900/60 group-hover:text-rose-900 shrink-0 ml-4 transition-colors">
           View Review
         </span>
       </div>

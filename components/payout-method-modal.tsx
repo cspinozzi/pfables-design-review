@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
@@ -152,6 +153,9 @@ export function PayoutMethodModal({
             <Building2 className="h-5 w-5 text-primary" />
             {isEditing ? 'Edit Payout Method' : 'Add Payout Method'}
           </DialogTitle>
+          <DialogDescription>
+            {isEditing ? 'Update your bank account details' : 'Add a new bank account for payouts'}
+          </DialogDescription>
         </DialogHeader>
 
         {status === 'success' ? (

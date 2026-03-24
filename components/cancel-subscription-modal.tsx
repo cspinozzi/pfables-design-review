@@ -4,6 +4,7 @@ import { useState } from 'react'
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
@@ -86,6 +87,9 @@ export function CancelSubscriptionModal({
               </>
             )}
           </DialogTitle>
+          <DialogDescription>
+            {status === 'complete' ? 'Your subscription has been cancelled' : `You are about to cancel your ${planName} subscription`}
+          </DialogDescription>
         </DialogHeader>
 
         {status === 'confirm' && (
