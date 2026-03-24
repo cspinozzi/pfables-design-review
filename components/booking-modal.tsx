@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
@@ -125,11 +126,11 @@ export function BookingModal({ provider, open, onOpenChange }: BookingModalProps
       <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl">
-            {isTeacher ? "Reserve a Lesson" : "Request a Service"}
+            Book {isTeacher ? "a lesson" : "a service"} with {provider.name}
           </DialogTitle>
-          <p className="text-sm text-muted-foreground">
-            with {provider.name}
-          </p>
+          <DialogDescription>
+            Fill out the form below to book your {isTeacher ? "lesson" : "service"}
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-5 pt-2">

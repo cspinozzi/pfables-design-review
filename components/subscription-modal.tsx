@@ -4,6 +4,7 @@ import { useState } from 'react'
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
@@ -121,6 +122,16 @@ export function SubscriptionModal({
                   : `Subscribe to ${plan.name}`
             }
           </DialogTitle>
+          <DialogDescription>
+            {status === 'complete' 
+              ? 'Your subscription is now active'
+              : isUpgrade 
+                ? `Upgrade to ${plan.name} plan - $${plan.price}/${plan.interval}`
+                : isDowngrade
+                  ? `Switch to ${plan.name} plan - $${plan.price}/${plan.interval}`
+                  : `Subscribe to ${plan.name} plan - $${plan.price}/${plan.interval}`
+            }
+          </DialogDescription>
         </DialogHeader>
 
         {status === 'idle' && (

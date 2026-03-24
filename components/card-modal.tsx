@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
@@ -143,6 +144,9 @@ export function CardModal({ open, onClose, onSave, onDelete, card }: CardModalPr
             <CreditCard className="h-5 w-5 text-primary" />
             {isEditMode ? 'Edit Card' : 'Add New Card'}
           </DialogTitle>
+          <DialogDescription>
+            {isEditMode ? 'Update your card details' : 'Add a new payment method'}
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 px-4 pb-4 sm:px-6 sm:pb-6">

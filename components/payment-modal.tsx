@@ -4,6 +4,7 @@ import { useState } from 'react'
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
@@ -101,6 +102,9 @@ export function PaymentModal({
             <CreditCard className="h-5 w-5 text-primary" />
             {status === 'complete' ? 'Payment Complete' : 'Complete Payment'}
           </DialogTitle>
+          <DialogDescription>
+            {status === 'complete' ? `Payment of $${amount.toFixed(2)} processed successfully` : `Pay $${amount.toFixed(2)} for ${serviceName}`}
+          </DialogDescription>
         </DialogHeader>
 
         {status === 'idle' && (

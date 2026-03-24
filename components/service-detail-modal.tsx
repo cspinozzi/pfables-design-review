@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
@@ -111,7 +112,12 @@ export function ServiceDetailModal({
             {title}
           </DialogTitle>
           {subtitle && (
-            <p className="text-sm text-muted-foreground">{subtitle}</p>
+            <DialogDescription>{subtitle}</DialogDescription>
+          )}
+          {!subtitle && (
+            <DialogDescription>
+              Details for {title}
+            </DialogDescription>
           )}
         </DialogHeader>
 

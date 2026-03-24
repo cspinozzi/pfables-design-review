@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Star } from "lucide-react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import Image from "next/image"
 
 export interface ReviewData {
@@ -25,7 +25,7 @@ export function ReviewDisplay({ review, serviceName }: ReviewDisplayProps) {
   return (
     <>
       <div
-        className="flex items-center justify-between px-4 sm:px-6 py-2.5 bg-muted/50 rounded-b-xl cursor-pointer group transition-colors hover:bg-muted/80"
+        className="flex items-center justify-between px-4 sm:px-6 py-3 bg-muted/50 rounded-b-xl cursor-pointer group transition-colors hover:bg-muted/80"
         onClick={(e) => {
           e.stopPropagation()
           setIsOpen(true)
@@ -70,12 +70,15 @@ export function ReviewDisplay({ review, serviceName }: ReviewDisplayProps) {
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Review for {serviceName}</DialogTitle>
+            <DialogDescription>
+              A detailed review from {review.reviewerName}
+            </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             {/* Reviewer Info */}
             <div className="flex items-center gap-3">
-              <div className="relative h-12 w-12 rounded-full overflow-hidden shrink-0 bg-muted">
+              <div className="relative h-12 w-12 rounded-full overflow-hidden shrink-0 bg-muted flex-shrink-0">
                 <Image
                   src={review.reviewerAvatar || "/placeholder-user.jpg"}
                   alt={review.reviewerName}
