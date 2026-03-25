@@ -6,6 +6,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -121,6 +122,9 @@ export function SubscriptionModal({
                   : `Subscribe to ${plan.name}`
             }
           </DialogTitle>
+          <DialogDescription>
+            {status === 'complete' ? 'Your subscription is now active.' : `$${plan.price}/${plan.interval}`}
+          </DialogDescription>
         </DialogHeader>
 
         {status === 'idle' && (

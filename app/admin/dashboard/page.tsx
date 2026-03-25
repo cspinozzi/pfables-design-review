@@ -269,7 +269,7 @@ export default function AdminDashboardPage() {
               { href: "/admin/verification", icon: Shield, label: "Review Verifications", desc: "Background check approvals" },
               { href: "/admin/payments", icon: DollarSign, label: "View Payments", desc: "Platform transactions and revenue" },
               { href: "/admin/qr-codes", icon: QrCode, label: "QR Code Manager", desc: "Generate and manage QR codes" },
-              { href: "/admin/verification", icon: Flag, label: "Handle Flags", desc: "Review reported content" },
+              { href: "/admin/refunds", icon: Flag, label: "Handle Refunds", desc: "Review refund requests" },
             ].map((action) => (
               <Link key={action.href} href={action.href}>
                 <Card className="p-4 hover:bg-muted/50 transition-colors cursor-pointer border border-border/50">

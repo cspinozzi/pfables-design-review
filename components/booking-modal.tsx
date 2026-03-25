@@ -11,6 +11,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog"
 import {
   Select,
@@ -103,13 +104,19 @@ export function BookingModal({ provider, open, onOpenChange }: BookingModalProps
     return (
       <Dialog open={open} onOpenChange={handleClose}>
         <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Request Sent</DialogTitle>
+            <DialogDescription>
+              Your {isTeacher ? "lesson" : "service"} request has been sent to {provider.name}.
+            </DialogDescription>
+          </DialogHeader>
           <div className="flex flex-col items-center text-center py-6">
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-100 mb-4">
               <CheckCircle2 className="h-8 w-8 text-green-600" />
             </div>
-            <h3 className="text-xl font-semibold mb-2">Request Sent</h3>
+            <h3 className="text-xl font-semibold mb-2">Success!</h3>
             <p className="text-sm text-muted-foreground mb-6 max-w-xs">
-              Your {isTeacher ? "lesson" : "service"} request has been sent to {provider.name}. They will get back to you shortly.
+              They will get back to you shortly.
             </p>
             <Button onClick={handleClose} className="w-full">
               Done
@@ -127,9 +134,9 @@ export function BookingModal({ provider, open, onOpenChange }: BookingModalProps
           <DialogTitle className="text-xl">
             {isTeacher ? "Reserve a Lesson" : "Request a Service"}
           </DialogTitle>
-          <p className="text-sm text-muted-foreground">
+          <DialogDescription>
             with {provider.name}
-          </p>
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-5 pt-2">

@@ -6,6 +6,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -101,6 +102,9 @@ export function PaymentModal({
             <CreditCard className="h-5 w-5 text-primary" />
             {status === 'complete' ? 'Payment Complete' : 'Complete Payment'}
           </DialogTitle>
+          <DialogDescription>
+            {status === 'complete' ? 'Your payment has been processed.' : `Pay $${amount.toFixed(2)} for ${serviceName}`}
+          </DialogDescription>
         </DialogHeader>
 
         {status === 'idle' && (
