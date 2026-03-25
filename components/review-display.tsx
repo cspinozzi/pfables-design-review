@@ -25,7 +25,7 @@ export function ReviewDisplay({ review, serviceName }: ReviewDisplayProps) {
   return (
     <>
       <div
-        className="flex items-center justify-between px-6 sm:px-8 py-6 bg-muted rounded-b-xl cursor-pointer group transition-colors hover:bg-muted/90"
+        className="flex items-center justify-end px-4 sm:px-6 py-3 bg-primary rounded-b-xl cursor-pointer"
         onClick={(e) => {
           e.stopPropagation()
           setIsOpen(true)
@@ -39,31 +39,24 @@ export function ReviewDisplay({ review, serviceName }: ReviewDisplayProps) {
           }
         }}
       >
-        {/* Stars + comment preview — left */}
-        <div className="flex items-center gap-2 min-w-0 flex-1">
-          <div className="flex items-center gap-0.5 shrink-0">
+        <button
+          className="flex items-center gap-1.5 rounded-full bg-secondary text-secondary-foreground px-4 py-1.5 text-sm font-semibold transition-colors hover:bg-secondary/80"
+          tabIndex={-1}
+        >
+          <div className="flex items-center gap-0.5">
             {[1, 2, 3, 4, 5].map((star) => (
               <Star
                 key={star}
-                className={`h-4 w-4 ${
+                className={`h-3.5 w-3.5 ${
                   star <= review.rating
                     ? "fill-amber-400 text-amber-400"
-                    : "text-muted-foreground/30"
+                    : "fill-muted-foreground/20 text-muted-foreground/20"
                 }`}
               />
             ))}
           </div>
-          {review.comment && (
-            <p className="text-sm text-muted-foreground truncate ml-2">
-              "{review.comment.substring(0, 35)}{review.comment.length > 35 ? "…" : ""}"
-            </p>
-          )}
-        </div>
-
-        {/* View Review link — right */}
-        <span className="text-sm text-muted-foreground group-hover:text-foreground shrink-0 ml-4 transition-colors">
           View Review
-        </span>
+        </button>
       </div>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>

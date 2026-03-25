@@ -9,11 +9,10 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { PaymentModal } from "@/components/payment-modal"
 import { ReviewModal } from "@/components/review-modal"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { ReviewDisplay } from "@/components/review-display"
 import { useMockMessages } from "@/hooks/use-mock-messages"
 import { useAuth } from "@/lib/auth-context"
 import { Star } from "lucide-react"
-import Image from "next/image"
 
 type ItemStatus = "active" | "completed" | "cancelled"
 
@@ -51,7 +50,6 @@ export default function LessonsPage() {
   const [selectedItem, setSelectedItem] = useState<LessonItem | null>(null)
   const [payingItem, setPayingItem] = useState<LessonItem | null>(null)
   const [reviewingItem, setReviewingItem] = useState<LessonItem | null>(null)
-  const [viewingReview, setViewingReview] = useState<LessonItem | null>(null)
 
   const handleMessageProvider = (providerName: string) => {
     const conv = conversations.find((c) =>
@@ -231,34 +229,7 @@ export default function LessonsPage() {
                 }
                 footer={item.status === "completed" && item.price ? (
                   item.review ? (
-                    <div 
-                      className="flex items-center justify-between px-4 sm:px-6 py-3 bg-muted/30 rounded-b-xl cursor-pointer hover:bg-muted/50 transition-colors"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        setViewingReview(item)
-                      }}
-                    >
-                      <div className="flex items-center gap-2">
-                        <div className="flex items-center">
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <Star
-                              key={star}
-                              className={`h-4 w-4 ${
-                                star <= item.review!.rating
-                                  ? "fill-amber-400 text-amber-400"
-                                  : "text-muted-foreground/30"
-                              }`}
-                            />
-                          ))}
-                        </div>
-                        {item.review.comment && (
-                          <span className="text-xs text-muted-foreground truncate max-w-[200px]">
-                            "{item.review.comment}"
-                          </span>
-                        )}
-                      </div>
-                      <span className="text-xs text-muted-foreground">View Review</span>
-                    </div>
+                    <ReviewDisplay review={item.review} serviceName={item.title} />
                   ) : (
                     <div className="flex items-center justify-end px-4 sm:px-6 py-3 bg-primary rounded-b-xl">
                       <Button
@@ -345,65 +316,6 @@ export default function LessonsPage() {
         )}
 
         {/* View Review Modal */}
-        {viewingReview && viewingReview.review && (
-          <Dialog open={!!viewingReview} onOpenChange={() => setViewingReview(null)}>
-            <DialogContent className="max-w-sm">
-              <DialogHeader>
-                <DialogTitle>Your Review</DialogTitle>
-                <DialogDescription>
-                  Review for {viewingReview.title} with {viewingReview.provider}
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4">
-                {/* Provider Info */}
-                <div className="flex items-center gap-3">
-                  <div className="relative h-12 w-12 rounded-full overflow-hidden shrink-0">
-                    <Image 
-                      src={viewingReview.providerAvatar} 
-                      alt={viewingReview.provider} 
-                      fill 
-                      className="object-cover" 
-                    />
-                  </div>
-                  <div>
-                    <p className="font-semibold">{viewingReview.provider}</p>
-                    <p className="text-sm text-muted-foreground">{viewingReview.title}</p>
-                  </div>
-                </div>
-
-                {/* Star Rating */}
-                <div className="flex items-center justify-center gap-1 py-2">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <Star
-                      key={star}
-                      className={`h-8 w-8 ${
-                        star <= viewingReview.review!.rating
-                          ? "fill-amber-400 text-amber-400"
-                          : "text-muted-foreground/30"
-                      }`}
-                    />
-                  ))}
-                </div>
-
-                {/* Comment */}
-                {viewingReview.review.comment && (
-                  <div className="p-4 bg-muted/50 rounded-lg">
-                    <p className="text-sm italic">"{viewingReview.review.comment}"</p>
-                  </div>
-                )}
-
-                {/* Date */}
-                <p className="text-xs text-center text-muted-foreground">
-                  Reviewed on {viewingReview.review.date.toLocaleDateString("en-US", { 
-                    month: "long", 
-                    day: "numeric", 
-                    year: "numeric" 
-                  })}
-                </p>
-              </div>
-            </DialogContent>
-          </Dialog>
-        )}
       </div>
     </div>
   )
