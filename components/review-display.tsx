@@ -25,7 +25,7 @@ export function ReviewDisplay({ review, serviceName }: ReviewDisplayProps) {
   return (
     <>
       <div
-        className="flex items-center justify-end px-4 sm:px-6 py-3 bg-primary rounded-b-xl cursor-pointer"
+        className="flex items-center justify-between gap-3 px-4 sm:px-6 py-3 bg-primary/35 rounded-b-xl cursor-pointer"
         onClick={(e) => {
           e.stopPropagation()
           setIsOpen(true)
@@ -39,22 +39,34 @@ export function ReviewDisplay({ review, serviceName }: ReviewDisplayProps) {
           }
         }}
       >
+        {/* Stars on the left */}
+        <div className="flex items-center gap-0.5 shrink-0">
+          {[1, 2, 3, 4, 5].map((star) => (
+            <Star
+              key={star}
+              className={`h-4 w-4 ${
+                star <= review.rating
+                  ? "fill-amber-400 text-amber-400"
+                  : "fill-muted-foreground/20 text-muted-foreground/20"
+              }`}
+            />
+          ))}
+        </div>
+
+        {/* Comment preview in the middle */}
+        {review.comment && (
+          <div className="flex-1 min-w-0 ml-2">
+            <p className="text-xs text-muted-foreground truncate">
+              "{review.comment.substring(0, 40)}{review.comment.length > 40 ? "..." : ""}"
+            </p>
+          </div>
+        )}
+
+        {/* View Review button on the right */}
         <button
-          className="flex items-center gap-1.5 rounded-full bg-secondary text-secondary-foreground px-4 py-1.5 text-sm font-semibold transition-colors hover:bg-secondary/80"
+          className="flex items-center rounded-full bg-secondary text-secondary-foreground px-4 py-1.5 text-sm font-semibold transition-colors hover:bg-secondary/80 shrink-0"
           tabIndex={-1}
         >
-          <div className="flex items-center gap-0.5">
-            {[1, 2, 3, 4, 5].map((star) => (
-              <Star
-                key={star}
-                className={`h-3.5 w-3.5 ${
-                  star <= review.rating
-                    ? "fill-amber-400 text-amber-400"
-                    : "fill-muted-foreground/20 text-muted-foreground/20"
-                }`}
-              />
-            ))}
-          </div>
           View Review
         </button>
       </div>

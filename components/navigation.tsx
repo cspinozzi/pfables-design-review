@@ -230,11 +230,11 @@ export function Navigation() {
 
           {/* Navigation Links */}
           <div className="hidden sm:flex items-center gap-4 lg:gap-6">
-            {navLinks.map((link) => {
+            {navLinks.map((link, idx) => {
               const isActive = pathname === link.href
               return (
                 <Link
-                  key={link.href}
+                  key={`nav-${idx}`}
                   href={link.href}
                   className={cn(
                     "text-sm transition-colors duration-300",
@@ -247,11 +247,11 @@ export function Navigation() {
                 </Link>
               )
             })}
-            {secondaryLinks.map((link) => {
+            {secondaryLinks.map((link, idx) => {
               const isActive = pathname === link.href
               return (
                 <Link
-                  key={link.href}
+                  key={`secondary-${idx}`}
                   href={link.href}
                   className={cn(
                     "text-sm transition-colors duration-300",
@@ -409,13 +409,13 @@ export function Navigation() {
       {/* Mobile Bottom Navigation Bar */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border/50 bg-card/95 backdrop-blur-sm sm:hidden">
         <div className="flex items-center justify-around px-2 py-2 safe-area-inset-bottom">
-          {bottomNavLinks.map((link) => {
+          {bottomNavLinks.map((link, idx) => {
             const Icon = link.icon
             const isActive = pathname === link.href
 
             return (
               <Link
-                key={link.href}
+                key={`bottom-${idx}`}
                 href={link.href}
                 className={cn(
                   "flex flex-1 flex-col items-center gap-1 rounded-xl px-2 py-2 transition-all duration-200",

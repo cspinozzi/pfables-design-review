@@ -211,7 +211,7 @@ export default function LessonsPage() {
                       <User className="h-3.5 w-3.5" />
                       {item.provider}
                     </span>
-                    <span className="flex items-center gap-1">
+                    <span className="flex items-center gap-1" suppressHydrationWarning>
                       <Calendar className="h-3.5 w-3.5" />
                       {formatDate(item.date)}
                     </span>

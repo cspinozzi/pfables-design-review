@@ -58,7 +58,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${fraunces.variable} ${dmSans.variable}`} data-scroll-behavior="smooth">
+    <html lang="en" className={`${fraunces.variable} ${dmSans.variable}`} data-scroll-behavior="smooth" suppressHydrationWarning>
       <body className="font-sans antialiased">
         <AuthProvider>
           <ScrollToTop />
