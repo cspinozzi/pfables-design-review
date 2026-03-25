@@ -25,7 +25,7 @@ export function ReviewDisplay({ review, serviceName }: ReviewDisplayProps) {
   return (
     <>
       <div
-        className="flex items-center justify-between px-6 sm:px-8 py-4 bg-muted/70 rounded-b-xl cursor-pointer group transition-colors hover:bg-muted"
+        className="flex items-center justify-between px-6 sm:px-8 py-6 bg-muted rounded-b-xl cursor-pointer group transition-colors hover:bg-muted/90"
         onClick={(e) => {
           e.stopPropagation()
           setIsOpen(true)
