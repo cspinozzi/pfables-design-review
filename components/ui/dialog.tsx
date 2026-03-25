@@ -64,9 +64,8 @@ function DialogContent({
           className,
         )}
         {...props}
+        aria-describedby={undefined}
       >
-        {/* Hidden description for Radix UI accessibility requirement */}
-        <DialogPrimitive.Description className="sr-only" />
         {children}
         {showCloseButton && (
           <DialogPrimitive.Close

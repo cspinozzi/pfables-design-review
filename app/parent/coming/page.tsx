@@ -206,12 +206,12 @@ export default function LessonsPage() {
                 status={item.status === "completed" ? "received" : item.status === "cancelled" ? "cancelled" : item.pendingApproval ? "pending" : "active"}
                 onClick={() => setSelectedItem(item)}
                 details={
-                  <>
+                  <div suppressHydrationWarning>
                     <span className="flex items-center gap-1">
                       <User className="h-3.5 w-3.5" />
                       {item.provider}
                     </span>
-                    <span className="flex items-center gap-1" suppressHydrationWarning>
+                    <span className="flex items-center gap-1">
                       <Calendar className="h-3.5 w-3.5" />
                       {formatDate(item.date)}
                     </span>
@@ -225,7 +225,7 @@ export default function LessonsPage() {
                       <MapPin className="h-3.5 w-3.5" />
                       {item.location}
                     </span>
-                  </>
+                  </div>
                 }
                 footer={item.status === "completed" && item.price ? (
                   item.review ? (
