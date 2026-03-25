@@ -6,6 +6,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Calendar, Clock, MapPin, User, DollarSign, MessageCircle, Wrench, CheckCircle2, Circle, XCircle, Star } from "lucide-react"
@@ -110,9 +111,9 @@ export function ServiceDetailModal({
           <DialogTitle className="flex items-center gap-2">
             {title}
           </DialogTitle>
-          {subtitle && (
-            <p className="text-sm text-muted-foreground">{subtitle}</p>
-          )}
+          <DialogDescription>
+            {subtitle || 'Service details and information'}
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-1">

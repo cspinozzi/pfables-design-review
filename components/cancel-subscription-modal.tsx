@@ -6,6 +6,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -86,6 +87,9 @@ export function CancelSubscriptionModal({
               </>
             )}
           </DialogTitle>
+          <DialogDescription>
+            {status === 'cancelled' ? `Your subscription has been cancelled.` : `Your ${planName} plan will remain active until ${renewalDate}.`}
+          </DialogDescription>
         </DialogHeader>
 
         {status === 'confirm' && (

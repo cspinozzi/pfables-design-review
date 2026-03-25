@@ -6,6 +6,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -152,6 +153,9 @@ export function PayoutMethodModal({
             <Building2 className="h-5 w-5 text-primary" />
             {isEditing ? 'Edit Payout Method' : 'Add Payout Method'}
           </DialogTitle>
+          <DialogDescription>
+            {isEditing ? 'Update your bank account details' : 'Add a new payout method to receive payments'}
+          </DialogDescription>
         </DialogHeader>
 
         {status === 'success' ? (

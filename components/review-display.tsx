@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Star } from "lucide-react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import Image from "next/image"
 
 export interface ReviewData {
@@ -25,7 +25,7 @@ export function ReviewDisplay({ review, serviceName }: ReviewDisplayProps) {
   return (
     <>
       <div
-        className="flex items-center justify-between px-4 sm:px-6 py-2.5 bg-muted/50 rounded-b-xl cursor-pointer group transition-colors hover:bg-muted/80"
+        className="flex items-center justify-between gap-3 px-4 sm:px-6 py-3 bg-primary/10 rounded-b-xl cursor-pointer"
         onClick={(e) => {
           e.stopPropagation()
           setIsOpen(true)
@@ -39,37 +39,45 @@ export function ReviewDisplay({ review, serviceName }: ReviewDisplayProps) {
           }
         }}
       >
-        {/* Stars + comment preview — left */}
-        <div className="flex items-center gap-2 min-w-0 flex-1">
-          <div className="flex items-center gap-0.5 shrink-0">
-            {[1, 2, 3, 4, 5].map((star) => (
-              <Star
-                key={star}
-                className={`h-4 w-4 ${
-                  star <= review.rating
-                    ? "fill-amber-400 text-amber-400"
-                    : "text-muted-foreground/30"
-                }`}
-              />
-            ))}
-          </div>
-          {review.comment && (
-            <p className="text-sm text-muted-foreground truncate ml-2">
-              "{review.comment.substring(0, 35)}{review.comment.length > 35 ? "…" : ""}"
-            </p>
-          )}
+        {/* Stars on the left */}
+        <div className="flex items-center gap-0.5 shrink-0">
+          {[1, 2, 3, 4, 5].map((star) => (
+            <Star
+              key={star}
+              className={`h-4 w-4 ${
+                star <= review.rating
+                  ? "fill-amber-400 text-amber-400"
+                  : "fill-muted-foreground/20 text-muted-foreground/20"
+              }`}
+            />
+          ))}
         </div>
 
-        {/* View Review link — right */}
-        <span className="text-sm text-muted-foreground group-hover:text-foreground shrink-0 ml-4 transition-colors">
+        {/* Comment preview in the middle */}
+        {review.comment && (
+          <div className="flex-1 min-w-0 ml-2">
+            <p className="text-xs text-muted-foreground truncate">
+              "{review.comment.substring(0, 40)}{review.comment.length > 40 ? "..." : ""}"
+            </p>
+          </div>
+        )}
+
+        {/* View Review button on the right */}
+        <button
+          className="flex items-center rounded-full bg-secondary text-secondary-foreground px-4 py-1.5 text-sm font-semibold transition-colors hover:bg-secondary/80 shrink-0"
+          tabIndex={-1}
+        >
           View Review
-        </span>
+        </button>
       </div>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Review for {serviceName}</DialogTitle>
+            <DialogDescription>
+              Left by {review.reviewerName} on {review.date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+            </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
