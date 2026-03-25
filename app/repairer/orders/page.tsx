@@ -243,11 +243,10 @@ function RepairerOrdersContent() {
                       Decline
                     </Button>
                 </div>
+                ) : order.review ? (
+                  <ReviewDisplay review={order.review} serviceName={order.title} />
                 ) : undefined}
               >
-                {order.review && (
-                  <ReviewDisplay review={order.review} serviceName={order.title} />
-                )}
               </ServiceCard>
               ))}
             </div>

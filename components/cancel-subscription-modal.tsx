@@ -87,6 +87,9 @@ export function CancelSubscriptionModal({
               </>
             )}
           </DialogTitle>
+          <DialogDescription>
+            {status === 'cancelled' ? `Your subscription has been cancelled.` : `Your ${planName} plan will remain active until ${renewalDate}.`}
+          </DialogDescription>
         </DialogHeader>
 
         {status === 'confirm' && (

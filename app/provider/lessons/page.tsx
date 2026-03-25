@@ -220,6 +220,8 @@ function ProviderLessonsContent() {
                       Decline
                     </Button>
                   </div>
+                ) : lesson.review ? (
+                  <ReviewDisplay review={lesson.review} serviceName={lesson.title} />
                 ) : undefined}
                 details={
                   <>
@@ -242,9 +244,6 @@ function ProviderLessonsContent() {
                   </>
                 }
               >
-                {lesson.review && (
-                  <ReviewDisplay review={lesson.review} serviceName={lesson.title} />
-                )}
               </ServiceCard>
             ))}
           </div>

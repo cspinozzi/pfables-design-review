@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Star } from "lucide-react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import Image from "next/image"
 
 export interface ReviewData {
@@ -70,6 +70,9 @@ export function ReviewDisplay({ review, serviceName }: ReviewDisplayProps) {
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Review for {serviceName}</DialogTitle>
+            <DialogDescription>
+              Left by {review.reviewerName} on {review.date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+            </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">

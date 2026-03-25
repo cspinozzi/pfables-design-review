@@ -9,7 +9,7 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { PaymentModal } from "@/components/payment-modal"
 import { ReviewModal } from "@/components/review-modal"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { useMockMessages } from "@/hooks/use-mock-messages"
 import { useAuth } from "@/lib/auth-context"
 import { Star } from "lucide-react"
@@ -350,6 +350,9 @@ export default function LessonsPage() {
             <DialogContent className="max-w-sm">
               <DialogHeader>
                 <DialogTitle>Your Review</DialogTitle>
+                <DialogDescription>
+                  Review for {viewingReview.title} with {viewingReview.provider}
+                </DialogDescription>
               </DialogHeader>
               <div className="space-y-4">
                 {/* Provider Info */}
