@@ -297,31 +297,46 @@ export function ServiceDetailModal({
 
   // Confirmation view (shown after successful reschedule)
   const confirmationView = (
-    <div className="flex flex-col items-center justify-center py-10 gap-5 text-center">
-      <div className="flex items-center justify-center h-16 w-16 rounded-full bg-primary/10">
-        <CalendarCheck className="h-8 w-8 text-primary" />
+    <div className="flex flex-col items-center justify-center py-8 gap-6 text-center">
+      {/* Success icon */}
+      <div className="flex items-center justify-center h-20 w-20 rounded-full bg-primary/10">
+        <CalendarCheck className="h-10 w-10 text-primary" />
       </div>
-      <div className="space-y-1.5">
-        <h3 className="font-semibold text-base text-foreground">Class Rescheduled</h3>
-        <p className="text-sm text-muted-foreground leading-relaxed max-w-[260px]">
-          Your class has been rescheduled successfully. The provider will be notified.
+
+      {/* Heading + subtext */}
+      <div className="space-y-2">
+        <h3 className="font-semibold text-lg text-foreground">Class Rescheduled</h3>
+        <p className="text-sm text-muted-foreground leading-relaxed max-w-[240px] mx-auto">
+          Your request has been sent. The provider will confirm the new time shortly.
         </p>
       </div>
+
+      {/* New date + time chips */}
       {selectedDate && selectedTime && (
-        <div className="rounded-xl border bg-secondary/50 px-5 py-3.5 space-y-1.5 w-full max-w-[260px]">
-          <div className="flex items-center gap-2 text-sm text-foreground">
-            <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-            <span className="font-medium">
-              {selectedDate.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
-            </span>
-          </div>
-          <div className="flex items-center gap-2 text-sm text-foreground">
-            <Clock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-            <span className="font-medium">{selectedTime}</span>
+        <div className="w-full rounded-2xl border bg-secondary/40 p-4 space-y-3">
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">New Schedule</p>
+          <div className="flex items-center gap-3">
+            <div className="flex-1 flex items-center gap-2.5 rounded-xl border bg-background px-4 py-3">
+              <Calendar className="h-4 w-4 text-primary flex-shrink-0" />
+              <div className="text-left">
+                <p className="text-[10px] text-muted-foreground leading-none mb-0.5">Date</p>
+                <p className="text-sm font-semibold text-foreground">
+                  {selectedDate.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+                </p>
+              </div>
+            </div>
+            <div className="flex-1 flex items-center gap-2.5 rounded-xl border bg-background px-4 py-3">
+              <Clock className="h-4 w-4 text-primary flex-shrink-0" />
+              <div className="text-left">
+                <p className="text-[10px] text-muted-foreground leading-none mb-0.5">Time</p>
+                <p className="text-sm font-semibold text-foreground">{selectedTime}</p>
+              </div>
+            </div>
           </div>
         </div>
       )}
-      <Button className="w-full rounded-full mt-2" onClick={onClose}>
+
+      <Button className="w-full rounded-full" onClick={onClose}>
         Done
       </Button>
     </div>
