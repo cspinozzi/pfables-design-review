@@ -50,6 +50,7 @@ export default function LessonsPage() {
   const [selectedItem, setSelectedItem] = useState<LessonItem | null>(null)
   const [payingItem, setPayingItem] = useState<LessonItem | null>(null)
   const [reviewingItem, setReviewingItem] = useState<LessonItem | null>(null)
+  const [rescheduledIds, setRescheduledIds] = useState<Set<string>>(new Set())
 
   const handleMessageProvider = (providerName: string) => {
     const conv = conversations.find((c) =>
@@ -207,6 +208,7 @@ export default function LessonsPage() {
                   item.status === "cancelled" || item.paid === true ? "text-muted-foreground" : "text-primary"
                 }
                 status={item.status === "completed" ? "received" : item.status === "cancelled" ? "cancelled" : item.pendingApproval ? "pending" : "active"}
+                rescheduled={rescheduledIds.has(item.id)}
                 onClick={() => setSelectedItem(item)}
                 details={
                   <>
@@ -288,11 +290,12 @@ export default function LessonsPage() {
             }}
             messageLabel="Message Provider"
             showRescheduleButton={selectedItem.status === "active" && !selectedItem.pendingApproval && selectedItem.type === "lesson"}
+            showRescheduledBadge={rescheduledIds.has(selectedItem.id)}
             onReschedule={(newDate: Date, newTime: string) => {
               setItems((prev) => prev.map((i) =>
                 i.id === selectedItem.id ? { ...i, date: newDate, time: newTime } : i
               ))
-              setSelectedItem(null)
+              setRescheduledIds((prev) => new Set(prev).add(selectedItem.id))
             }}
             showClassReceivedButton={selectedItem.status === "active" && !selectedItem.pendingApproval}
             onClassReceived={() => handleClassReceived(selectedItem)}

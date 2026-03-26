@@ -9,7 +9,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Calendar, Clock, MapPin, User, DollarSign, MessageCircle, Wrench, CheckCircle2, Circle, XCircle, Star, RefreshCw, ChevronLeft, ChevronRight } from "lucide-react"
+import { Calendar, Clock, MapPin, User, DollarSign, MessageCircle, Wrench, CheckCircle2, Circle, XCircle, Star, RefreshCw, ChevronLeft, ChevronRight, CalendarCheck } from "lucide-react"
 import Image from "next/image"
 import { cn } from "@/lib/utils"
 import type { ReviewData } from "@/components/review-display"
@@ -74,6 +74,7 @@ export interface ServiceDetailModalProps {
   showClassReceivedButton?: boolean
   onReschedule?: (newDate: Date, newTime: string) => void
   showRescheduleButton?: boolean
+  showRescheduledBadge?: boolean
   review?: ReviewData
 }
 
@@ -118,10 +119,12 @@ export function ServiceDetailModal({
   showClassReceivedButton = false,
   onReschedule,
   showRescheduleButton = false,
+  showRescheduledBadge = false,
   review,
 }: ServiceDetailModalProps) {
   const [currentStatus, setCurrentStatus] = useState<StatusType | undefined>(status)
   const [rescheduling, setRescheduling] = useState(false)
+  const [confirmed, setConfirmed] = useState(false)
 
   const today = new Date()
   const [calMonth, setCalMonth] = useState(today.getMonth())
@@ -133,6 +136,7 @@ export function ServiceDetailModal({
   useEffect(() => {
     setCurrentStatus(status)
     setRescheduling(false)
+    setConfirmed(false)
     setSelectedDate(null)
     setSelectedTime(null)
   }, [status, open])
@@ -145,6 +149,7 @@ export function ServiceDetailModal({
   const handleConfirmReschedule = () => {
     if (selectedDate && selectedTime && onReschedule) {
       onReschedule(selectedDate, selectedTime)
+      setConfirmed(true)
       setRescheduling(false)
     }
   }
@@ -290,6 +295,38 @@ export function ServiceDetailModal({
     </div>
   )
 
+  // Confirmation view (shown after successful reschedule)
+  const confirmationView = (
+    <div className="flex flex-col items-center justify-center py-10 gap-5 text-center">
+      <div className="flex items-center justify-center h-16 w-16 rounded-full bg-primary/10">
+        <CalendarCheck className="h-8 w-8 text-primary" />
+      </div>
+      <div className="space-y-1.5">
+        <h3 className="font-semibold text-base text-foreground">Class Rescheduled</h3>
+        <p className="text-sm text-muted-foreground leading-relaxed max-w-[260px]">
+          Your class has been rescheduled successfully. The provider will be notified.
+        </p>
+      </div>
+      {selectedDate && selectedTime && (
+        <div className="rounded-xl border bg-secondary/50 px-5 py-3.5 space-y-1.5 w-full max-w-[260px]">
+          <div className="flex items-center gap-2 text-sm text-foreground">
+            <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+            <span className="font-medium">
+              {selectedDate.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+            </span>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-foreground">
+            <Clock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+            <span className="font-medium">{selectedTime}</span>
+          </div>
+        </div>
+      )}
+      <Button className="w-full rounded-full mt-2" onClick={onClose}>
+        Done
+      </Button>
+    </div>
+  )
+
   // Detail view
   const detailView = (
     <div className="space-y-4 py-1">
@@ -297,13 +334,21 @@ export function ServiceDetailModal({
       {currentStatus && (
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium text-muted-foreground">Status</span>
-          <span className={cn(
-            "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium",
-            statusStyles[currentStatus]
-          )}>
-            {statusIcons[currentStatus]}
-            {statusLabels[currentStatus]}
-          </span>
+          <div className="flex items-center gap-1.5">
+            {showRescheduledBadge && (
+              <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700">
+                <RefreshCw className="h-3 w-3" />
+                Rescheduled
+              </span>
+            )}
+            <span className={cn(
+              "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium",
+              statusStyles[currentStatus]
+            )}>
+              {statusIcons[currentStatus]}
+              {statusLabels[currentStatus]}
+            </span>
+          </div>
         </div>
       )}
 
@@ -431,7 +476,7 @@ export function ServiceDetailModal({
       <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            {rescheduling && (
+            {rescheduling && !confirmed && (
               <button
                 type="button"
                 onClick={() => setRescheduling(false)}
@@ -444,11 +489,15 @@ export function ServiceDetailModal({
             {title}
           </DialogTitle>
           <DialogDescription>
-            {rescheduling ? "Select a new date and time for your class" : subtitle || "Service details and information"}
+            {confirmed
+              ? "Your request has been sent to the provider"
+              : rescheduling
+              ? "Select a new date and time for your class"
+              : subtitle || "Service details and information"}
           </DialogDescription>
         </DialogHeader>
 
-        {rescheduling ? rescheduleView : detailView}
+        {confirmed ? confirmationView : rescheduling ? rescheduleView : detailView}
       </DialogContent>
     </Dialog>
   )
