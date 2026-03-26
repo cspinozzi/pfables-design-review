@@ -287,6 +287,11 @@ export default function LessonsPage() {
               setSelectedItem(null)
             }}
             messageLabel="Message Provider"
+            showRescheduleButton={selectedItem.status === "active" && !selectedItem.pendingApproval && selectedItem.type === "lesson"}
+            onReschedule={() => {
+              handleMessageProvider(selectedItem.provider)
+              setSelectedItem(null)
+            }}
             showClassReceivedButton={selectedItem.status === "active" && !selectedItem.pendingApproval}
             onClassReceived={() => handleClassReceived(selectedItem)}
           />

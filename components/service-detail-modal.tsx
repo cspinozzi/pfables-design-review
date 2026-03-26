@@ -9,7 +9,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Calendar, Clock, MapPin, User, DollarSign, MessageCircle, Wrench, CheckCircle2, Circle, XCircle, Star } from "lucide-react"
+import { Calendar, Clock, MapPin, User, DollarSign, MessageCircle, Wrench, CheckCircle2, Circle, XCircle, Star, RefreshCw } from "lucide-react"
 import Image from "next/image"
 import { cn } from "@/lib/utils"
 import type { ReviewData } from "@/components/review-display"
@@ -72,6 +72,8 @@ export interface ServiceDetailModalProps {
   extraActions?: React.ReactNode
   onClassReceived?: () => void
   showClassReceivedButton?: boolean
+  onReschedule?: () => void
+  showRescheduleButton?: boolean
   review?: ReviewData
 }
 
@@ -90,6 +92,8 @@ export function ServiceDetailModal({
   extraActions,
   onClassReceived,
   showClassReceivedButton = false,
+  onReschedule,
+  showRescheduleButton = false,
   review,
 }: ServiceDetailModalProps) {
   const [currentStatus, setCurrentStatus] = useState<StatusType | undefined>(status)
@@ -231,6 +235,12 @@ export function ServiceDetailModal({
               <Button className="w-full rounded-full" variant="outline" onClick={onMessage}>
                 <MessageCircle className="h-4 w-4 mr-2" />
                 {messageLabel}
+              </Button>
+            )}
+            {showRescheduleButton && onReschedule && (
+              <Button className="w-full rounded-full" variant="outline" onClick={onReschedule}>
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Reschedule Class
               </Button>
             )}
             {showClassReceivedButton && onClassReceived && (
