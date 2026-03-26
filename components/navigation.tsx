@@ -31,7 +31,7 @@ import { cn } from "@/lib/utils"
 import { Logo, LogoIcon } from "@/components/logo"
 
 export function Navigation() {
-  const { user, logout } = useAuth()
+  const { user, logout, isLoading } = useAuth()
   const pathname = usePathname()
   const router = useRouter()
   const [isCollapsed, setIsCollapsed] = useState(false)
@@ -158,6 +158,18 @@ export function Navigation() {
   const secondaryLinks = getSecondaryLinks()
   
   const bottomNavLinks = navLinks
+
+  // Wait for localStorage hydration before rendering — prevents avatar flash on load
+  if (isLoading) {
+    return (
+      <>
+        <div className="fixed top-0 left-0 right-0 z-50 flex justify-center px-4 pt-4 sm:pt-6">
+          <nav className="flex items-center justify-between w-full max-w-[1100px] px-6 sm:px-8 py-3 rounded-full glass sm:py-2 h-[52px]" />
+        </div>
+        <div className="h-[120px]" />
+      </>
+    )
+  }
 
   if (!user) {
     // Pages with full-bleed hero images (no spacer needed, navbar floats over hero)
