@@ -75,6 +75,7 @@ export interface ServiceDetailModalProps {
   onReschedule?: (newDate: Date, newTime: string) => void
   showRescheduleButton?: boolean
   showRescheduledBadge?: boolean
+  currentSessionTime?: string
   review?: ReviewData
 }
 
@@ -120,6 +121,7 @@ export function ServiceDetailModal({
   onReschedule,
   showRescheduleButton = false,
   showRescheduledBadge = false,
+  currentSessionTime,
   review,
 }: ServiceDetailModalProps) {
   const [currentStatus, setCurrentStatus] = useState<StatusType | undefined>(status)
@@ -256,21 +258,27 @@ export function ServiceDetailModal({
           Select a time
         </p>
         <div className="grid grid-cols-3 gap-2">
-          {TIME_SLOTS.map((slot) => (
-            <button
-              key={slot}
-              type="button"
-              onClick={() => setSelectedTime(slot)}
-              className={cn(
-                "rounded-full border px-2 py-1.5 text-xs font-medium transition-colors",
-                selectedTime === slot
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "border-border text-foreground hover:bg-secondary"
-              )}
-            >
-              {slot}
-            </button>
-          ))}
+          {TIME_SLOTS.map((slot) => {
+            const isCurrentSession = currentSessionTime && slot === currentSessionTime
+            const isSelectedSlot = selectedTime === slot
+            return (
+              <button
+                key={slot}
+                type="button"
+                onClick={() => setSelectedTime(slot)}
+                className={cn(
+                  "rounded-full border px-2 py-1.5 text-xs font-medium transition-colors",
+                  isSelectedSlot
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : isCurrentSession
+                    ? "border-red-300 text-red-600 font-semibold hover:bg-red-50"
+                    : "border-border text-foreground hover:bg-secondary"
+                )}
+              >
+                {slot}
+              </button>
+            )
+          })}
         </div>
       </div>
 

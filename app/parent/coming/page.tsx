@@ -291,6 +291,7 @@ export default function LessonsPage() {
             messageLabel="Message Provider"
             showRescheduleButton={selectedItem.status === "active" && !selectedItem.pendingApproval && selectedItem.type === "lesson"}
             showRescheduledBadge={rescheduledIds.has(selectedItem.id)}
+            currentSessionTime={selectedItem.time}
             onReschedule={(newDate: Date, newTime: string) => {
               setItems((prev) => prev.map((i) =>
                 i.id === selectedItem.id ? { ...i, date: newDate, time: newTime } : i
