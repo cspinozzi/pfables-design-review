@@ -3,12 +3,13 @@
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Users, MessageCircle, DollarSign, Eye, TrendingUp, Calendar, ChevronRight, ShieldCheck, CheckCircle2, Clock, Timer, AlertCircle, Phone, MapPin, User, Inbox, CalendarCheck } from "lucide-react"
+import { Users, MessageCircle, DollarSign, Eye, TrendingUp, Calendar, ChevronRight, ShieldCheck, CheckCircle2, Clock, Timer, AlertCircle, Phone, MapPin, User, Inbox, CalendarCheck, RefreshCw } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { VerificationBadge } from "@/components/verification-badge"
 import { useAuth } from "@/lib/auth-context"
+import { useReschedule } from "@/lib/reschedule-context"
 import { cn } from "@/lib/utils"
 import { mockProviders, mockConversations } from "@/lib/mock-data"
 import { useMockMessages } from "@/hooks/use-mock-messages"
@@ -30,6 +31,7 @@ interface LessonRequest {
   time: string
   duration: string
   location: string
+  isReschedule?: boolean
 }
 
 export default function ProviderDashboardPage() {
@@ -38,13 +40,33 @@ export default function ProviderDashboardPage() {
   const { conversations } = useMockMessages()
   const provider = mockProviders.find((p) => p.userId === user?.id)
 
+  const { rescheduledLessons } = useReschedule()
+
   const [selectedLesson, setSelectedLesson] = useState<CalendarLesson | null>(null)
   const [selectedRequest, setSelectedRequest] = useState<LessonRequest | null>(null)
-  const [requests, setRequests] = useState<LessonRequest[]>([
+  const [baseRequests, setBaseRequests] = useState<LessonRequest[]>([
     { id: "lr-1", title: "Piano Lesson", parent: "Sarah Thompson", parentId: "user-1", parentAvatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop", child: "Emma", date: "Thu, Feb 6", time: "4:00 PM", duration: "45 min", location: "Naperville, IL" },
     { id: "lr-2", title: "Music Theory Session", parent: "Mike Wilson", parentId: "user-2", parentAvatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&h=100&fit=crop", child: "Jake", date: "Thu, Feb 6", time: "5:00 PM", duration: "30 min", location: "Online" },
     { id: "lr-3", title: "Piano Lesson", parent: "Laura Martinez", parentId: "user-3", parentAvatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop", child: "Sophia", date: "Fri, Feb 7", time: "3:30 PM", duration: "60 min", location: "Downers Grove, IL" },
   ])
+
+  // Merge static base requests with any rescheduled lessons from the parent side
+  const rescheduledAsRequests: LessonRequest[] = rescheduledLessons
+    .filter((r) => !baseRequests.some((br) => br.id === `reschedule-${r.id}`))
+    .map((r) => ({
+      id: `reschedule-${r.id}`,
+      title: `${r.title} (Reschedule Request)`,
+      parent: r.parentName,
+      parentId: "",
+      parentAvatar: r.parentAvatar,
+      child: r.childName,
+      date: r.newDate.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }),
+      time: r.newTime,
+      duration: r.duration,
+      location: r.location,
+      isReschedule: true,
+    }))
+  const requests = [...baseRequests, ...rescheduledAsRequests]
 
   const handleMessage = (parentName: string) => {
     const conv = conversations.find((c) =>
@@ -58,7 +80,7 @@ export default function ProviderDashboardPage() {
   }
 
   const handleAccept = (request: LessonRequest) => {
-    setRequests((prev) => prev.filter((r) => r.id !== request.id))
+    setBaseRequests((prev) => prev.filter((r) => r.id !== request.id))
     toast.success("Lesson Confirmed", {
       description: `${request.title} requested by ${request.parent} has been confirmed.`,
     })
@@ -229,6 +251,7 @@ export default function ProviderDashboardPage() {
                 imageAlt={request.parent}
                 title={request.title}
                 subtitle={`Requested by ${request.parent}`}
+                rescheduled={request.isReschedule}
                 onClick={() => setSelectedRequest(request)}
                 details={
                   <>

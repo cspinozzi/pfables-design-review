@@ -12,6 +12,7 @@ import { ReviewModal } from "@/components/review-modal"
 import { ReviewDisplay } from "@/components/review-display"
 import { useMockMessages } from "@/hooks/use-mock-messages"
 import { useAuth } from "@/lib/auth-context"
+import { useReschedule } from "@/lib/reschedule-context"
 import { Star } from "lucide-react"
 
 type ItemStatus = "active" | "completed" | "cancelled"
@@ -50,7 +51,7 @@ export default function LessonsPage() {
   const [selectedItem, setSelectedItem] = useState<LessonItem | null>(null)
   const [payingItem, setPayingItem] = useState<LessonItem | null>(null)
   const [reviewingItem, setReviewingItem] = useState<LessonItem | null>(null)
-  const [rescheduledIds, setRescheduledIds] = useState<Set<string>>(new Set())
+  const { rescheduledIds, addReschedule } = useReschedule()
 
   const handleMessageProvider = (providerName: string) => {
     const conv = conversations.find((c) =>
@@ -294,10 +295,22 @@ export default function LessonsPage() {
             currentSessionTime={selectedItem.time}
             currentSessionDate={selectedItem.date instanceof Date ? selectedItem.date : undefined}
             onReschedule={(newDate: Date, newTime: string) => {
+              const item = selectedItem
               setItems((prev) => prev.map((i) =>
-                i.id === selectedItem.id ? { ...i, date: newDate, time: newTime } : i
+                i.id === item.id ? { ...i, date: newDate, time: newTime } : i
               ))
-              setRescheduledIds((prev) => new Set(prev).add(selectedItem.id))
+              addReschedule({
+                id: item.id,
+                title: item.title,
+                parentName: user?.name ?? "Parent",
+                parentAvatar: user?.avatar ?? "/parent-woman.jpg",
+                childName: item.student,
+                newDate,
+                newTime,
+                duration: item.duration,
+                location: item.location,
+                rescheduledAt: new Date(),
+              })
             }}
             showClassReceivedButton={selectedItem.status === "active" && !selectedItem.pendingApproval}
             onClassReceived={() => handleClassReceived(selectedItem)}
