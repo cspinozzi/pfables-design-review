@@ -12,7 +12,16 @@ interface MessageContextType {
   findConversationByParticipantName: (name: string, excludeId?: string) => Conversation | undefined
 }
 
-const MessageContext = createContext<MessageContextType | null>(null)
+const defaultMessageContext: MessageContextType = {
+  conversations: [],
+  messages: {},
+  getConversationMessages: () => [],
+  sendMessage: () => {},
+  injectMessage: () => {},
+  findConversationByParticipantName: () => undefined,
+}
+
+const MessageContext = createContext<MessageContextType>(defaultMessageContext)
 
 export function MessageProvider({ children }: { children: ReactNode }) {
   const [conversations, setConversations] = useState<Conversation[]>(mockConversations)
@@ -72,7 +81,5 @@ export function MessageProvider({ children }: { children: ReactNode }) {
 }
 
 export function useMessageContext() {
-  const context = useContext(MessageContext)
-  if (!context) throw new Error("useMessageContext must be used within a MessageProvider")
-  return context
+  return useContext(MessageContext)
 }
