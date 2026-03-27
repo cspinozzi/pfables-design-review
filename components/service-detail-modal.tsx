@@ -76,6 +76,7 @@ export interface ServiceDetailModalProps {
   showRescheduleButton?: boolean
   showRescheduledBadge?: boolean
   currentSessionTime?: string
+  currentSessionDate?: Date
   review?: ReviewData
 }
 
@@ -122,6 +123,7 @@ export function ServiceDetailModal({
   showRescheduleButton = false,
   showRescheduledBadge = false,
   currentSessionTime,
+  currentSessionDate,
   review,
 }: ServiceDetailModalProps) {
   const [currentStatus, setCurrentStatus] = useState<StatusType | undefined>(status)
@@ -478,7 +480,21 @@ export function ServiceDetailModal({
           </Button>
         )}
         {showRescheduleButton && onReschedule && (
-          <Button className="w-full rounded-full" variant="outline" onClick={() => setRescheduling(true)}>
+          <Button
+            className="w-full rounded-full"
+            variant="outline"
+            onClick={() => {
+              if (currentSessionDate) {
+                setSelectedDate(currentSessionDate)
+                setCalMonth(currentSessionDate.getMonth())
+                setCalYear(currentSessionDate.getFullYear())
+              }
+              if (currentSessionTime) {
+                setSelectedTime(currentSessionTime)
+              }
+              setRescheduling(true)
+            }}
+          >
             <RefreshCw className="h-4 w-4 mr-2" />
             Reschedule Class
           </Button>

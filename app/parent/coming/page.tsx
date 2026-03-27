@@ -292,6 +292,7 @@ export default function LessonsPage() {
             showRescheduleButton={selectedItem.status === "active" && !selectedItem.pendingApproval && selectedItem.type === "lesson"}
             showRescheduledBadge={rescheduledIds.has(selectedItem.id)}
             currentSessionTime={selectedItem.time}
+            currentSessionDate={selectedItem.date instanceof Date ? selectedItem.date : undefined}
             onReschedule={(newDate: Date, newTime: string) => {
               setItems((prev) => prev.map((i) =>
                 i.id === selectedItem.id ? { ...i, date: newDate, time: newTime } : i
