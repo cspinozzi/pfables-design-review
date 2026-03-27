@@ -9,7 +9,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Calendar, Clock, MapPin, User, DollarSign, MessageCircle, Wrench, CheckCircle2, Circle, XCircle, Star, RefreshCw, ChevronLeft, ChevronRight, CalendarCheck } from "lucide-react"
+import { Calendar, Clock, MapPin, User, DollarSign, MessageCircle, Wrench, CheckCircle2, Circle, XCircle, Star, RefreshCw, ChevronLeft, ChevronRight, CalendarCheck, AlertCircle } from "lucide-react"
 import Image from "next/image"
 import { cn } from "@/lib/utils"
 import type { ReviewData } from "@/components/review-display"
@@ -161,6 +161,28 @@ export function ServiceDetailModal({
     setCurrentStatus(newStatus)
     onStatusChange?.(newStatus)
   }
+
+  // Compute whether reschedule is allowed (must be > 24h before class start)
+  const rescheduleAllowed = (() => {
+    if (!currentSessionDate || !currentSessionTime) return true
+    // Parse the time string (e.g. "4:00 PM") into hours/minutes
+    const match = currentSessionTime.match(/^(\d+):(\d+)\s*(AM|PM)$/i)
+    if (!match) return true
+    let hours = parseInt(match[1], 10)
+    const minutes = parseInt(match[2], 10)
+    const meridiem = match[3].toUpperCase()
+    if (meridiem === "PM" && hours !== 12) hours += 12
+    if (meridiem === "AM" && hours === 12) hours = 0
+    const classStart = new Date(
+      currentSessionDate.getFullYear(),
+      currentSessionDate.getMonth(),
+      currentSessionDate.getDate(),
+      hours,
+      minutes,
+    )
+    const hoursUntilClass = (classStart.getTime() - Date.now()) / (1000 * 60 * 60)
+    return hoursUntilClass > 24
+  })()
 
   const handleConfirmReschedule = () => {
     if (selectedDate && selectedTime && onReschedule) {
@@ -522,14 +544,26 @@ export function ServiceDetailModal({
           </Button>
         )}
         {showRescheduleButton && onReschedule && (
-          <Button
-            className="w-full rounded-full"
-            variant="outline"
-            onClick={() => setRescheduling(true)}
-          >
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Reschedule Class
-          </Button>
+          <div className="flex flex-col gap-1.5">
+            <Button
+              className="w-full rounded-full"
+              variant="outline"
+              disabled={!rescheduleAllowed}
+              onClick={() => setRescheduling(true)}
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Reschedule Class
+            </Button>
+            {!rescheduleAllowed && (
+              <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5">
+                <AlertCircle className="h-4 w-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                <p className="text-xs text-amber-700 leading-relaxed">
+                  <span className="font-semibold">Reschedules must be requested at least 24 hours before the class.</span>{" "}
+                  This class is too close to reschedule.
+                </p>
+              </div>
+            )}
+          </div>
         )}
         {showClassReceivedButton && onClassReceived && (
           <Button className="w-full rounded-full" onClick={onClassReceived}>

@@ -147,8 +147,11 @@ function ProviderLessonsContent() {
   const activeLessons = lessons.filter((l) => l.status === "active")
   const completedLessons = lessons.filter((l) => l.status === "completed" || l.status === "cancelled")
 
-  const formatDate = (date: Date) =>
-    date.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
+  const formatDate = (date: Date) => {
+    const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    return `${weekdays[date.getDay()]}, ${months[date.getMonth()]} ${date.getDate()}`
+  }
 
   const filters: { key: FilterKey; label: string }[] = [
     { key: "active", label: `Active (${activeLessons.length})` },
