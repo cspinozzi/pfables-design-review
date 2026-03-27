@@ -12,6 +12,8 @@ import { ReviewModal } from "@/components/review-modal"
 import { ReviewDisplay } from "@/components/review-display"
 import { useMockMessages } from "@/hooks/use-mock-messages"
 import { useAuth } from "@/lib/auth-context"
+import { useReschedule } from "@/lib/reschedule-context"
+import { useMessageContext } from "@/lib/message-context"
 import { Star } from "lucide-react"
 
 type ItemStatus = "active" | "completed" | "cancelled"
@@ -50,6 +52,8 @@ export default function LessonsPage() {
   const [selectedItem, setSelectedItem] = useState<LessonItem | null>(null)
   const [payingItem, setPayingItem] = useState<LessonItem | null>(null)
   const [reviewingItem, setReviewingItem] = useState<LessonItem | null>(null)
+  const { rescheduledIds, addReschedule } = useReschedule()
+  const { findConversationByParticipantName, sendMessage } = useMessageContext()
 
   const handleMessageProvider = (providerName: string) => {
     const conv = conversations.find((c) =>
@@ -58,34 +62,41 @@ export default function LessonsPage() {
     router.push(conv ? `/messages?conv=${conv.id}` : `/messages`)
   }
 
+  // First lesson is within 24h (reschedule disabled), rest are 2+ days out (reschedule enabled)
+  const in12h = new Date(Date.now() + 12 * 60 * 60 * 1000)
+  const in2days = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000)
+  const in4days = new Date(Date.now() + 4 * 24 * 60 * 60 * 1000)
+  const in6days = new Date(Date.now() + 6 * 24 * 60 * 60 * 1000)
+  const in8days = new Date(Date.now() + 8 * 24 * 60 * 60 * 1000)
+
   const [items, setItems] = useState<LessonItem[]>([
     {
       id: "class-1", type: "lesson", title: "Piano Lesson", provider: "Emily Carter",
-      providerAvatar: "/music-teacher-woman-piano.jpg", date: new Date("2026-02-04"),
+      providerAvatar: "/music-teacher-woman-piano.jpg", date: in12h,
       time: "4:00 PM", duration: "45 min", location: "Naperville, IL", student: "Emma",
       status: "active", price: 65,
     },
     {
       id: "class-2", type: "lesson", title: "Guitar Lesson", provider: "Michael Rodriguez",
-      providerAvatar: "/guitar-teacher-man.jpg", date: new Date("2026-02-06"),
+      providerAvatar: "/guitar-teacher-man.jpg", date: in2days,
       time: "3:30 PM", duration: "60 min", location: "Online", student: "Jake",
       status: "active", price: 55,
     },
     {
       id: "class-3", type: "lesson", title: "Piano Lesson", provider: "Emily Carter",
-      providerAvatar: "/music-teacher-woman-piano.jpg", date: new Date("2026-02-11"),
+      providerAvatar: "/music-teacher-woman-piano.jpg", date: in4days,
       time: "4:00 PM", duration: "45 min", location: "Naperville, IL", student: "Emma",
       status: "active", price: 65,
     },
     {
       id: "repair-1", type: "repair", title: "Violin String Replacement", provider: "Marcus Chen",
-      providerAvatar: "/luthier-carousel-1.jpg", date: new Date("2026-02-07"),
+      providerAvatar: "/luthier-carousel-1.jpg", date: in6days,
       time: "In Progress", duration: "Est. completion", location: "Drop-off", student: "Jake",
       status: "active", price: 85,
     },
     {
       id: "class-4", type: "lesson", title: "Piano Lesson", provider: "Sophia Martinez",
-      providerAvatar: "/music-teacher-woman-piano.jpg", date: new Date("2026-01-27"),
+      providerAvatar: "/music-teacher-woman-piano.jpg", date: in8days,
       time: "3:30 PM", duration: "60 min", location: "Downers Grove, IL", student: "Emma",
       status: "active", price: 75, pendingApproval: true,
     },
@@ -207,6 +218,7 @@ export default function LessonsPage() {
                   item.status === "cancelled" || item.paid === true ? "text-muted-foreground" : "text-primary"
                 }
                 status={item.status === "completed" ? "received" : item.status === "cancelled" ? "cancelled" : item.pendingApproval ? "pending" : "active"}
+                rescheduled={rescheduledIds.has(item.id)}
                 onClick={() => setSelectedItem(item)}
                 details={
                   <>
@@ -287,6 +299,40 @@ export default function LessonsPage() {
               setSelectedItem(null)
             }}
             messageLabel="Message Provider"
+            showRescheduleButton={selectedItem.status === "active" && !selectedItem.pendingApproval && selectedItem.type === "lesson"}
+            showRescheduledBadge={rescheduledIds.has(selectedItem.id)}
+            currentSessionTime={selectedItem.time}
+            currentSessionDate={selectedItem.date instanceof Date ? selectedItem.date : undefined}
+            onReschedule={(newDate: Date, newTime: string) => {
+              const item = selectedItem
+              setItems((prev) => prev.map((i) =>
+                i.id === item.id ? { ...i, date: newDate, time: newTime } : i
+              ))
+              addReschedule({
+                id: item.id,
+                title: item.title,
+                parentName: user?.name ?? "Parent",
+                parentAvatar: user?.avatar ?? "/parent-woman.jpg",
+                childName: item.student,
+                newDate,
+                newTime,
+                duration: item.duration,
+                location: item.location,
+                rescheduledAt: new Date(),
+              })
+              // Send automatic message in the conversation with the provider
+              const conv = findConversationByParticipantName(item.provider, user?.id)
+              if (conv && user) {
+                const formattedDate = newDate.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
+                sendMessage(
+                  conv.id,
+                  `Hi! I'd like to reschedule our ${item.title} for ${item.student} to ${formattedDate} at ${newTime}. Please let me know if this works for you.`,
+                  user.id,
+                  user.name,
+                  user.avatar
+                )
+              }
+            }}
             showClassReceivedButton={selectedItem.status === "active" && !selectedItem.pendingApproval}
             onClassReceived={() => handleClassReceived(selectedItem)}
           />

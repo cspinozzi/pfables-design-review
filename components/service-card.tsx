@@ -3,7 +3,7 @@
 import { Card, CardContent } from "@/components/ui/card"
 import Image from "next/image"
 import { type ReactNode } from "react"
-import { CheckCircle2, XCircle, Clock } from "lucide-react"
+import { CheckCircle2, XCircle, Clock, RefreshCw } from "lucide-react"
 
 type StatusType = "active" | "completed" | "cancelled" | "received" | "pending" | "paid" | "refund" | "topay" | "waiting" | "done" | "refunded" | "requested"
 
@@ -24,6 +24,8 @@ interface ServiceCardProps {
   }
   tags?: string[]
   children?: ReactNode
+  /** Shows a "Rescheduled" badge to the left of the status badge */
+  rescheduled?: boolean
   /** Footer rendered below the card content, outside the click target. Used for action bars. */
   footer?: ReactNode
   /** Action that appears on hover next to the price */
@@ -111,6 +113,7 @@ export function ServiceCard({
   price,
   priceClassName,
   status,
+  rescheduled = false,
   details,
   badge,
   tags,
@@ -158,6 +161,13 @@ export function ServiceCard({
                       </span>
                     ))}
                   </div>
+                )}
+
+                {rescheduled && (
+                  <span className="flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700">
+                    <RefreshCw className="h-3 w-3" />
+                    Rescheduled
+                  </span>
                 )}
 
                 {status ? (

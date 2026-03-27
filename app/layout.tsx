@@ -2,7 +2,7 @@ import type React from "react"
 import type { Metadata, Viewport } from "next"
 import { Fraunces, DM_Sans } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
-import { AuthProvider } from "@/lib/auth-context"
+import { Providers } from "@/components/providers"
 import { Navigation } from "@/components/navigation"
 import { Toaster } from "sonner"
 import { ScrollToTop } from "@/components/scroll-to-top"
@@ -60,13 +60,13 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${fraunces.variable} ${dmSans.variable}`} data-scroll-behavior="smooth" suppressHydrationWarning>
       <body className="font-sans antialiased">
-        <AuthProvider>
+        <Providers>
           <ScrollToTop />
           <Navigation />
           <main>{children}</main>
           <Toaster />
           <Analytics />
-        </AuthProvider>
+        </Providers>
       </body>
     </html>
   )

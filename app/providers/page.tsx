@@ -39,7 +39,7 @@ export default function ProvidersPage() {
       {/* Hero Section with Background Image */}
       <section className="relative min-h-[70vh] flex items-center overflow-hidden">
         {/* Background Image */}
-        <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 z-0 relative">
           <Image
             src="/music-teacher-woman.jpg"
             alt="Music teacher"

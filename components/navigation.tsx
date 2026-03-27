@@ -31,7 +31,7 @@ import { cn } from "@/lib/utils"
 import { Logo, LogoIcon } from "@/components/logo"
 
 export function Navigation() {
-  const { user, logout } = useAuth()
+  const { user, logout, isLoading } = useAuth()
   const pathname = usePathname()
   const router = useRouter()
   const [isCollapsed, setIsCollapsed] = useState(false)
@@ -159,6 +159,18 @@ export function Navigation() {
   
   const bottomNavLinks = navLinks
 
+  // Wait for localStorage hydration before rendering — prevents avatar flash on load
+  if (isLoading) {
+    return (
+      <>
+        <div className="fixed top-0 left-0 right-0 z-50 flex justify-center px-4 pt-4 sm:pt-6">
+          <nav className="flex items-center justify-between w-full max-w-[1100px] px-6 sm:px-8 py-3 rounded-full glass sm:py-2 h-[52px]" />
+        </div>
+        <div className="h-[120px]" />
+      </>
+    )
+  }
+
   if (!user) {
     // Pages with full-bleed hero images (no spacer needed, navbar floats over hero)
     const isHomePage = pathname === "/"
@@ -285,11 +297,11 @@ export function Navigation() {
                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                 className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/50 hover:bg-muted transition-colors"
               >
-                <div className="relative flex h-7 w-7 items-center justify-center rounded-full overflow-hidden bg-primary text-primary-foreground">
+                <div className="relative h-7 w-7 rounded-full overflow-hidden bg-primary text-primary-foreground flex items-center justify-center shrink-0">
                   {user.avatar ? (
-                    <Image src={user.avatar} alt={user.name} fill className="object-cover" />
+                    <Image src={user.avatar} alt={user.name} fill sizes="28px" className="object-cover" />
                   ) : (
-                    <span className="text-sm font-medium">{user.name.charAt(0)}</span>
+                    <span className="text-sm font-medium leading-none">{user.name.charAt(0)}</span>
                   )}
                 </div>
                 <span className="text-sm font-medium text-foreground">
