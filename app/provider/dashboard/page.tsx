@@ -55,12 +55,17 @@ export default function ProviderDashboardPage() {
     .filter((r) => !baseRequests.some((br) => br.id === `reschedule-${r.id}`))
     .map((r) => ({
       id: `reschedule-${r.id}`,
-      title: `${r.title} (Reschedule Request)`,
+      title: r.title,
       parent: r.parentName,
       parentId: "",
       parentAvatar: r.parentAvatar,
       child: r.childName,
-      date: r.newDate.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }),
+      date: (() => {
+        const d = r.newDate
+        const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"]
+        const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+        return `${days[d.getDay()]}, ${months[d.getMonth()]} ${d.getDate()}`
+      })(),
       time: r.newTime,
       duration: r.duration,
       location: r.location,

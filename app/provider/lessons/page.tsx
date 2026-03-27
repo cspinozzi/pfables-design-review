@@ -1,5 +1,5 @@
 "use client"
-
+// v2
 import { useState, Suspense } from "react"
 import { ServiceCard } from "@/components/service-card"
 import { ServiceDetailModal } from "@/components/service-detail-modal"
