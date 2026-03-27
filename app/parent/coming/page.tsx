@@ -13,6 +13,7 @@ import { ReviewDisplay } from "@/components/review-display"
 import { useMockMessages } from "@/hooks/use-mock-messages"
 import { useAuth } from "@/lib/auth-context"
 import { useReschedule } from "@/lib/reschedule-context"
+import { useMessageContext } from "@/lib/message-context"
 import { Star } from "lucide-react"
 
 type ItemStatus = "active" | "completed" | "cancelled"
@@ -52,6 +53,7 @@ export default function LessonsPage() {
   const [payingItem, setPayingItem] = useState<LessonItem | null>(null)
   const [reviewingItem, setReviewingItem] = useState<LessonItem | null>(null)
   const { rescheduledIds, addReschedule } = useReschedule()
+  const { findConversationByParticipantName, sendMessage } = useMessageContext()
 
   const handleMessageProvider = (providerName: string) => {
     const conv = conversations.find((c) =>
@@ -311,6 +313,18 @@ export default function LessonsPage() {
                 location: item.location,
                 rescheduledAt: new Date(),
               })
+              // Send automatic message in the conversation with the provider
+              const conv = findConversationByParticipantName(item.provider, user?.id)
+              if (conv && user) {
+                const formattedDate = newDate.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
+                sendMessage(
+                  conv.id,
+                  `Hi! I'd like to reschedule our ${item.title} for ${item.student} to ${formattedDate} at ${newTime}. Please let me know if this works for you.`,
+                  user.id,
+                  user.name,
+                  user.avatar
+                )
+              }
             }}
             showClassReceivedButton={selectedItem.status === "active" && !selectedItem.pendingApproval}
             onClassReceived={() => handleClassReceived(selectedItem)}
