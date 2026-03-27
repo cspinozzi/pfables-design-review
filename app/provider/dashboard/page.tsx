@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import { VerificationBadge } from "@/components/verification-badge"
 import { useAuth } from "@/lib/auth-context"
 import { useReschedule } from "@/lib/reschedule-context"
+import { useMessageContext } from "@/lib/message-context"
 import { cn } from "@/lib/utils"
 import { mockProviders, mockConversations } from "@/lib/mock-data"
 import { useMockMessages } from "@/hooks/use-mock-messages"
@@ -28,6 +29,7 @@ interface LessonRequest {
   parentAvatar: string
   child: string
   date: string
+  dateObj?: Date
   time: string
   duration: string
   location: string
@@ -40,7 +42,8 @@ export default function ProviderDashboardPage() {
   const { conversations } = useMockMessages()
   const provider = mockProviders.find((p) => p.userId === user?.id)
 
-  const { rescheduledLessons } = useReschedule()
+  const { rescheduledLessons, addReschedule } = useReschedule()
+  const { findConversationByParticipantName, sendMessage } = useMessageContext()
 
   const [selectedLesson, setSelectedLesson] = useState<CalendarLesson | null>(null)
   const [selectedRequest, setSelectedRequest] = useState<LessonRequest | null>(null)
@@ -488,6 +491,39 @@ export default function ProviderDashboardPage() {
             { icon: <Timer className="h-4 w-4" />, label: "Duration", value: selectedRequest.duration },
             { icon: <MapPin className="h-4 w-4" />, label: "Location", value: selectedRequest.location },
           ]}
+          showRescheduleButton
+          rescheduleLabel="Suggest New Time"
+          currentSessionDate={selectedRequest.dateObj}
+          currentSessionTime={selectedRequest.time}
+          onReschedule={(newDate: Date, newTime: string) => {
+            const req = selectedRequest
+            const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"]
+            const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+            const formatted = `${days[newDate.getDay()]}, ${months[newDate.getMonth()]} ${newDate.getDate()}`
+            addReschedule({
+              id: req.id,
+              title: req.title,
+              parentName: user?.name ?? "Provider",
+              parentAvatar: user?.avatar ?? "/music-teacher-woman.jpg",
+              childName: req.child,
+              newDate,
+              newTime,
+              duration: req.duration,
+              location: req.location,
+              rescheduledAt: new Date(),
+            })
+            const conv = findConversationByParticipantName(req.parent, user?.id)
+            if (conv && user) {
+              sendMessage(
+                conv.id,
+                `Hi! I'd like to suggest a new time for our ${req.title} for ${req.child}: ${formatted} at ${newTime}. Please let me know if this works for you.`,
+                user.id,
+                user.name,
+                user.avatar
+              )
+            }
+            setSelectedRequest(null)
+          }}
           extraActions={
             <>
               <Button variant="outline" className="w-full rounded-full" onClick={() => {
@@ -496,13 +532,6 @@ export default function ProviderDashboardPage() {
               }}>
                 <MessageCircle className="h-4 w-4 mr-2" />
                 Message
-              </Button>
-              <Button variant="outline" className="w-full rounded-full" onClick={() => {
-                handleMessage(selectedRequest.parent)
-                setSelectedRequest(null)
-              }}>
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Suggest New Time
               </Button>
               <Button className="w-full rounded-full" onClick={() => {
                 handleAccept(selectedRequest)

@@ -74,6 +74,7 @@ export interface ServiceDetailModalProps {
   showClassReceivedButton?: boolean
   onReschedule?: (newDate: Date, newTime: string) => void
   showRescheduleButton?: boolean
+  rescheduleLabel?: string
   showRescheduledBadge?: boolean
   currentSessionTime?: string
   currentSessionDate?: Date
@@ -121,6 +122,7 @@ export function ServiceDetailModal({
   showClassReceivedButton = false,
   onReschedule,
   showRescheduleButton = false,
+  rescheduleLabel = "Reschedule Class",
   showRescheduledBadge = false,
   currentSessionTime,
   currentSessionDate,
@@ -552,7 +554,7 @@ export function ServiceDetailModal({
               onClick={() => setRescheduling(true)}
             >
               <RefreshCw className="h-4 w-4 mr-2" />
-              Reschedule Class
+              {rescheduleLabel}
             </Button>
             {!rescheduleAllowed && (
               <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5">
