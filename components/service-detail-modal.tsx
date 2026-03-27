@@ -143,9 +143,19 @@ export function ServiceDetailModal({
     setRescheduling(false)
     setConfirmed(false)
     setClosing(false)
-    setSelectedDate(null)
-    setSelectedTime(null)
-  }, [status, open])
+    // Pre-populate with the current session date/time so the calendar
+    // and time grid start with the lesson's existing values highlighted
+    if (currentSessionDate) {
+      setSelectedDate(currentSessionDate)
+      setCalMonth(currentSessionDate.getMonth())
+      setCalYear(currentSessionDate.getFullYear())
+    } else {
+      setSelectedDate(null)
+      setCalMonth(today.getMonth())
+      setCalYear(today.getFullYear())
+    }
+    setSelectedTime(currentSessionTime ?? null)
+  }, [status, open]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleStatusChange = (newStatus: StatusType) => {
     setCurrentStatus(newStatus)
@@ -515,17 +525,7 @@ export function ServiceDetailModal({
           <Button
             className="w-full rounded-full"
             variant="outline"
-            onClick={() => {
-              if (currentSessionDate) {
-                setSelectedDate(currentSessionDate)
-                setCalMonth(currentSessionDate.getMonth())
-                setCalYear(currentSessionDate.getFullYear())
-              }
-              if (currentSessionTime) {
-                setSelectedTime(currentSessionTime)
-              }
-              setRescheduling(true)
-            }}
+            onClick={() => setRescheduling(true)}
           >
             <RefreshCw className="h-4 w-4 mr-2" />
             Reschedule Class
