@@ -35,6 +35,19 @@ interface Lesson {
   review?: ReviewData
 }
 
+// Module-scope: computed once at bundle time — identical on server and client
+function fmtDate(d: Date): string {
+  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+  return `${days[d.getDay()]}, ${months[d.getMonth()]} ${d.getDate()}`
+}
+const _now   = new Date(2026, 2, 27, 8, 0, 0) // fixed reference: Mar 27 2026 08:00 local
+const _in12h = new Date(_now.getTime() + 12 * 60 * 60 * 1000)
+const _in2d  = new Date(_now.getTime() + 2  * 24 * 60 * 60 * 1000)
+const _in4d  = new Date(_now.getTime() + 4  * 24 * 60 * 60 * 1000)
+const _in6d  = new Date(_now.getTime() + 6  * 24 * 60 * 60 * 1000)
+const _in8d  = new Date(_now.getTime() + 8  * 24 * 60 * 60 * 1000)
+
 export default function ProviderLessonsPage() {
   return (
     <Suspense fallback={<div className="min-h-screen bg-background" />}>
@@ -68,31 +81,31 @@ function ProviderLessonsContent() {
     {
       id: "lesson-1", title: "Piano Lesson", student: "Emma Thompson",
       studentAvatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop",
-      parent: "Sarah Thompson", date: "Fri, Feb 6", dateObj: new Date(2026, 1, 6), time: "4:00 PM",
+      parent: "Sarah Thompson", date: fmtDate(_in12h), dateObj: _in12h, time: "4:00 PM",
       duration: "45 min", location: "Naperville, IL", rate: 65, status: "active",
     },
     {
       id: "lesson-2", title: "Music Theory Session", student: "Jake Wilson",
       studentAvatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&h=100&fit=crop",
-      parent: "Lisa Wilson", date: "Fri, Feb 6", dateObj: new Date(2026, 1, 6), time: "5:00 PM",
+      parent: "Lisa Wilson", date: fmtDate(_in2d), dateObj: _in2d, time: "5:00 PM",
       duration: "30 min", location: "Online", rate: 45, status: "active",
     },
     {
       id: "lesson-3", title: "Piano Lesson", student: "Sophia Martinez",
       studentAvatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop",
-      parent: "Ana Martinez", date: "Sat, Feb 7", dateObj: new Date(2026, 1, 7), time: "3:30 PM",
+      parent: "Ana Martinez", date: fmtDate(_in4d), dateObj: _in4d, time: "3:30 PM",
       duration: "60 min", location: "Downers Grove, IL", rate: 75, status: "active",
     },
     {
       id: "lesson-4", title: "Piano Lesson", student: "Emma Thompson",
       studentAvatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop",
-      parent: "Sarah Thompson", date: "Fri, Feb 13", dateObj: new Date(2026, 1, 13), time: "4:00 PM",
+      parent: "Sarah Thompson", date: fmtDate(_in6d), dateObj: _in6d, time: "4:00 PM",
       duration: "45 min", location: "Naperville, IL", rate: 65, status: "active",
     },
     {
       id: "lesson-5", title: "Piano Lesson", student: "Mia Johnson",
       studentAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop",
-      parent: "Robert Johnson", date: "Mon, Feb 10", dateObj: new Date(2026, 1, 10), time: "2:00 PM",
+      parent: "Robert Johnson", date: fmtDate(_in8d), dateObj: _in8d, time: "2:00 PM",
       duration: "45 min", location: "Online", rate: 65, status: "active", pendingApproval: true,
     },
     {

@@ -62,34 +62,41 @@ export default function LessonsPage() {
     router.push(conv ? `/messages?conv=${conv.id}` : `/messages`)
   }
 
+  // First lesson is within 24h (reschedule disabled), rest are 2+ days out (reschedule enabled)
+  const in12h = new Date(Date.now() + 12 * 60 * 60 * 1000)
+  const in2days = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000)
+  const in4days = new Date(Date.now() + 4 * 24 * 60 * 60 * 1000)
+  const in6days = new Date(Date.now() + 6 * 24 * 60 * 60 * 1000)
+  const in8days = new Date(Date.now() + 8 * 24 * 60 * 60 * 1000)
+
   const [items, setItems] = useState<LessonItem[]>([
     {
       id: "class-1", type: "lesson", title: "Piano Lesson", provider: "Emily Carter",
-      providerAvatar: "/music-teacher-woman-piano.jpg", date: new Date("2026-02-04"),
+      providerAvatar: "/music-teacher-woman-piano.jpg", date: in12h,
       time: "4:00 PM", duration: "45 min", location: "Naperville, IL", student: "Emma",
       status: "active", price: 65,
     },
     {
       id: "class-2", type: "lesson", title: "Guitar Lesson", provider: "Michael Rodriguez",
-      providerAvatar: "/guitar-teacher-man.jpg", date: new Date("2026-02-06"),
+      providerAvatar: "/guitar-teacher-man.jpg", date: in2days,
       time: "3:30 PM", duration: "60 min", location: "Online", student: "Jake",
       status: "active", price: 55,
     },
     {
       id: "class-3", type: "lesson", title: "Piano Lesson", provider: "Emily Carter",
-      providerAvatar: "/music-teacher-woman-piano.jpg", date: new Date("2026-02-11"),
+      providerAvatar: "/music-teacher-woman-piano.jpg", date: in4days,
       time: "4:00 PM", duration: "45 min", location: "Naperville, IL", student: "Emma",
       status: "active", price: 65,
     },
     {
       id: "repair-1", type: "repair", title: "Violin String Replacement", provider: "Marcus Chen",
-      providerAvatar: "/luthier-carousel-1.jpg", date: new Date("2026-02-07"),
+      providerAvatar: "/luthier-carousel-1.jpg", date: in6days,
       time: "In Progress", duration: "Est. completion", location: "Drop-off", student: "Jake",
       status: "active", price: 85,
     },
     {
       id: "class-4", type: "lesson", title: "Piano Lesson", provider: "Sophia Martinez",
-      providerAvatar: "/music-teacher-woman-piano.jpg", date: new Date("2026-01-27"),
+      providerAvatar: "/music-teacher-woman-piano.jpg", date: in8days,
       time: "3:30 PM", duration: "60 min", location: "Downers Grove, IL", student: "Emma",
       status: "active", price: 75, pendingApproval: true,
     },

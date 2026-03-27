@@ -23,15 +23,13 @@ interface RescheduleContextType {
   isRescheduled: (id: string) => boolean
 }
 
-const defaultContext: RescheduleContextType = {
+const RescheduleContext = createContext<RescheduleContextType>({
   rescheduledIds: new Set(),
   rescheduledLessons: [],
   addReschedule: () => {},
   removeReschedule: () => {},
   isRescheduled: () => false,
-}
-
-const RescheduleContext = createContext<RescheduleContextType>(defaultContext)
+})
 
 export function RescheduleProvider({ children }: { children: ReactNode }) {
   const [rescheduledLessons, setRescheduledLessons] = useState<RescheduledLesson[]>([])
