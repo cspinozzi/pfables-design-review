@@ -130,6 +130,7 @@ export function ServiceDetailModal({
 }: ServiceDetailModalProps) {
   const [currentStatus, setCurrentStatus] = useState<StatusType | undefined>(status)
   const [rescheduling, setRescheduling] = useState(false)
+  const [confirming, setConfirming] = useState(false)
   const [confirmed, setConfirmed] = useState(false)
   const [closing, setClosing] = useState(false)
 
@@ -143,6 +144,7 @@ export function ServiceDetailModal({
   useEffect(() => {
     setCurrentStatus(status)
     setRescheduling(false)
+    setConfirming(false)
     setConfirmed(false)
     setClosing(false)
     // Pre-populate with the current session date/time so the calendar
@@ -189,6 +191,7 @@ export function ServiceDetailModal({
   const handleConfirmReschedule = () => {
     if (selectedDate && selectedTime && onReschedule) {
       onReschedule(selectedDate, selectedTime)
+      setConfirming(false)
       setConfirmed(true)
       setRescheduling(false)
     }
@@ -321,21 +324,79 @@ export function ServiceDetailModal({
       </div>
 
       {/* Actions */}
-      <div className="flex flex-col gap-2 pt-1">
+      <div className="flex items-center gap-2 pt-1 pb-0">
         <Button
-          className="w-full rounded-full"
-          disabled={!selectedDate || !selectedTime}
-          onClick={handleConfirmReschedule}
-        >
-          <RefreshCw className="h-4 w-4 mr-2" />
-          Confirm Reschedule
-        </Button>
-        <Button
-          className="w-full rounded-full"
+          className="flex-1 rounded-full"
           variant="outline"
           onClick={() => setRescheduling(false)}
         >
-          Cancel
+          <ChevronLeft className="h-4 w-4 mr-1" />
+          Back
+        </Button>
+        <Button
+          className="flex-1 rounded-full"
+          disabled={!selectedDate || !selectedTime}
+          onClick={() => setConfirming(true)}
+        >
+          Next
+        </Button>
+      </div>
+    </div>
+  )
+
+  // Confirming view — "Are you sure?" step
+  const confirmingView = (
+    <div className="flex flex-col items-center justify-center py-8 gap-6 text-center">
+      <div className="flex items-center justify-center h-20 w-20 rounded-full bg-primary/10">
+        <CalendarCheck className="h-10 w-10 text-primary" />
+      </div>
+      <div className="space-y-2">
+        <h3 className="font-semibold text-lg text-foreground">Confirm Reschedule</h3>
+        <p className="text-sm text-muted-foreground leading-relaxed max-w-[240px] mx-auto">
+          Are you sure you want to reschedule this class?
+        </p>
+      </div>
+      {selectedDate && selectedTime && (
+        <div className="w-full rounded-2xl border bg-secondary/40 p-4 space-y-3">
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">New Schedule</p>
+          <div className="flex items-center gap-3">
+            <div className="flex-1 flex items-center gap-2.5 rounded-xl border bg-background px-4 py-3">
+              <Calendar className="h-4 w-4 text-primary flex-shrink-0" />
+              <div className="text-left">
+                <p className="text-[10px] text-muted-foreground leading-none mb-0.5">Date</p>
+                <p className="text-sm font-semibold text-foreground">
+                  {(() => {
+                    const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"]
+                    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+                    return `${days[selectedDate.getDay()]}, ${months[selectedDate.getMonth()]} ${selectedDate.getDate()}`
+                  })()}
+                </p>
+              </div>
+            </div>
+            <div className="flex-1 flex items-center gap-2.5 rounded-xl border bg-background px-4 py-3">
+              <Clock className="h-4 w-4 text-primary flex-shrink-0" />
+              <div className="text-left">
+                <p className="text-[10px] text-muted-foreground leading-none mb-0.5">Time</p>
+                <p className="text-sm font-semibold text-foreground">{selectedTime}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      <div className="flex items-center gap-2 w-full pb-0">
+        <Button
+          className="flex-1 rounded-full"
+          variant="outline"
+          onClick={() => setConfirming(false)}
+        >
+          <ChevronLeft className="h-4 w-4 mr-1" />
+          Back
+        </Button>
+        <Button
+          className="flex-1 rounded-full"
+          onClick={handleConfirmReschedule}
+        >
+          Confirm
         </Button>
       </div>
     </div>
@@ -580,10 +641,10 @@ export function ServiceDetailModal({
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto pb-4">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            {rescheduling && !confirmed && (
+            {(rescheduling && !confirmed && !confirming) && (
               <button
                 type="button"
                 onClick={() => setRescheduling(false)}
@@ -598,13 +659,15 @@ export function ServiceDetailModal({
           <DialogDescription>
             {confirmed
               ? "Your request has been sent to the provider"
+              : confirming
+              ? "Review your new schedule"
               : rescheduling
               ? "Select a new date and time for your class"
               : subtitle || "Service details and information"}
           </DialogDescription>
         </DialogHeader>
 
-        {confirmed ? confirmationView : rescheduling ? rescheduleView : detailView}
+        {confirmed ? confirmationView : confirming ? confirmingView : rescheduling ? rescheduleView : detailView}
       </DialogContent>
     </Dialog>
   )

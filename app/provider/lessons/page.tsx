@@ -35,14 +35,14 @@ interface Lesson {
   review?: ReviewData
 }
 
-// Stable date helpers — module scope so server and client produce identical output
+// Module-scope helpers — evaluated once, identical on server and client
 function fmtDate(d: Date): string {
   const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
   return `${days[d.getDay()]}, ${months[d.getMonth()]} ${d.getDate()}`
 }
-// Fixed reference point — identical on server (UTC) and client (local)
-const _ref  = new Date(2026, 2, 27, 8, 0, 0)
+// Fixed reference point: Mar 27 2026 08:00 local — identical on server (UTC) and client
+const _ref   = new Date(2026, 2, 27, 8, 0, 0)
 const _in12h = new Date(_ref.getTime() + 12 * 60 * 60 * 1000)
 const _in2d  = new Date(_ref.getTime() + 2  * 24 * 60 * 60 * 1000)
 const _in4d  = new Date(_ref.getTime() + 4  * 24 * 60 * 60 * 1000)
