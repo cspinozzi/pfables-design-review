@@ -1,5 +1,5 @@
 "use client"
-// v2
+
 import { createContext, useContext, useState, useCallback, type ReactNode } from "react"
 
 export interface RescheduledLesson {
@@ -55,7 +55,9 @@ export function RescheduleProvider({ children }: { children: ReactNode }) {
   const rescheduledIds = new Set(rescheduledLessons.map((l) => l.id))
 
   return (
-    <RescheduleContext.Provider value={{ rescheduledIds, rescheduledLessons, addReschedule, removeReschedule, isRescheduled }}>
+    <RescheduleContext.Provider
+      value={{ rescheduledIds, rescheduledLessons, addReschedule, removeReschedule, isRescheduled }}
+    >
       {children}
     </RescheduleContext.Provider>
   )

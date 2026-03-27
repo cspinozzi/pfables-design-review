@@ -1,17 +1,17 @@
 "use client"
-// v2
+
 import { useState, Suspense } from "react"
 import { ServiceCard } from "@/components/service-card"
 import { ServiceDetailModal } from "@/components/service-detail-modal"
 import { ReviewDisplay, type ReviewData } from "@/components/review-display"
 import { useRouter, useSearchParams } from "next/navigation"
-import { Calendar, Clock, MapPin, User, DollarSign, Timer } from "lucide-react"
+import { Calendar, Clock, MapPin, User, DollarSign } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useMockMessages } from "@/hooks/use-mock-messages"
 import { useAuth } from "@/lib/auth-context"
 import { useReschedule } from "@/lib/reschedule-context"
-
+import { useMessageContext } from "@/lib/message-context"
 
 type LessonStatus = "active" | "completed" | "cancelled"
 type FilterKey = "active" | "received"
@@ -24,6 +24,7 @@ interface Lesson {
   parent: string
   parentAvatar?: string
   date: string
+  dateObj?: Date
   time: string
   duration: string
   location: string
@@ -33,8 +34,6 @@ interface Lesson {
   pendingApproval?: boolean
   review?: ReviewData
 }
-
-
 
 export default function ProviderLessonsPage() {
   return (
@@ -49,7 +48,8 @@ function ProviderLessonsContent() {
   const searchParams = useSearchParams()
   const { user } = useAuth()
   const { conversations } = useMockMessages()
-  const { rescheduledIds } = useReschedule()
+  const { rescheduledIds, addReschedule } = useReschedule()
+  const { findConversationByParticipantName, sendMessage } = useMessageContext()
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null)
 
   const initialTab = searchParams.get("tab")
@@ -68,31 +68,31 @@ function ProviderLessonsContent() {
     {
       id: "lesson-1", title: "Piano Lesson", student: "Emma Thompson",
       studentAvatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop",
-      parent: "Sarah Thompson", date: "Fri, Feb 6", time: "4:00 PM",
+      parent: "Sarah Thompson", date: "Fri, Feb 6", dateObj: new Date(2026, 1, 6), time: "4:00 PM",
       duration: "45 min", location: "Naperville, IL", rate: 65, status: "active",
     },
     {
       id: "lesson-2", title: "Music Theory Session", student: "Jake Wilson",
       studentAvatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&h=100&fit=crop",
-      parent: "Lisa Wilson", date: "Fri, Feb 6", time: "5:00 PM",
+      parent: "Lisa Wilson", date: "Fri, Feb 6", dateObj: new Date(2026, 1, 6), time: "5:00 PM",
       duration: "30 min", location: "Online", rate: 45, status: "active",
     },
     {
       id: "lesson-3", title: "Piano Lesson", student: "Sophia Martinez",
       studentAvatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop",
-      parent: "Ana Martinez", date: "Sat, Feb 7", time: "3:30 PM",
+      parent: "Ana Martinez", date: "Sat, Feb 7", dateObj: new Date(2026, 1, 7), time: "3:30 PM",
       duration: "60 min", location: "Downers Grove, IL", rate: 75, status: "active",
     },
     {
       id: "lesson-4", title: "Piano Lesson", student: "Emma Thompson",
       studentAvatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop",
-      parent: "Sarah Thompson", date: "Fri, Feb 13", time: "4:00 PM",
+      parent: "Sarah Thompson", date: "Fri, Feb 13", dateObj: new Date(2026, 1, 13), time: "4:00 PM",
       duration: "45 min", location: "Naperville, IL", rate: 65, status: "active",
     },
     {
       id: "lesson-5", title: "Piano Lesson", student: "Mia Johnson",
       studentAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop",
-      parent: "Robert Johnson", date: "Mon, Feb 10", time: "2:00 PM",
+      parent: "Robert Johnson", date: "Mon, Feb 10", dateObj: new Date(2026, 1, 10), time: "2:00 PM",
       duration: "45 min", location: "Online", rate: 65, status: "active", pendingApproval: true,
     },
     {
@@ -101,12 +101,9 @@ function ProviderLessonsContent() {
       parent: "Sarah Thompson", parentAvatar: "/parent-woman.jpg", date: "Fri, Jan 30", time: "4:00 PM",
       duration: "45 min", location: "Naperville, IL", rate: 65, status: "completed", paid: true,
       review: {
-        id: "review-1",
-        rating: 5,
-        comment: "Emma had an amazing lesson! The teacher was patient and really helped her understand the new piece. We're so happy with the progress she's making.",
-        reviewerName: "Sarah Thompson",
-        reviewerAvatar: "/parent-woman.jpg",
-        date: new Date(2026, 0, 31),
+        id: "review-1", rating: 5,
+        comment: "Emma had an amazing lesson! The teacher was patient and really helped her understand the new piece.",
+        reviewerName: "Sarah Thompson", reviewerAvatar: "/parent-woman.jpg", date: new Date(2026, 0, 31),
       },
     },
     {
@@ -115,12 +112,9 @@ function ProviderLessonsContent() {
       parent: "Lisa Wilson", parentAvatar: "/avatars/jennifer-wilson.jpg", date: "Thu, Jan 29", time: "5:00 PM",
       duration: "30 min", location: "Online", rate: 45, status: "completed", paid: true,
       review: {
-        id: "review-2",
-        rating: 4,
-        comment: "Great session! Jake really enjoyed learning about chord progressions. Would love more practice exercises for home.",
-        reviewerName: "Lisa Wilson",
-        reviewerAvatar: "/avatars/jennifer-wilson.jpg",
-        date: new Date(2026, 0, 30),
+        id: "review-2", rating: 4,
+        comment: "Great session! Jake really enjoyed learning about chord progressions.",
+        reviewerName: "Lisa Wilson", reviewerAvatar: "/avatars/jennifer-wilson.jpg", date: new Date(2026, 0, 30),
       },
     },
     {
@@ -152,7 +146,7 @@ function ProviderLessonsContent() {
     { key: "received", label: `Received (${completedLessons.length})` },
   ]
 
-  const currentLessons = filter === "active" ? activeLessons : filter === "received" ? completedLessons : completedLessons
+  const currentLessons = filter === "active" ? activeLessons : completedLessons
 
   return (
     <div className="min-h-screen bg-background pb-24 sm:pb-12">
@@ -162,7 +156,7 @@ function ProviderLessonsContent() {
           <p className="text-sm text-muted-foreground">View your active and past lessons</p>
         </div>
 
-        <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-1 -mb-1 scrollbar-hide">
+        <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-1 scrollbar-hide">
           {filters.map((f) => (
             <button
               key={f.key}
@@ -190,9 +184,16 @@ function ProviderLessonsContent() {
                 subtitle={`${lesson.student} (${lesson.parent})`}
                 price={`$${lesson.rate}`}
                 priceClassName={
-                  lesson.status === "cancelled" || lesson.paid === true ? "text-muted-foreground" : "text-primary"
+                  lesson.status === "cancelled" || lesson.paid === true
+                    ? "text-muted-foreground"
+                    : "text-primary"
                 }
-                status={lesson.status === "completed" && lesson.paid === true ? "paid" : lesson.status === "completed" && lesson.paid === false ? "completed" : lesson.status === "cancelled" ? "cancelled" : lesson.pendingApproval ? "pending" : "active"}
+                status={
+                  lesson.status === "completed" && lesson.paid === true ? "paid" :
+                  lesson.status === "completed" && lesson.paid === false ? "completed" :
+                  lesson.status === "cancelled" ? "cancelled" :
+                  lesson.pendingApproval ? "pending" : "active"
+                }
                 rescheduled={rescheduledIds.has(lesson.id)}
                 onClick={() => setSelectedLesson(lesson)}
                 footer={lesson.pendingApproval ? (
@@ -203,7 +204,9 @@ function ProviderLessonsContent() {
                       className="rounded-full px-5 font-semibold"
                       onClick={(e) => {
                         e.stopPropagation()
-                        setLessons((prev) => prev.map((l) => l.id === lesson.id ? { ...l, pendingApproval: false } : l))
+                        setLessons((prev) => prev.map((l) =>
+                          l.id === lesson.id ? { ...l, pendingApproval: false } : l
+                        ))
                       }}
                     >
                       Accept
@@ -214,7 +217,9 @@ function ProviderLessonsContent() {
                       className="rounded-full px-5 font-semibold text-primary-foreground hover:bg-white/20 hover:text-primary-foreground"
                       onClick={(e) => {
                         e.stopPropagation()
-                        setLessons((prev) => prev.map((l) => l.id === lesson.id ? { ...l, status: "cancelled", pendingApproval: false } : l))
+                        setLessons((prev) => prev.map((l) =>
+                          l.id === lesson.id ? { ...l, status: "cancelled", pendingApproval: false } : l
+                        ))
                       }}
                     >
                       Decline
@@ -243,8 +248,7 @@ function ProviderLessonsContent() {
                     </span>
                   </>
                 }
-              >
-              </ServiceCard>
+              />
             ))}
           </div>
         ) : (
@@ -280,10 +284,44 @@ function ProviderLessonsContent() {
               setSelectedLesson(null)
             }}
             messageLabel="Message Parent"
+            showRescheduleButton={selectedLesson.status === "active"}
+            currentSessionDate={selectedLesson.dateObj}
+            currentSessionTime={selectedLesson.time}
+            onReschedule={(newDate: Date, newTime: string) => {
+              const lesson = selectedLesson
+              const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+              const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+              const formatted = `${days[newDate.getDay()]}, ${months[newDate.getMonth()]} ${newDate.getDate()}`
+              setLessons((prev) => prev.map((l) =>
+                l.id === lesson.id ? { ...l, date: formatted, dateObj: newDate, time: newTime } : l
+              ))
+              setSelectedLesson((prev) => prev ? { ...prev, date: formatted, dateObj: newDate, time: newTime } : null)
+              addReschedule({
+                id: lesson.id,
+                title: lesson.title,
+                parentName: user?.name ?? "Provider",
+                parentAvatar: user?.avatar ?? "/music-teacher-woman.jpg",
+                childName: lesson.student,
+                newDate,
+                newTime,
+                duration: lesson.duration,
+                location: lesson.location,
+                rescheduledAt: new Date(),
+              })
+              const conv = findConversationByParticipantName(lesson.parent, user?.id)
+              if (conv && user) {
+                sendMessage(
+                  conv.id,
+                  `Hi! I need to reschedule our ${lesson.title} for ${lesson.student} to ${formatted} at ${newTime}. Please let me know if this works for you.`,
+                  user.id,
+                  user.name,
+                  user.avatar
+                )
+              }
+            }}
             review={selectedLesson.review}
           />
         )}
-
       </div>
     </div>
   )
