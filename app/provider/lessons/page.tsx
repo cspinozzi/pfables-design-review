@@ -35,19 +35,20 @@ interface Lesson {
   review?: ReviewData
 }
 
-// Module-scope helpers — evaluated once, identical on server and client
+// Module-scope helpers — evaluated once at bundle time, identical on server and client
 function fmtDate(d: Date): string {
   const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
   return `${days[d.getDay()]}, ${months[d.getMonth()]} ${d.getDate()}`
 }
-// Fixed reference point: Mar 27 2026 08:00 local — identical on server (UTC) and client
-const _ref   = new Date(2026, 2, 27, 8, 0, 0)
+
+// Fixed reference: Mar 27 2026 08:00 local — stable across server and client
+const _ref  = new Date(2026, 2, 27, 8, 0, 0)
 const _in12h = new Date(_ref.getTime() + 12 * 60 * 60 * 1000)
-const _in2d  = new Date(_ref.getTime() + 2  * 24 * 60 * 60 * 1000)
-const _in4d  = new Date(_ref.getTime() + 4  * 24 * 60 * 60 * 1000)
-const _in6d  = new Date(_ref.getTime() + 6  * 24 * 60 * 60 * 1000)
-const _in8d  = new Date(_ref.getTime() + 8  * 24 * 60 * 60 * 1000)
+const _in2d  = new Date(_ref.getTime() + 2 * 24 * 60 * 60 * 1000)
+const _in4d  = new Date(_ref.getTime() + 4 * 24 * 60 * 60 * 1000)
+const _in6d  = new Date(_ref.getTime() + 6 * 24 * 60 * 60 * 1000)
+const _in8d  = new Date(_ref.getTime() + 8 * 24 * 60 * 60 * 1000)
 
 export default function ProviderLessonsPage() {
   return (
@@ -80,68 +81,149 @@ function ProviderLessonsContent() {
 
   const [lessons, setLessons] = useState<Lesson[]>([
     {
-      id: "lesson-1", title: "Piano Lesson", student: "Emma Thompson",
+      id: "lesson-1",
+      title: "Piano Lesson",
+      student: "Emma Thompson",
       studentAvatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop",
-      parent: "Sarah Thompson", date: fmtDate(_in12h), dateObj: _in12h, time: "4:00 PM",
-      duration: "45 min", location: "Naperville, IL", rate: 65, status: "active",
+      parent: "Sarah Thompson",
+      date: fmtDate(_in12h),
+      dateObj: _in12h,
+      time: "4:00 PM",
+      duration: "45 min",
+      location: "Naperville, IL",
+      rate: 65,
+      status: "active",
     },
     {
-      id: "lesson-2", title: "Music Theory Session", student: "Jake Wilson",
+      id: "lesson-2",
+      title: "Music Theory Session",
+      student: "Jake Wilson",
       studentAvatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&h=100&fit=crop",
-      parent: "Lisa Wilson", date: fmtDate(_in2d), dateObj: _in2d, time: "5:00 PM",
-      duration: "30 min", location: "Online", rate: 45, status: "active",
+      parent: "Lisa Wilson",
+      date: fmtDate(_in2d),
+      dateObj: _in2d,
+      time: "5:00 PM",
+      duration: "30 min",
+      location: "Online",
+      rate: 45,
+      status: "active",
     },
     {
-      id: "lesson-3", title: "Piano Lesson", student: "Sophia Martinez",
+      id: "lesson-3",
+      title: "Piano Lesson",
+      student: "Sophia Martinez",
       studentAvatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop",
-      parent: "Ana Martinez", date: fmtDate(_in4d), dateObj: _in4d, time: "3:30 PM",
-      duration: "60 min", location: "Downers Grove, IL", rate: 75, status: "active",
+      parent: "Ana Martinez",
+      date: fmtDate(_in4d),
+      dateObj: _in4d,
+      time: "3:30 PM",
+      duration: "60 min",
+      location: "Downers Grove, IL",
+      rate: 75,
+      status: "active",
     },
     {
-      id: "lesson-4", title: "Piano Lesson", student: "Emma Thompson",
+      id: "lesson-4",
+      title: "Piano Lesson",
+      student: "Emma Thompson",
       studentAvatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop",
-      parent: "Sarah Thompson", date: fmtDate(_in6d), dateObj: _in6d, time: "4:00 PM",
-      duration: "45 min", location: "Naperville, IL", rate: 65, status: "active",
+      parent: "Sarah Thompson",
+      date: fmtDate(_in6d),
+      dateObj: _in6d,
+      time: "4:00 PM",
+      duration: "45 min",
+      location: "Naperville, IL",
+      rate: 65,
+      status: "active",
     },
     {
-      id: "lesson-5", title: "Piano Lesson", student: "Mia Johnson",
+      id: "lesson-5",
+      title: "Piano Lesson",
+      student: "Mia Johnson",
       studentAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop",
-      parent: "Robert Johnson", date: fmtDate(_in8d), dateObj: _in8d, time: "2:00 PM",
-      duration: "45 min", location: "Online", rate: 65, status: "active", pendingApproval: true,
+      parent: "Robert Johnson",
+      date: fmtDate(_in8d),
+      dateObj: _in8d,
+      time: "2:00 PM",
+      duration: "45 min",
+      location: "Online",
+      rate: 65,
+      status: "active",
+      pendingApproval: true,
     },
     {
-      id: "lesson-c1", title: "Piano Lesson", student: "Emma Thompson",
+      id: "lesson-c1",
+      title: "Piano Lesson",
+      student: "Emma Thompson",
       studentAvatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop",
-      parent: "Sarah Thompson", parentAvatar: "/parent-woman.jpg", date: "Fri, Jan 30", time: "4:00 PM",
-      duration: "45 min", location: "Naperville, IL", rate: 65, status: "completed", paid: true,
+      parent: "Sarah Thompson",
+      parentAvatar: "/parent-woman.jpg",
+      date: "Fri, Jan 30",
+      time: "4:00 PM",
+      duration: "45 min",
+      location: "Naperville, IL",
+      rate: 65,
+      status: "completed",
+      paid: true,
       review: {
-        id: "review-1", rating: 5,
+        id: "review-1",
+        rating: 5,
         comment: "Emma had an amazing lesson! The teacher was patient and really helped her understand the new piece.",
-        reviewerName: "Sarah Thompson", reviewerAvatar: "/parent-woman.jpg", date: new Date(2026, 0, 31),
+        reviewerName: "Sarah Thompson",
+        reviewerAvatar: "/parent-woman.jpg",
+        date: new Date(2026, 0, 31),
       },
     },
     {
-      id: "lesson-c2", title: "Music Theory Session", student: "Jake Wilson",
+      id: "lesson-c2",
+      title: "Music Theory Session",
+      student: "Jake Wilson",
       studentAvatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&h=100&fit=crop",
-      parent: "Lisa Wilson", parentAvatar: "/avatars/jennifer-wilson.jpg", date: "Thu, Jan 29", time: "5:00 PM",
-      duration: "30 min", location: "Online", rate: 45, status: "completed", paid: true,
+      parent: "Lisa Wilson",
+      parentAvatar: "/avatars/jennifer-wilson.jpg",
+      date: "Thu, Jan 29",
+      time: "5:00 PM",
+      duration: "30 min",
+      location: "Online",
+      rate: 45,
+      status: "completed",
+      paid: true,
       review: {
-        id: "review-2", rating: 4,
+        id: "review-2",
+        rating: 4,
         comment: "Great session! Jake really enjoyed learning about chord progressions.",
-        reviewerName: "Lisa Wilson", reviewerAvatar: "/avatars/jennifer-wilson.jpg", date: new Date(2026, 0, 30),
+        reviewerName: "Lisa Wilson",
+        reviewerAvatar: "/avatars/jennifer-wilson.jpg",
+        date: new Date(2026, 0, 30),
       },
     },
     {
-      id: "lesson-c3", title: "Piano Lesson", student: "Sophia Martinez",
+      id: "lesson-c3",
+      title: "Piano Lesson",
+      student: "Sophia Martinez",
       studentAvatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop",
-      parent: "Ana Martinez", parentAvatar: "/avatars/amanda-martinez.jpg", date: "Wed, Jan 28", time: "3:30 PM",
-      duration: "60 min", location: "Downers Grove, IL", rate: 75, status: "completed", paid: false,
+      parent: "Ana Martinez",
+      parentAvatar: "/avatars/amanda-martinez.jpg",
+      date: "Wed, Jan 28",
+      time: "3:30 PM",
+      duration: "60 min",
+      location: "Downers Grove, IL",
+      rate: 75,
+      status: "completed",
+      paid: false,
     },
     {
-      id: "lesson-x1", title: "Guitar Lesson", student: "Liam Parker",
+      id: "lesson-x1",
+      title: "Guitar Lesson",
+      student: "Liam Parker",
       studentAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop",
-      parent: "David Parker", date: "Thu, Jan 22", time: "4:30 PM",
-      duration: "45 min", location: "Naperville, IL", rate: 65, status: "cancelled",
+      parent: "David Parker",
+      date: "Thu, Jan 22",
+      time: "4:30 PM",
+      duration: "45 min",
+      location: "Naperville, IL",
+      rate: 65,
+      status: "cancelled",
     },
   ])
 

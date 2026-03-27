@@ -413,7 +413,7 @@ export function ServiceDetailModal({
       {/* Heading + subtext */}
       <div className="space-y-2">
         <h3 className="font-semibold text-lg text-foreground">Class Rescheduled</h3>
-        <p className="text-sm text-muted-foreground leading-relaxed max-w-[240px] mx-auto">
+        <p className="text-sm text-muted-foreground leading-relaxed max-w-[300px] mx-auto">
           Your request has been sent. The provider will confirm the new time shortly.
         </p>
       </div>

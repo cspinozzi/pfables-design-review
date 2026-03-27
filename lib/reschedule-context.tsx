@@ -63,6 +63,7 @@ export function RescheduleProvider({ children }: { children: ReactNode }) {
   )
 }
 
+// No throw — context has a safe non-null default value
 export function useReschedule() {
   return useContext(RescheduleContext)
 }
