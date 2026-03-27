@@ -23,7 +23,7 @@ interface Lesson {
   studentAvatar: string
   parent: string
   parentAvatar?: string
-  date: Date
+  date: string
   time: string
   duration: string
   location: string
@@ -68,37 +68,37 @@ function ProviderLessonsContent() {
     {
       id: "lesson-1", title: "Piano Lesson", student: "Emma Thompson",
       studentAvatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop",
-      parent: "Sarah Thompson", date: new Date(2026, 1, 6), time: "4:00 PM",
+      parent: "Sarah Thompson", date: "Fri, Feb 6", time: "4:00 PM",
       duration: "45 min", location: "Naperville, IL", rate: 65, status: "active",
     },
     {
       id: "lesson-2", title: "Music Theory Session", student: "Jake Wilson",
       studentAvatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&h=100&fit=crop",
-      parent: "Lisa Wilson", date: new Date(2026, 1, 6), time: "5:00 PM",
+      parent: "Lisa Wilson", date: "Fri, Feb 6", time: "5:00 PM",
       duration: "30 min", location: "Online", rate: 45, status: "active",
     },
     {
       id: "lesson-3", title: "Piano Lesson", student: "Sophia Martinez",
       studentAvatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop",
-      parent: "Ana Martinez", date: new Date(2026, 1, 7), time: "3:30 PM",
+      parent: "Ana Martinez", date: "Sat, Feb 7", time: "3:30 PM",
       duration: "60 min", location: "Downers Grove, IL", rate: 75, status: "active",
     },
     {
       id: "lesson-4", title: "Piano Lesson", student: "Emma Thompson",
       studentAvatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop",
-      parent: "Sarah Thompson", date: new Date(2026, 1, 13), time: "4:00 PM",
+      parent: "Sarah Thompson", date: "Fri, Feb 13", time: "4:00 PM",
       duration: "45 min", location: "Naperville, IL", rate: 65, status: "active",
     },
     {
       id: "lesson-5", title: "Piano Lesson", student: "Mia Johnson",
       studentAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop",
-      parent: "Robert Johnson", date: new Date(2026, 1, 10), time: "2:00 PM",
+      parent: "Robert Johnson", date: "Mon, Feb 10", time: "2:00 PM",
       duration: "45 min", location: "Online", rate: 65, status: "active", pendingApproval: true,
     },
     {
       id: "lesson-c1", title: "Piano Lesson", student: "Emma Thompson",
       studentAvatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop",
-      parent: "Sarah Thompson", parentAvatar: "/parent-woman.jpg", date: new Date(2026, 0, 30), time: "4:00 PM",
+      parent: "Sarah Thompson", parentAvatar: "/parent-woman.jpg", date: "Fri, Jan 30", time: "4:00 PM",
       duration: "45 min", location: "Naperville, IL", rate: 65, status: "completed", paid: true,
       review: {
         id: "review-1",
@@ -112,7 +112,7 @@ function ProviderLessonsContent() {
     {
       id: "lesson-c2", title: "Music Theory Session", student: "Jake Wilson",
       studentAvatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&h=100&fit=crop",
-      parent: "Lisa Wilson", parentAvatar: "/avatars/jennifer-wilson.jpg", date: new Date(2026, 0, 29), time: "5:00 PM",
+      parent: "Lisa Wilson", parentAvatar: "/avatars/jennifer-wilson.jpg", date: "Thu, Jan 29", time: "5:00 PM",
       duration: "30 min", location: "Online", rate: 45, status: "completed", paid: true,
       review: {
         id: "review-2",
@@ -126,13 +126,13 @@ function ProviderLessonsContent() {
     {
       id: "lesson-c3", title: "Piano Lesson", student: "Sophia Martinez",
       studentAvatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop",
-      parent: "Ana Martinez", parentAvatar: "/avatars/amanda-martinez.jpg", date: new Date(2026, 0, 28), time: "3:30 PM",
+      parent: "Ana Martinez", parentAvatar: "/avatars/amanda-martinez.jpg", date: "Wed, Jan 28", time: "3:30 PM",
       duration: "60 min", location: "Downers Grove, IL", rate: 75, status: "completed", paid: false,
     },
     {
       id: "lesson-x1", title: "Guitar Lesson", student: "Liam Parker",
       studentAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop",
-      parent: "David Parker", date: new Date(2026, 0, 22), time: "4:30 PM",
+      parent: "David Parker", date: "Thu, Jan 22", time: "4:30 PM",
       duration: "45 min", location: "Naperville, IL", rate: 65, status: "cancelled",
     },
   ])
@@ -146,12 +146,6 @@ function ProviderLessonsContent() {
 
   const activeLessons = lessons.filter((l) => l.status === "active")
   const completedLessons = lessons.filter((l) => l.status === "completed" || l.status === "cancelled")
-
-  const formatDate = (date: Date) => {
-    const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
-    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-    return `${weekdays[date.getDay()]}, ${months[date.getMonth()]} ${date.getDate()}`
-  }
 
   const filters: { key: FilterKey; label: string }[] = [
     { key: "active", label: `Active (${activeLessons.length})` },
@@ -237,7 +231,7 @@ function ProviderLessonsContent() {
                     </span>
                     <span className="flex items-center gap-1">
                       <Calendar className="h-3.5 w-3.5" />
-                      {formatDate(lesson.date)}
+                      {lesson.date}
                     </span>
                     <span className="flex items-center gap-1">
                       <Clock className="h-3.5 w-3.5" />
@@ -275,7 +269,7 @@ function ProviderLessonsContent() {
               { name: selectedLesson.parent, role: "Parent / Guardian" },
             ]}
             fields={[
-              { icon: <Calendar className="h-4 w-4" />, label: "Date", value: formatDate(selectedLesson.date) },
+              { icon: <Calendar className="h-4 w-4" />, label: "Date", value: selectedLesson.date },
               { icon: <Clock className="h-4 w-4" />, label: "Time", value: `${selectedLesson.time} (${selectedLesson.duration})` },
               { icon: <MapPin className="h-4 w-4" />, label: "Location", value: selectedLesson.location },
               { icon: <DollarSign className="h-4 w-4" />, label: "Rate", value: `$${selectedLesson.rate}` },

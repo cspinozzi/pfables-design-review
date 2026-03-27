@@ -483,19 +483,30 @@ export default function ProviderDashboardPage() {
             { icon: <Timer className="h-4 w-4" />, label: "Duration", value: selectedRequest.duration },
             { icon: <MapPin className="h-4 w-4" />, label: "Location", value: selectedRequest.location },
           ]}
-          onMessage={() => {
-            handleMessage(selectedRequest.parent)
-            setSelectedRequest(null)
-          }}
-          messageLabel="Message"
           extraActions={
-            <Button className="flex-1 rounded-full" onClick={() => {
-              handleAccept(selectedRequest)
-              setSelectedRequest(null)
-            }}>
-              <CheckCircle2 className="h-4 w-4 mr-2" />
-              Accept
-            </Button>
+            <>
+              <Button variant="outline" className="w-full rounded-full" onClick={() => {
+                handleMessage(selectedRequest.parent)
+                setSelectedRequest(null)
+              }}>
+                <MessageCircle className="h-4 w-4 mr-2" />
+                Message
+              </Button>
+              <Button variant="outline" className="w-full rounded-full" onClick={() => {
+                handleMessage(selectedRequest.parent)
+                setSelectedRequest(null)
+              }}>
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Suggest New Time
+              </Button>
+              <Button className="w-full rounded-full" onClick={() => {
+                handleAccept(selectedRequest)
+                setSelectedRequest(null)
+              }}>
+                <CheckCircle2 className="h-4 w-4 mr-2" />
+                Accept
+              </Button>
+            </>
           }
         />
       )}
