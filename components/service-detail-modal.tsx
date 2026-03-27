@@ -129,6 +129,7 @@ export function ServiceDetailModal({
   const [currentStatus, setCurrentStatus] = useState<StatusType | undefined>(status)
   const [rescheduling, setRescheduling] = useState(false)
   const [confirmed, setConfirmed] = useState(false)
+  const [closing, setClosing] = useState(false)
 
   const today = new Date()
   const [calMonth, setCalMonth] = useState(today.getMonth())
@@ -141,6 +142,7 @@ export function ServiceDetailModal({
     setCurrentStatus(status)
     setRescheduling(false)
     setConfirmed(false)
+    setClosing(false)
     setSelectedDate(null)
     setSelectedTime(null)
   }, [status, open])
@@ -346,9 +348,39 @@ export function ServiceDetailModal({
         </div>
       )}
 
-      <Button className="w-full rounded-full" onClick={onClose}>
-        Done
-      </Button>
+      <div className="flex items-center gap-2 w-full">
+        <Button
+          className="flex-1 rounded-full"
+          variant="outline"
+          onClick={() => {
+            setConfirmed(false)
+            setRescheduling(true)
+          }}
+        >
+          <ChevronLeft className="h-4 w-4 mr-1" />
+          Back
+        </Button>
+        <Button
+          className="flex-1 rounded-full"
+          disabled={closing}
+          onClick={() => {
+            setClosing(true)
+            setTimeout(() => {
+              onClose()
+              setClosing(false)
+            }, 900)
+          }}
+        >
+          {closing ? (
+            <span className="flex items-center gap-1.5">
+              <CheckCircle2 className="h-4 w-4" />
+              Confirmed
+            </span>
+          ) : (
+            "Done"
+          )}
+        </Button>
+      </div>
     </div>
   )
 
