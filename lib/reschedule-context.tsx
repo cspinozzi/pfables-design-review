@@ -45,7 +45,20 @@ const RescheduleContext = createContext<RescheduleContextType>(defaultContext)
 
 export function RescheduleProvider({ children }: { children: ReactNode }) {
   const [rescheduledLessons, setRescheduledLessons] = useState<RescheduledLesson[]>([])
-  const [providerReschedules, setProviderReschedules] = useState<RescheduledLesson[]>([])
+  const [providerReschedules, setProviderReschedules] = useState<RescheduledLesson[]>([
+    {
+      id: "class-2",
+      title: "Guitar Lesson",
+      parentName: "Michael Rodriguez",
+      parentAvatar: "/guitar-teacher-man.jpg",
+      childName: "Jake",
+      newDate: new Date(2026, 3, 3), // Apr 3, 2026
+      newTime: "5:00 PM",
+      duration: "60 min",
+      location: "Online",
+      rescheduledAt: new Date(2026, 2, 30),
+    },
+  ])
 
   const addReschedule = useCallback((lesson: RescheduledLesson) => {
     setRescheduledLessons((prev) => {
