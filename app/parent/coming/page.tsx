@@ -250,23 +250,6 @@ export default function LessonsPage() {
                       <div className="flex items-center justify-end gap-2 px-4 sm:px-6 py-3 bg-primary rounded-b-xl">
                         <Button
                           size="sm"
-                          variant="secondary"
-                          className="rounded-full px-5 font-semibold"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            // Accept: apply the new date/time and remove the pending reschedule
-                            setItems((prev) => prev.map((i) =>
-                              i.id === item.id
-                                ? { ...i, date: providerReschedule.newDate, time: providerReschedule.newTime }
-                                : i
-                            ))
-                            removeProviderReschedule(item.id)
-                          }}
-                        >
-                          Accept
-                        </Button>
-                        <Button
-                          size="sm"
                           variant="ghost"
                           className="rounded-full px-5 font-semibold text-primary-foreground hover:bg-white/20 hover:text-primary-foreground"
                           onClick={(e) => {
@@ -276,6 +259,22 @@ export default function LessonsPage() {
                         >
                           <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
                           Suggest New Time
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          className="rounded-full px-5 font-semibold"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setItems((prev) => prev.map((i) =>
+                              i.id === item.id
+                                ? { ...i, date: providerReschedule.newDate, time: providerReschedule.newTime }
+                                : i
+                            ))
+                            removeProviderReschedule(item.id)
+                          }}
+                        >
+                          Accept
                         </Button>
                       </div>
                     )
