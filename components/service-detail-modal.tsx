@@ -9,7 +9,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Calendar, Clock, MapPin, User, DollarSign, MessageCircle, Wrench, CheckCircle2, Circle, XCircle, Star, RefreshCw, ChevronLeft, ChevronRight, CalendarCheck, AlertCircle, ArrowRight } from "lucide-react"
+import { Calendar, Clock, MapPin, User, DollarSign, MessageCircle, Wrench, CheckCircle2, Circle, XCircle, Star, RefreshCw, ChevronLeft, ChevronRight, CalendarCheck, AlertCircle, ArrowRight, Hourglass } from "lucide-react"
 import Image from "next/image"
 import { cn } from "@/lib/utils"
 import type { ReviewData } from "@/components/review-display"
@@ -437,78 +437,16 @@ export function ServiceDetailModal({
 
   // Confirmation view (shown after successful reschedule)
   const confirmationView = (
-    <div className="flex flex-col items-center justify-center py-8 gap-6 text-center">
-      {/* Success icon */}
-      <div className="flex items-center justify-center h-20 w-20 rounded-full bg-primary/10">
-        <CalendarCheck className="h-10 w-10 text-primary" />
+    <div className="flex flex-col items-center justify-center py-10 gap-6 text-center">
+      {/* Hourglass icon */}
+      <div className="flex items-center justify-center h-28 w-28 rounded-full bg-primary/10">
+        <Hourglass className="h-12 w-12 text-primary" />
       </div>
 
-      {/* Heading + subtext */}
-      <div className="space-y-2">
-        <h3 className="font-semibold text-lg text-foreground">Class Rescheduled</h3>
-        <p className="text-sm text-muted-foreground leading-relaxed max-w-[300px] mx-auto">
-          Your request has been sent. The provider will confirm the new time shortly.
-        </p>
-      </div>
-
-      {/* New date + time chips */}
-      {selectedDate && selectedTime && (
-        <div className="w-full rounded-2xl border bg-secondary/40 p-4 space-y-3">
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">New Schedule</p>
-          <div className="flex items-center gap-3">
-            <div className="flex-1 flex items-center gap-2.5 rounded-xl border bg-background px-4 py-3">
-              <Calendar className="h-4 w-4 text-primary flex-shrink-0" />
-              <div className="text-left">
-                <p className="text-[10px] text-muted-foreground leading-none mb-0.5">Date</p>
-                <p className="text-sm font-semibold text-foreground">
-                  {selectedDate.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
-                </p>
-              </div>
-            </div>
-            <div className="flex-1 flex items-center gap-2.5 rounded-xl border bg-background px-4 py-3">
-              <Clock className="h-4 w-4 text-primary flex-shrink-0" />
-              <div className="text-left">
-                <p className="text-[10px] text-muted-foreground leading-none mb-0.5">Time</p>
-                <p className="text-sm font-semibold text-foreground">{selectedTime}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div className="flex items-center gap-2 w-full">
-        <Button
-          className="flex-1 rounded-full"
-          variant="outline"
-          onClick={() => {
-            setConfirmed(false)
-            setRescheduling(true)
-          }}
-        >
-          <ChevronLeft className="h-4 w-4 mr-1" />
-          Back
-        </Button>
-        <Button
-          className="flex-1 rounded-full"
-          disabled={closing}
-          onClick={() => {
-            setClosing(true)
-            setTimeout(() => {
-              onClose()
-              setClosing(false)
-            }, 900)
-          }}
-        >
-          {closing ? (
-            <span className="flex items-center gap-1.5">
-              <CheckCircle2 className="h-4 w-4" />
-              Confirmed
-            </span>
-          ) : (
-            "Done"
-          )}
-        </Button>
-      </div>
+      {/* Body copy */}
+      <p className="text-sm text-muted-foreground leading-relaxed max-w-[300px] mx-auto">
+        Your request has been sent. The provider will confirm the new time shortly.
+      </p>
     </div>
   )
 
@@ -687,7 +625,7 @@ export function ServiceDetailModal({
                 <ChevronLeft className="h-4 w-4 text-muted-foreground" />
               </button>
             )}
-            {title}
+            {confirmed ? "Reschedule request sent" : title}
           </DialogTitle>
           <DialogDescription>
             {confirmed
