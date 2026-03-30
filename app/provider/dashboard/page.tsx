@@ -42,7 +42,7 @@ export default function ProviderDashboardPage() {
   const { conversations } = useMockMessages()
   const provider = mockProviders.find((p) => p.userId === user?.id)
 
-  const { rescheduledLessons, addReschedule } = useReschedule()
+  const { rescheduledLessons, addProviderReschedule } = useReschedule()
   const { findConversationByParticipantName, sendMessage } = useMessageContext()
 
   const [selectedLesson, setSelectedLesson] = useState<CalendarLesson | null>(null)
@@ -500,7 +500,7 @@ export default function ProviderDashboardPage() {
             const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"]
             const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
             const formatted = `${days[newDate.getDay()]}, ${months[newDate.getMonth()]} ${newDate.getDate()}`
-            addReschedule({
+            addProviderReschedule({
               id: req.id,
               title: req.title,
               parentName: user?.name ?? "Provider",

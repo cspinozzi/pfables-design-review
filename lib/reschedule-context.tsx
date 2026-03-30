@@ -16,11 +16,17 @@ export interface RescheduledLesson {
 }
 
 interface RescheduleContextType {
+  // Parent-initiated reschedules (shown as badge on provider side)
   rescheduledIds: Set<string>
   rescheduledLessons: RescheduledLesson[]
   addReschedule: (lesson: RescheduledLesson) => void
   removeReschedule: (id: string) => void
   isRescheduled: (id: string) => boolean
+  // Provider-initiated reschedules (shown as pending action on parent side)
+  providerReschedules: RescheduledLesson[]
+  addProviderReschedule: (lesson: RescheduledLesson) => void
+  removeProviderReschedule: (id: string) => void
+  getProviderReschedule: (id: string) => RescheduledLesson | undefined
 }
 
 const defaultContext: RescheduleContextType = {
@@ -29,12 +35,17 @@ const defaultContext: RescheduleContextType = {
   addReschedule: () => {},
   removeReschedule: () => {},
   isRescheduled: () => false,
+  providerReschedules: [],
+  addProviderReschedule: () => {},
+  removeProviderReschedule: () => {},
+  getProviderReschedule: () => undefined,
 }
 
 const RescheduleContext = createContext<RescheduleContextType>(defaultContext)
 
 export function RescheduleProvider({ children }: { children: ReactNode }) {
   const [rescheduledLessons, setRescheduledLessons] = useState<RescheduledLesson[]>([])
+  const [providerReschedules, setProviderReschedules] = useState<RescheduledLesson[]>([])
 
   const addReschedule = useCallback((lesson: RescheduledLesson) => {
     setRescheduledLessons((prev) => {
@@ -52,11 +63,30 @@ export function RescheduleProvider({ children }: { children: ReactNode }) {
     [rescheduledLessons]
   )
 
+  const addProviderReschedule = useCallback((lesson: RescheduledLesson) => {
+    setProviderReschedules((prev) => {
+      const filtered = prev.filter((l) => l.id !== lesson.id)
+      return [...filtered, lesson]
+    })
+  }, [])
+
+  const removeProviderReschedule = useCallback((id: string) => {
+    setProviderReschedules((prev) => prev.filter((l) => l.id !== id))
+  }, [])
+
+  const getProviderReschedule = useCallback(
+    (id: string) => providerReschedules.find((l) => l.id === id),
+    [providerReschedules]
+  )
+
   const rescheduledIds = new Set(rescheduledLessons.map((l) => l.id))
 
   return (
     <RescheduleContext.Provider
-      value={{ rescheduledIds, rescheduledLessons, addReschedule, removeReschedule, isRescheduled }}
+      value={{
+        rescheduledIds, rescheduledLessons, addReschedule, removeReschedule, isRescheduled,
+        providerReschedules, addProviderReschedule, removeProviderReschedule, getProviderReschedule,
+      }}
     >
       {children}
     </RescheduleContext.Provider>

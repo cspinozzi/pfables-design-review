@@ -63,7 +63,7 @@ function ProviderLessonsContent() {
   const searchParams = useSearchParams()
   const { user } = useAuth()
   const { conversations } = useMockMessages()
-  const { rescheduledIds, addReschedule } = useReschedule()
+  const { rescheduledIds, addProviderReschedule } = useReschedule()
   const { findConversationByParticipantName, sendMessage } = useMessageContext()
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null)
 
@@ -392,7 +392,7 @@ function ProviderLessonsContent() {
                 l.id === lesson.id ? { ...l, date: formatted, dateObj: newDate, time: newTime } : l
               ))
               setSelectedLesson((prev) => prev ? { ...prev, date: formatted, dateObj: newDate, time: newTime } : null)
-              addReschedule({
+              addProviderReschedule({
                 id: lesson.id,
                 title: lesson.title,
                 parentName: user?.name ?? "Provider",
