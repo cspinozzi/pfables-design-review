@@ -66,6 +66,7 @@ export interface ServiceDetailModalProps {
   onStatusChange?: (status: StatusType) => void
   people?: DetailPerson[]
   fields?: DetailField[]
+  customFields?: React.ReactNode
   price?: string
   onMessage?: () => void
   messageLabel?: string
@@ -127,6 +128,7 @@ export function ServiceDetailModal({
   currentSessionTime,
   currentSessionDate,
   review,
+  customFields,
 }: ServiceDetailModalProps) {
   const [currentStatus, setCurrentStatus] = useState<StatusType | undefined>(status)
   const [rescheduling, setRescheduling] = useState(false)
@@ -501,7 +503,9 @@ export function ServiceDetailModal({
       )}
 
       {/* Detail Fields */}
-      {fields && fields.length > 0 && (
+      {customFields
+        ? customFields
+        : fields && fields.length > 0 && (
         <div className="rounded-lg border p-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {fields.map((field, i) => (

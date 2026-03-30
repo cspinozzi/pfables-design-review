@@ -4,7 +4,7 @@ import { useState } from "react"
 import { ServiceCard } from "@/components/service-card"
 import { ServiceDetailModal } from "@/components/service-detail-modal"
 import { useRouter } from "next/navigation"
-import { Calendar, Clock, MapPin, User, DollarSign, RefreshCw } from "lucide-react"
+import { Calendar, Clock, MapPin, User, DollarSign, RefreshCw, ArrowRight } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { PaymentModal } from "@/components/payment-modal"
@@ -414,11 +414,60 @@ export default function LessonsPage() {
               { name: suggestingItem.provider, role: "Music Teacher", avatar: suggestingItem.providerAvatar },
               ...(suggestingItem.student ? [{ name: suggestingItem.student, role: "Your child" }] : []),
             ]}
-            fields={[
-              { icon: <Calendar className="h-4 w-4" />, label: "Date", value: formatDate(suggestingItem.date) },
-              { icon: <Clock className="h-4 w-4" />, label: "Time", value: `${suggestingItem.time}${suggestingItem.duration ? ` (${suggestingItem.duration})` : ""}` },
-              { icon: <MapPin className="h-4 w-4" />, label: "Location", value: suggestingItem.location },
-            ]}
+            customFields={(() => {
+              const pr = providerReschedules.find((r) => r.id === suggestingItem.id)
+              const fmtD = (d: Date) => {
+                const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"]
+                const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+                return `${days[d.getDay()]}, ${months[d.getMonth()]} ${d.getDate()}`
+              }
+              const currentDate = suggestingItem.date instanceof Date ? fmtD(suggestingItem.date) : formatDate(suggestingItem.date)
+              const newDate = pr ? fmtD(pr.newDate) : null
+              return (
+                <div className="flex items-stretch gap-3">
+                  {/* Current */}
+                  <div className="flex-1 rounded-2xl border bg-secondary/40 p-3 space-y-2">
+                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide text-center">Current</p>
+                    <div className="flex items-center gap-2 rounded-xl border bg-background px-3 py-2.5">
+                      <Calendar className="h-3.5 w-3.5 text-primary flex-shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-[10px] text-muted-foreground leading-none mb-0.5">Date</p>
+                        <p className="text-xs font-semibold text-foreground truncate">{currentDate}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 rounded-xl border bg-background px-3 py-2.5">
+                      <Clock className="h-3.5 w-3.5 text-primary flex-shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-[10px] text-muted-foreground leading-none mb-0.5">Time</p>
+                        <p className="text-xs font-semibold text-foreground truncate">{suggestingItem.time}</p>
+                      </div>
+                    </div>
+                  </div>
+                  {/* Arrow */}
+                  <div className="flex items-center justify-center flex-shrink-0">
+                    <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                  {/* New */}
+                  <div className="flex-1 rounded-2xl border bg-primary/10 p-3 space-y-2">
+                    <p className="text-[10px] font-semibold text-primary uppercase tracking-wide text-center">New</p>
+                    <div className="flex items-center gap-2 rounded-xl border bg-background px-3 py-2.5">
+                      <Calendar className="h-3.5 w-3.5 text-primary flex-shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-[10px] text-muted-foreground leading-none mb-0.5">Date</p>
+                        <p className="text-xs font-semibold text-foreground truncate">{newDate ?? "—"}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 rounded-xl border bg-background px-3 py-2.5">
+                      <Clock className="h-3.5 w-3.5 text-primary flex-shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-[10px] text-muted-foreground leading-none mb-0.5">Time</p>
+                        <p className="text-xs font-semibold text-foreground truncate">{pr?.newTime ?? "—"}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )
+            })()}
             onMessage={() => {
               handleMessageProvider(suggestingItem.provider)
               setSuggestingItem(null)
