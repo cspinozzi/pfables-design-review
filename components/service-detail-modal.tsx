@@ -695,7 +695,8 @@ export function ServiceDetailModal({
             )}
           </div>
         )}
-        {showClassReceivedButton && onClassReceived && (
+        {/* Only show Class Received for Active/Rescheduled, NOT for reschedule requests or pending */}
+        {showClassReceivedButton && onClassReceived && !isRescheduleRequest && currentStatus !== "pending" && (
           <Button className="w-full rounded-full" onClick={onClassReceived}>
             <CheckCircle2 className="h-4 w-4 mr-2" />
             Class Received

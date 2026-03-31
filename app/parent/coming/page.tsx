@@ -401,7 +401,7 @@ export default function LessonsPage() {
               setSelectedItem(null)
             }}
             messageLabel="Message Provider"
-            showRescheduleButton={selectedItem.status === "active" && !selectedItem.pendingApproval && selectedItem.type === "lesson"}
+            showRescheduleButton={(selectedItem.status === "active" || selectedItem.status === "rescheduled" || (selectedItem.originalDate && !selectedItem.isRescheduleRequest)) && !selectedItem.pendingApproval && selectedItem.type === "lesson"}
             showRescheduledBadge={rescheduledIds.has(selectedItem.id) || !!selectedItem.originalDate}
             originalDate={selectedItem.originalDate}
             originalTime={selectedItem.originalTime}

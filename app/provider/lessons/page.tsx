@@ -433,7 +433,7 @@ function ProviderLessonsContent() {
             open={!!selectedLesson}
             onClose={() => setSelectedLesson(null)}
             title={selectedLesson.title}
-            status={selectedLesson.status}
+            status={selectedLesson.pendingApproval ? "pending" : selectedLesson.status}
             onStatusChange={(s) => handleStatusChange(selectedLesson.id, s as LessonStatus)}
             people={[
               { name: selectedLesson.student, role: "Student", avatar: selectedLesson.studentAvatar },
@@ -448,20 +448,33 @@ function ProviderLessonsContent() {
             originalDate={selectedLesson.originalDate}
             originalTime={selectedLesson.originalTime}
             isRescheduleRequest={selectedLesson.isRescheduleRequest}
-            onAcceptReschedule={selectedLesson.isRescheduleRequest ? () => {
-              // Accept reschedule — mark as rescheduled (not a request anymore)
-              setLessons((prev) => prev.map((l) =>
-                l.id === selectedLesson.id ? { ...l, isRescheduleRequest: false } : l
-              ))
-              setSelectedLesson((prev) => prev ? { ...prev, isRescheduleRequest: false } : null)
+            onAcceptReschedule={(selectedLesson.isRescheduleRequest || selectedLesson.pendingApproval) ? () => {
+              if (selectedLesson.isRescheduleRequest) {
+                // Accept reschedule — mark as rescheduled (not a request anymore)
+                setLessons((prev) => prev.map((l) =>
+                  l.id === selectedLesson.id ? { ...l, isRescheduleRequest: false } : l
+                ))
+                setSelectedLesson((prev) => prev ? { ...prev, isRescheduleRequest: false } : null)
+              } else if (selectedLesson.pendingApproval) {
+                // Accept pending lesson
+                setLessons((prev) => prev.map((l) =>
+                  l.id === selectedLesson.id ? { ...l, pendingApproval: false, status: "active" } : l
+                ))
+                setSelectedLesson(null)
+              }
             } : undefined}
-            onDeclineReschedule={selectedLesson.isRescheduleRequest ? () => {
-              // Decline reschedule — revert to original date/time
-              setLessons((prev) => prev.map((l) =>
-                l.id === selectedLesson.id
-                  ? { ...l, isRescheduleRequest: false, date: l.originalDate ?? l.date, time: l.originalTime ?? l.time, originalDate: undefined, originalTime: undefined }
-                  : l
-              ))
+            onDeclineReschedule={(selectedLesson.isRescheduleRequest || selectedLesson.pendingApproval) ? () => {
+              if (selectedLesson.isRescheduleRequest) {
+                // Decline reschedule — revert to original date/time
+                setLessons((prev) => prev.map((l) =>
+                  l.id === selectedLesson.id
+                    ? { ...l, isRescheduleRequest: false, date: l.originalDate ?? l.date, time: l.originalTime ?? l.time, originalDate: undefined, originalTime: undefined }
+                    : l
+                ))
+              } else if (selectedLesson.pendingApproval) {
+                // Decline pending lesson — remove from list
+                setLessons((prev) => prev.filter((l) => l.id !== selectedLesson.id))
+              }
               setSelectedLesson(null)
             } : undefined}
             price={`$${selectedLesson.rate}`}
@@ -470,7 +483,7 @@ function ProviderLessonsContent() {
               setSelectedLesson(null)
             }}
             messageLabel="Message Parent"
-            showRescheduleButton={selectedLesson.status === "active"}
+            showRescheduleButton={(selectedLesson.status === "active" || selectedLesson.status === "rescheduled" || (selectedLesson.originalDate && !selectedLesson.isRescheduleRequest)) && !selectedLesson.pendingApproval && !selectedLesson.isRescheduleRequest}
             currentSessionDate={selectedLesson.dateObj}
             currentSessionTime={selectedLesson.time}
             onReschedule={(newDate: Date, newTime: string) => {

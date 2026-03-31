@@ -542,13 +542,22 @@ export default function ProviderDashboardPage() {
                 <MessageCircle className="h-4 w-4 mr-2" />
                 Message
               </Button>
-              <Button className="w-full rounded-full" onClick={() => {
-                handleAccept(selectedRequest)
-                setSelectedRequest(null)
-              }}>
-                <CheckCircle2 className="h-4 w-4 mr-2" />
-                Accept
-              </Button>
+              <div className="flex items-center gap-2 w-full">
+                <Button variant="outline" className="flex-1 rounded-full" onClick={() => {
+                  // Decline the request - remove from list
+                  setRequests((prev) => prev.filter((r) => r.id !== selectedRequest.id))
+                  setSelectedRequest(null)
+                }}>
+                  Decline
+                </Button>
+                <Button className="flex-1 rounded-full" onClick={() => {
+                  handleAccept(selectedRequest)
+                  setSelectedRequest(null)
+                }}>
+                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                  Accept
+                </Button>
+              </div>
             </>
           }
         />
