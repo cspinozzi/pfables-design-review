@@ -139,6 +139,7 @@ export function ServiceCard({
               src={image || "/placeholder.svg?height=128&width=128"}
               alt={imageAlt || title}
               fill
+              sizes="128px"
               className="object-cover"
             />
           </div>
