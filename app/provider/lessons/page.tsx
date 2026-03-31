@@ -483,7 +483,7 @@ function ProviderLessonsContent() {
               setSelectedLesson(null)
             }}
             messageLabel="Message Parent"
-            showRescheduleButton={selectedLesson.status === "active"}
+            showRescheduleButton={(selectedLesson.status === "active" || selectedLesson.status === "rescheduled" || (selectedLesson.originalDate && !selectedLesson.isRescheduleRequest)) && !selectedLesson.pendingApproval && !selectedLesson.isRescheduleRequest}
             currentSessionDate={selectedLesson.dateObj}
             currentSessionTime={selectedLesson.time}
             onReschedule={(newDate: Date, newTime: string) => {
