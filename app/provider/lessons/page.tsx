@@ -154,6 +154,23 @@ function ProviderLessonsContent() {
       status: "active",
       pendingApproval: true,
     },
+    // Rescheduled lesson — provider already proposed new time, showing old/new dates
+    {
+      id: "lesson-rescheduled-1",
+      title: "Guitar Lesson",
+      student: "Jake Wilson",
+      studentAvatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&h=100&fit=crop",
+      parent: "Mike Wilson",
+      date: fmtDate(_in4d),
+      dateObj: _in4d,
+      time: "3:00 PM",
+      duration: "45 min",
+      location: "Naperville, IL",
+      rate: 55,
+      status: "active",
+      originalDate: fmtDate(_in2d),
+      originalTime: "4:00 PM",
+    },
     {
       id: "lesson-c1",
       title: "Piano Lesson",
