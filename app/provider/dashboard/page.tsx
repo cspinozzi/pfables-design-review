@@ -264,7 +264,7 @@ export default function ProviderDashboardPage() {
                 imageAlt={request.parent}
                 title={request.title}
                 subtitle={`Requested by ${request.parent}`}
-                rescheduled={request.isReschedule}
+                status={request.isReschedule ? "reschedule_request" : undefined}
                 onClick={() => setSelectedRequest(request)}
                 details={
                   <>
