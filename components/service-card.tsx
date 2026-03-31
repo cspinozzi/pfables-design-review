@@ -1,11 +1,10 @@
 "use client"
 
 import { Card, CardContent } from "@/components/ui/card"
-import Image from "next/image"
 import { type ReactNode } from "react"
 import { CheckCircle2, XCircle, Clock, RefreshCw } from "lucide-react"
 
-type StatusType = "active" | "completed" | "cancelled" | "received" | "pending" | "paid" | "refund" | "topay" | "waiting" | "done" | "refunded" | "requested"
+type StatusType = "active" | "completed" | "cancelled" | "received" | "pending" | "paid" | "refund" | "topay" | "waiting" | "done" | "refunded" | "requested" | "rescheduled" | "reschedule_request"
 
 interface ServiceCardProps {
   image?: string
@@ -103,6 +102,16 @@ const statusConfig: Record<StatusType, { label: string; bgClass: string; icon: R
     bgClass: "bg-red-50 text-red-700 border-red-200",
     icon: <Clock className="h-3 w-3 text-red-700" />,
   },
+  rescheduled: {
+    label: "Rescheduled",
+    bgClass: "bg-blue-50 text-blue-700 border-blue-200",
+    icon: <RefreshCw className="h-3 w-3 text-blue-700" />,
+  },
+  reschedule_request: {
+    label: "Reschedule Requested",
+    bgClass: "bg-amber-50 text-amber-700 border-amber-200",
+    icon: <RefreshCw className="h-3 w-3 text-amber-700" />,
+  },
 }
 
 export function ServiceCard({
@@ -135,11 +144,11 @@ export function ServiceCard({
         >
           {/* Image */}
           <div className={`relative h-32 w-full sm:h-auto sm:w-32 flex-shrink-0 overflow-hidden ${footer ? "rounded-t-2xl sm:rounded-t-none sm:rounded-tl-2xl" : "rounded-t-2xl sm:rounded-t-none sm:rounded-l-2xl"}`}>
-            <Image
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
               src={image || "/placeholder.svg?height=128&width=128"}
               alt={imageAlt || title}
-              fill
-              className="object-cover"
+              className="absolute inset-0 h-full w-full object-cover"
             />
           </div>
 
@@ -161,13 +170,6 @@ export function ServiceCard({
                       </span>
                     ))}
                   </div>
-                )}
-
-                {rescheduled && (
-                  <span className="flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700">
-                    <RefreshCw className="h-3 w-3" />
-                    Rescheduled
-                  </span>
                 )}
 
                 {status ? (

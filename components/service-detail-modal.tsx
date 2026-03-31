@@ -80,6 +80,11 @@ export interface ServiceDetailModalProps {
   currentSessionTime?: string
   currentSessionDate?: Date
   review?: ReviewData
+  originalDate?: string
+  originalTime?: string
+  isRescheduleRequest?: boolean
+  onAcceptReschedule?: () => void
+  onDeclineReschedule?: () => void
 }
 
 // --- Reschedule helpers ---
@@ -129,6 +134,11 @@ export function ServiceDetailModal({
   currentSessionDate,
   review,
   customFields,
+  originalDate,
+  originalTime,
+  isRescheduleRequest = false,
+  onAcceptReschedule,
+  onDeclineReschedule,
 }: ServiceDetailModalProps) {
   const [currentStatus, setCurrentStatus] = useState<StatusType | undefined>(status)
   const [rescheduling, setRescheduling] = useState(false)
@@ -460,19 +470,26 @@ export function ServiceDetailModal({
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium text-muted-foreground">Status</span>
           <div className="flex items-center gap-1.5">
-            {showRescheduledBadge && (
+            {/* Show reschedule request badge (amber) when pending, or rescheduled badge (blue) when confirmed */}
+            {isRescheduleRequest ? (
               <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700">
+                <RefreshCw className="h-3 w-3" />
+                Reschedule Requested
+              </span>
+            ) : (showRescheduledBadge || originalDate) ? (
+              <span className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700">
                 <RefreshCw className="h-3 w-3" />
                 Rescheduled
               </span>
+            ) : (
+              <span className={cn(
+                "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium",
+                statusStyles[currentStatus]
+              )}>
+                {statusIcons[currentStatus]}
+                {statusLabels[currentStatus]}
+              </span>
             )}
-            <span className={cn(
-              "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium",
-              statusStyles[currentStatus]
-            )}>
-              {statusIcons[currentStatus]}
-              {statusLabels[currentStatus]}
-            </span>
           </div>
         </div>
       )}
@@ -506,19 +523,72 @@ export function ServiceDetailModal({
       {customFields
         ? customFields
         : fields && fields.length > 0 && (
-        <div className="rounded-lg border p-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {fields.map((field, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <span className="text-muted-foreground flex-shrink-0">{field.icon}</span>
-                <div className="min-w-0">
-                  <p className="text-xs text-muted-foreground">{field.label}</p>
-                  <p className="text-sm font-medium truncate">{field.value}</p>
+        originalDate && originalTime ? (
+          /* Side-by-side PREVIOUS/CURRENT or CURRENT/NEW layout for rescheduled lessons */
+          <div className="flex items-center gap-3">
+            {/* Left card - PREVIOUS or CURRENT */}
+            <div className="flex-1 rounded-xl bg-secondary/50 p-4">
+              <p className="text-[10px] font-medium text-muted-foreground tracking-wider mb-3">
+                {isRescheduleRequest ? "CURRENT" : "PREVIOUS"}
+              </p>
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 bg-background rounded-lg px-3 py-2">
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <div>
+                    <p className="text-[10px] text-muted-foreground">Date</p>
+                    <p className="text-sm font-medium">{originalDate}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 bg-background rounded-lg px-3 py-2">
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                  <div>
+                    <p className="text-[10px] text-muted-foreground">Time</p>
+                    <p className="text-sm font-medium">{originalTime}</p>
+                  </div>
                 </div>
               </div>
-            ))}
+            </div>
+            {/* Arrow */}
+            <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
+            {/* Right card - CURRENT or NEW */}
+            <div className="flex-1 rounded-xl bg-primary/10 p-4">
+              <p className="text-[10px] font-medium text-primary tracking-wider mb-3">
+                {isRescheduleRequest ? "NEW" : "CURRENT"}
+              </p>
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 bg-background rounded-lg px-3 py-2">
+                  <Calendar className="h-4 w-4 text-primary" />
+                  <div>
+                    <p className="text-[10px] text-muted-foreground">Date</p>
+                    <p className="text-sm font-medium">{fields.find(f => f.label === "Date")?.value}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 bg-background rounded-lg px-3 py-2">
+                  <Clock className="h-4 w-4 text-primary" />
+                  <div>
+                    <p className="text-[10px] text-muted-foreground">Time</p>
+                    <p className="text-sm font-medium">{fields.find(f => f.label === "Time")?.value?.split(" (")[0]}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
+        ) : (
+          /* Standard grid layout for non-rescheduled lessons */
+          <div className="rounded-lg border p-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {fields.map((field, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <span className="text-muted-foreground flex-shrink-0">{field.icon}</span>
+                  <div className="min-w-0">
+                    <p className="text-xs text-muted-foreground">{field.label}</p>
+                    <p className="text-sm font-medium truncate">{field.value}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )
       )}
 
       {/* Price */}
@@ -600,6 +670,28 @@ export function ServiceDetailModal({
                   This class is too close to reschedule.
                 </p>
               </div>
+            )}
+          </div>
+        )}
+        {/* Accept/Decline buttons for reschedule requests */}
+        {isRescheduleRequest && (onAcceptReschedule || onDeclineReschedule) && (
+          <div className="flex items-center gap-2">
+            {onDeclineReschedule && (
+              <Button
+                className="flex-1 rounded-full"
+                variant="outline"
+                onClick={onDeclineReschedule}
+              >
+                Decline
+              </Button>
+            )}
+            {onAcceptReschedule && (
+              <Button
+                className="flex-1 rounded-full"
+                onClick={onAcceptReschedule}
+              >
+                Accept
+              </Button>
             )}
           </div>
         )}

@@ -38,7 +38,8 @@ export function Navigation() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isPastDarkSections, setIsPastDarkSections] = useState(false)
   const [useWhiteText, setUseWhiteText] = useState(false)
-  const [isFullBleedPage, setIsFullBleedPage] = useState(false)
+  const fullBleedPages = ["/", "/providers", "/repair-services", "/luthiers"]
+  const [isFullBleedPage, setIsFullBleedPage] = useState(() => fullBleedPages.includes(pathname))
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
   const userMenuRef = useRef<HTMLDivElement>(null)
 
@@ -52,6 +53,11 @@ export function Navigation() {
     document.addEventListener("mousedown", handleClickOutside)
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
+
+  // Keep isFullBleedPage in sync when pathname changes via client-side navigation
+  useEffect(() => {
+    setIsFullBleedPage(fullBleedPages.includes(pathname))
+  }, [pathname])
 
   // Track scroll position for transparent navbar effect
   useEffect(() => {
@@ -75,7 +81,6 @@ export function Navigation() {
       }
 
       // Determine if the navbar should use white text
-      const fullBleedPages = ["/", "/providers", "/repair-services", "/luthiers"]
       const isFullBleed = fullBleedPages.includes(pathname)
       setIsFullBleedPage(isFullBleed)
       setUseWhiteText(isFullBleed && !isPastDarkSections)
@@ -479,7 +484,7 @@ export function Navigation() {
           >
             {user?.avatar ? (
               <div className="relative h-5 w-5 rounded-full overflow-hidden">
-                <Image src={user.avatar} alt={user.name} fill className="object-cover" />
+                <Image src={user.avatar} alt={user.name} fill sizes="20px" className="object-cover" />
               </div>
             ) : (
               <UserCircle className={cn("h-5 w-5", (pathname === "/parent/profile" || pathname === "/provider/profile" || pathname === "/repairer/profile" || pathname === "/admin/profile") && "fill-primary/20")} />
@@ -489,8 +494,8 @@ export function Navigation() {
         </div>
       </nav>
 
-      {/* Spacer for content */}
-      <div className="h-[120px]" />
+      {/* Spacer for content - skip on full-bleed pages that sit under the navbar */}
+      {!isFullBleedPage && <div className="h-[120px]" />}
       
       {/* Mobile Bottom Spacer */}
       <div className="h-[120px] sm:hidden" />

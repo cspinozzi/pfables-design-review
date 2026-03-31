@@ -25,8 +25,8 @@ export function ProviderCard({ provider, isFavorited, onToggleFavorite }: Provid
               src={provider.avatar || "/placeholder.svg?height=200&width=200&query=music teacher"}
               alt={provider.name}
               fill
+              sizes="(max-width: 640px) 100vw, 160px"
               className="object-cover transition-opacity hover:opacity-90"
-              loading="eager"
             />
             {provider.subscriptionTier === "featured" || provider.subscriptionTier === "premium" ? (
               <div className="absolute right-2 top-2 rounded-md bg-primary px-2 py-1 text-xs font-medium text-primary-foreground">

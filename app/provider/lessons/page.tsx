@@ -1,8 +1,9 @@
 "use client"
 
 import { useState, Suspense } from "react"
+import dynamic from "next/dynamic"
 import { ServiceCard } from "@/components/service-card"
-import { ServiceDetailModal } from "@/components/service-detail-modal"
+const ServiceDetailModal = dynamic(() => import("@/components/service-detail-modal").then(m => ({ default: m.ServiceDetailModal })), { ssr: false })
 import { ReviewDisplay, type ReviewData } from "@/components/review-display"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Calendar, Clock, MapPin, User, DollarSign } from "lucide-react"
@@ -33,6 +34,9 @@ interface Lesson {
   paid?: boolean
   pendingApproval?: boolean
   review?: ReviewData
+  originalDate?: string
+  originalTime?: string
+  isRescheduleRequest?: boolean
 }
 
 // Module-scope helpers — evaluated once at bundle time, identical on server and client
@@ -150,6 +154,41 @@ function ProviderLessonsContent() {
       rate: 65,
       status: "active",
       pendingApproval: true,
+    },
+    // Rescheduled lesson — provider already proposed new time, showing old/new dates
+    {
+      id: "lesson-rescheduled-1",
+      title: "Guitar Lesson",
+      student: "Jake Wilson",
+      studentAvatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&h=100&fit=crop",
+      parent: "Mike Wilson",
+      date: fmtDate(_in4d),
+      dateObj: _in4d,
+      time: "3:00 PM",
+      duration: "45 min",
+      location: "Naperville, IL",
+      rate: 55,
+      status: "active",
+      originalDate: fmtDate(_in2d),
+      originalTime: "4:00 PM",
+    },
+    // Reschedule request — parent requested reschedule, awaiting provider acceptance
+    {
+      id: "lesson-reschedule-request-1",
+      title: "Violin Lesson",
+      student: "Sophia Martinez",
+      studentAvatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop",
+      parent: "Ana Martinez",
+      date: fmtDate(_in6d),
+      dateObj: _in6d,
+      time: "2:00 PM",
+      duration: "60 min",
+      location: "Online",
+      rate: 70,
+      status: "active",
+      isRescheduleRequest: true,
+      originalDate: fmtDate(_in2d),
+      originalTime: "3:30 PM",
     },
     {
       id: "lesson-c1",
@@ -285,14 +324,46 @@ function ProviderLessonsContent() {
                     : "text-primary"
                 }
                 status={
+                  lesson.isRescheduleRequest ? "reschedule_request" :
+                  (lesson.originalDate && !lesson.isRescheduleRequest) || rescheduledIds.has(lesson.id) ? "rescheduled" :
                   lesson.status === "completed" && lesson.paid === true ? "paid" :
                   lesson.status === "completed" && lesson.paid === false ? "completed" :
                   lesson.status === "cancelled" ? "cancelled" :
                   lesson.pendingApproval ? "pending" : "active"
                 }
-                rescheduled={rescheduledIds.has(lesson.id)}
                 onClick={() => setSelectedLesson(lesson)}
-                footer={lesson.pendingApproval ? (
+                footer={lesson.isRescheduleRequest ? (
+                  <div className="flex items-center justify-end gap-2 px-4 sm:px-6 py-3 bg-primary rounded-b-xl">
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      className="rounded-full px-5 font-semibold"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        // Accept reschedule — mark as rescheduled (not a request anymore)
+                        setLessons((prev) => prev.map((l) =>
+                          l.id === lesson.id ? { ...l, isRescheduleRequest: false } : l
+                        ))
+                      }}
+                    >
+                      Accept
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="rounded-full px-5 font-semibold text-primary-foreground hover:bg-white/20 hover:text-primary-foreground"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        // Decline reschedule — revert to original date/time
+                        setLessons((prev) => prev.map((l) =>
+                          l.id === lesson.id ? { ...l, isRescheduleRequest: false, date: l.originalDate ?? l.date, time: l.originalTime ?? l.time, originalDate: undefined, originalTime: undefined } : l
+                        ))
+                      }}
+                    >
+                      Decline
+                    </Button>
+                  </div>
+                ) : lesson.pendingApproval ? (
                   <div className="flex items-center justify-end gap-2 px-4 sm:px-6 py-3 bg-primary rounded-b-xl">
                     <Button
                       size="sm"
@@ -374,6 +445,25 @@ function ProviderLessonsContent() {
               { icon: <MapPin className="h-4 w-4" />, label: "Location", value: selectedLesson.location },
               { icon: <DollarSign className="h-4 w-4" />, label: "Rate", value: `$${selectedLesson.rate}` },
             ]}
+            originalDate={selectedLesson.originalDate}
+            originalTime={selectedLesson.originalTime}
+            isRescheduleRequest={selectedLesson.isRescheduleRequest}
+            onAcceptReschedule={selectedLesson.isRescheduleRequest ? () => {
+              // Accept reschedule — mark as rescheduled (not a request anymore)
+              setLessons((prev) => prev.map((l) =>
+                l.id === selectedLesson.id ? { ...l, isRescheduleRequest: false } : l
+              ))
+              setSelectedLesson((prev) => prev ? { ...prev, isRescheduleRequest: false } : null)
+            } : undefined}
+            onDeclineReschedule={selectedLesson.isRescheduleRequest ? () => {
+              // Decline reschedule — revert to original date/time
+              setLessons((prev) => prev.map((l) =>
+                l.id === selectedLesson.id
+                  ? { ...l, isRescheduleRequest: false, date: l.originalDate ?? l.date, time: l.originalTime ?? l.time, originalDate: undefined, originalTime: undefined }
+                  : l
+              ))
+              setSelectedLesson(null)
+            } : undefined}
             price={`$${selectedLesson.rate}`}
             onMessage={() => {
               handleMessageParent(selectedLesson.parent)
@@ -389,9 +479,14 @@ function ProviderLessonsContent() {
               const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
               const formatted = `${days[newDate.getDay()]}, ${months[newDate.getMonth()]} ${newDate.getDate()}`
               setLessons((prev) => prev.map((l) =>
-                l.id === lesson.id ? { ...l, date: formatted, dateObj: newDate, time: newTime } : l
+                l.id === lesson.id
+                  ? { ...l, date: formatted, dateObj: newDate, time: newTime, originalDate: l.originalDate ?? l.date, originalTime: l.originalTime ?? l.time }
+                  : l
               ))
-              setSelectedLesson((prev) => prev ? { ...prev, date: formatted, dateObj: newDate, time: newTime } : null)
+              setSelectedLesson((prev) => prev
+                ? { ...prev, date: formatted, dateObj: newDate, time: newTime, originalDate: prev.originalDate ?? prev.date, originalTime: prev.originalTime ?? prev.time }
+                : null
+              )
               addProviderReschedule({
                 id: lesson.id,
                 title: lesson.title,

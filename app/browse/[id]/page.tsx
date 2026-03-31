@@ -9,12 +9,13 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { VerificationBadge } from "@/components/verification-badge"
 import { CategoryIcon } from "@/components/category-icon"
+import dynamic from "next/dynamic"
 import { ServiceCard } from "@/components/service-card"
-import { ServiceDetailModal } from "@/components/service-detail-modal"
 import { ProfileAvatarUpload } from "@/components/profile-avatar-upload"
 import { Card } from "@/components/ui/card"
 import { mockProviders, mockUsers, mockConversations } from "@/lib/mock-data"
-import { BookingModal } from "@/components/booking-modal"
+const ServiceDetailModal = dynamic(() => import("@/components/service-detail-modal").then(m => ({ default: m.ServiceDetailModal })), { ssr: false })
+const BookingModal = dynamic(() => import("@/components/booking-modal").then(m => ({ default: m.BookingModal })), { ssr: false })
 
 export default function ProviderDetailPage({ params }: { params: { id: string } }) {
   const router = useRouter()
@@ -340,7 +341,7 @@ export default function ProviderDetailPage({ params }: { params: { id: string } 
                     <div className="flex items-start gap-3">
                       <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-full bg-muted">
                         {review.avatar ? (
-                          <Image src={review.avatar} alt={review.author} fill className="object-cover" />
+                          <Image src={review.avatar} alt={review.author} fill sizes="40px" className="object-cover" />
                         ) : (
                           <div className="flex h-full w-full items-center justify-center bg-primary/10">
                             <User className="h-5 w-5 text-primary" />

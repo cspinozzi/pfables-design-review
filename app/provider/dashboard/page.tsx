@@ -19,7 +19,8 @@ import { formatDistanceToNow } from "date-fns"
 import { toast } from "sonner"
 import { LessonsCalendar, type CalendarLesson } from "@/components/lessons-calendar"
 import { ServiceCard } from "@/components/service-card"
-import { ServiceDetailModal } from "@/components/service-detail-modal"
+import dynamic from "next/dynamic"
+const ServiceDetailModal = dynamic(() => import("@/components/service-detail-modal").then(m => ({ default: m.ServiceDetailModal })), { ssr: false })
 
 interface LessonRequest {
   id: string
@@ -34,6 +35,8 @@ interface LessonRequest {
   duration: string
   location: string
   isReschedule?: boolean
+  originalDate?: string
+  originalTime?: string
 }
 
 export default function ProviderDashboardPage() {
@@ -51,6 +54,8 @@ export default function ProviderDashboardPage() {
     { id: "lr-1", title: "Piano Lesson", parent: "Sarah Thompson", parentId: "user-1", parentAvatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop", child: "Emma", date: "Thu, Feb 6", time: "4:00 PM", duration: "45 min", location: "Naperville, IL" },
     { id: "lr-2", title: "Music Theory Session", parent: "Mike Wilson", parentId: "user-2", parentAvatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&h=100&fit=crop", child: "Jake", date: "Thu, Feb 6", time: "5:00 PM", duration: "30 min", location: "Online" },
     { id: "lr-3", title: "Piano Lesson", parent: "Laura Martinez", parentId: "user-3", parentAvatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop", child: "Sophia", date: "Fri, Feb 7", time: "3:30 PM", duration: "60 min", location: "Downers Grove, IL" },
+    // Reschedule request — parent requested reschedule, provider needs to suggest new time
+    { id: "lr-reschedule-1", title: "Guitar Lesson", parent: "Sarah Thompson", parentId: "user-1", parentAvatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop", child: "Emma", date: "Wed, Apr 1", time: "4:00 PM", duration: "60 min", location: "Online", isReschedule: true, originalDate: "Mon, Mar 30", originalTime: "3:00 PM" },
   ])
 
   // Merge static base requests with any rescheduled lessons from the parent side
@@ -259,7 +264,7 @@ export default function ProviderDashboardPage() {
                 imageAlt={request.parent}
                 title={request.title}
                 subtitle={`Requested by ${request.parent}`}
-                rescheduled={request.isReschedule}
+                status={request.isReschedule ? "reschedule_request" : undefined}
                 onClick={() => setSelectedRequest(request)}
                 details={
                   <>
@@ -491,6 +496,10 @@ export default function ProviderDashboardPage() {
             { icon: <Timer className="h-4 w-4" />, label: "Duration", value: selectedRequest.duration },
             { icon: <MapPin className="h-4 w-4" />, label: "Location", value: selectedRequest.location },
           ]}
+          originalDate={selectedRequest.originalDate}
+          originalTime={selectedRequest.originalTime}
+          isRescheduleRequest={selectedRequest.isReschedule}
+          showRescheduledBadge={selectedRequest.isReschedule}
           showRescheduleButton
           rescheduleLabel="Suggest New Time"
           currentSessionDate={selectedRequest.dateObj}

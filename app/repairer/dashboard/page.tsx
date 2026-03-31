@@ -14,7 +14,8 @@ import { useMockMessages } from "@/hooks/use-mock-messages"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { formatDistanceToNow } from "date-fns"
 import { ServiceCard } from "@/components/service-card"
-import { ServiceDetailModal } from "@/components/service-detail-modal"
+import dynamic from "next/dynamic"
+const ServiceDetailModal = dynamic(() => import("@/components/service-detail-modal").then(m => ({ default: m.ServiceDetailModal })), { ssr: false })
 import { toast } from "sonner"
 
 interface ServiceRequest {

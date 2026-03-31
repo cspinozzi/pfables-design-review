@@ -1,14 +1,16 @@
 "use client"
 
 import { useState } from "react"
+import dynamic from "next/dynamic"
 import { ServiceCard } from "@/components/service-card"
-import { ServiceDetailModal } from "@/components/service-detail-modal"
 import { useRouter } from "next/navigation"
 import { Calendar, Clock, MapPin, User, DollarSign, RefreshCw, ArrowRight } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { PaymentModal } from "@/components/payment-modal"
-import { ReviewModal } from "@/components/review-modal"
+
+const ServiceDetailModal = dynamic(() => import("@/components/service-detail-modal").then(m => ({ default: m.ServiceDetailModal })), { ssr: false })
+const PaymentModal = dynamic(() => import("@/components/payment-modal").then(m => ({ default: m.PaymentModal })), { ssr: false })
+const ReviewModal = dynamic(() => import("@/components/review-modal").then(m => ({ default: m.ReviewModal })), { ssr: false })
 import { ReviewDisplay } from "@/components/review-display"
 import { useMockMessages } from "@/hooks/use-mock-messages"
 import { useAuth } from "@/lib/auth-context"
@@ -42,6 +44,9 @@ interface LessonItem {
   paid?: boolean
   pendingApproval?: boolean
   review?: Review
+  originalDate?: string
+  originalTime?: string
+  isRescheduleRequest?: boolean
 }
 
 export default function LessonsPage() {
@@ -63,12 +68,12 @@ export default function LessonsPage() {
     router.push(conv ? `/messages?conv=${conv.id}` : `/messages`)
   }
 
-  // First lesson is within 24h (reschedule disabled), rest are 2+ days out (reschedule enabled)
-  const in12h = new Date(Date.now() + 12 * 60 * 60 * 1000)
-  const in2days = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000)
-  const in4days = new Date(Date.now() + 4 * 24 * 60 * 60 * 1000)
-  const in6days = new Date(Date.now() + 6 * 24 * 60 * 60 * 1000)
-  const in8days = new Date(Date.now() + 8 * 24 * 60 * 60 * 1000)
+  // Fixed reference dates — stable across server and client (no Date.now())
+  const in12h  = new Date(2026, 2, 31, 16, 0, 0)  // Mar 31 4:00 PM
+  const in2days = new Date(2026, 3,  1, 15, 30, 0) // Apr 1  3:30 PM
+  const in4days = new Date(2026, 3,  3, 16,  0, 0) // Apr 3  4:00 PM
+  const in6days = new Date(2026, 3,  5,  0,  0, 0) // Apr 5
+  const in8days = new Date(2026, 3,  7, 15, 30, 0) // Apr 7  3:30 PM
 
   const [items, setItems] = useState<LessonItem[]>([
     {
@@ -100,6 +105,22 @@ export default function LessonsPage() {
       providerAvatar: "/music-teacher-woman-piano.jpg", date: in8days,
       time: "3:30 PM", duration: "60 min", location: "Downers Grove, IL", student: "Emma",
       status: "active", price: 75, pendingApproval: true,
+    },
+    // Rescheduled lesson — already confirmed new time
+    {
+      id: "class-rescheduled-1", type: "lesson", title: "Drums Lesson", provider: "Marcus Chen",
+      providerAvatar: "/luthier-carousel-1.jpg", date: in6days,
+      time: "2:00 PM", duration: "45 min", location: "Online", student: "Jake",
+      status: "active", price: 60,
+      originalDate: "Wed, Apr 1", originalTime: "4:00 PM",
+    },
+    // Reschedule request — provider requested, awaiting parent confirmation
+    {
+      id: "class-reschedule-req-1", type: "lesson", title: "Voice Lesson", provider: "Emily Carter",
+      providerAvatar: "/music-teacher-woman-piano.jpg", date: in4days,
+      time: "5:00 PM", duration: "30 min", location: "Naperville, IL", student: "Emma",
+      status: "active", price: 50,
+      originalDate: "Fri, Apr 3", originalTime: "3:00 PM", isRescheduleRequest: true,
     },
     {
       id: "comp-1", type: "lesson", title: "Piano Lesson", provider: "Emma Thompson",
@@ -170,7 +191,7 @@ export default function LessonsPage() {
   const formatDate = (date: Date) => {
     const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
     const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-    return `${days[date.getUTCDay()]}, ${months[date.getUTCMonth()]} ${date.getUTCDate()}`
+    return `${days[date.getDay()]}, ${months[date.getMonth()]} ${date.getDate()}`
   }
 
   const filters = [
@@ -218,8 +239,13 @@ export default function LessonsPage() {
                 priceClassName={
                   item.status === "cancelled" || item.paid === true ? "text-muted-foreground" : "text-primary"
                 }
-                status={item.status === "completed" ? "received" : item.status === "cancelled" ? "cancelled" : item.pendingApproval ? "pending" : "active"}
-                rescheduled={rescheduledIds.has(item.id)}
+                status={
+                  item.isRescheduleRequest ? "reschedule_request" :
+                  (item.originalDate && !item.isRescheduleRequest) || rescheduledIds.has(item.id) ? "rescheduled" :
+                  item.status === "completed" ? "received" :
+                  item.status === "cancelled" ? "cancelled" :
+                  item.pendingApproval ? "pending" : "active"
+                }
                 onClick={() => setSelectedItem(item)}
                 details={
                   <>
@@ -244,6 +270,43 @@ export default function LessonsPage() {
                   </>
                 }
                 footer={(() => {
+                  // Reschedule request from provider — parent needs to accept/decline
+                  if (item.isRescheduleRequest && item.status === "active") {
+                    return (
+                      <div className="flex items-center justify-end gap-2 px-4 sm:px-6 py-3 bg-primary rounded-b-xl">
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          className="rounded-full px-5 font-semibold"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            // Accept reschedule — mark as rescheduled
+                            setItems((prev) => prev.map((i) =>
+                              i.id === item.id ? { ...i, isRescheduleRequest: false } : i
+                            ))
+                          }}
+                        >
+                          Accept
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="rounded-full px-5 font-semibold text-primary-foreground hover:bg-white/20 hover:text-primary-foreground"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            // Decline reschedule — revert to original
+                            setItems((prev) => prev.map((i) =>
+                              i.id === item.id
+                                ? { ...i, isRescheduleRequest: false, time: i.originalTime ?? i.time, originalDate: undefined, originalTime: undefined }
+                                : i
+                            ))
+                          }}
+                        >
+                          Decline
+                        </Button>
+                      </div>
+                    )
+                  }
                   const providerReschedule = providerReschedules.find((r) => r.id === item.id)
                   if (providerReschedule && item.status === "active") {
                     return (
@@ -339,7 +402,26 @@ export default function LessonsPage() {
             }}
             messageLabel="Message Provider"
             showRescheduleButton={selectedItem.status === "active" && !selectedItem.pendingApproval && selectedItem.type === "lesson"}
-            showRescheduledBadge={rescheduledIds.has(selectedItem.id)}
+            showRescheduledBadge={rescheduledIds.has(selectedItem.id) || !!selectedItem.originalDate}
+            originalDate={selectedItem.originalDate}
+            originalTime={selectedItem.originalTime}
+            isRescheduleRequest={selectedItem.isRescheduleRequest}
+            onAcceptReschedule={selectedItem.isRescheduleRequest ? () => {
+              // Accept reschedule — mark as rescheduled
+              setItems((prev) => prev.map((i) =>
+                i.id === selectedItem.id ? { ...i, isRescheduleRequest: false } : i
+              ))
+              setSelectedItem((prev) => prev ? { ...prev, isRescheduleRequest: false } : null)
+            } : undefined}
+            onDeclineReschedule={selectedItem.isRescheduleRequest ? () => {
+              // Decline reschedule — revert to original
+              setItems((prev) => prev.map((i) =>
+                i.id === selectedItem.id
+                  ? { ...i, isRescheduleRequest: false, time: i.originalTime ?? i.time, originalDate: undefined, originalTime: undefined }
+                  : i
+              ))
+              setSelectedItem(null)
+            } : undefined}
             currentSessionTime={selectedItem.time}
             currentSessionDate={selectedItem.date instanceof Date ? selectedItem.date : undefined}
             onReschedule={(newDate: Date, newTime: string) => {
