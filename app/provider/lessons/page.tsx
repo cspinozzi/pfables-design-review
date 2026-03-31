@@ -325,13 +325,12 @@ function ProviderLessonsContent() {
                 }
                 status={
                   lesson.isRescheduleRequest ? "reschedule_request" :
-                  lesson.originalDate && !lesson.isRescheduleRequest ? "rescheduled" :
+                  (lesson.originalDate && !lesson.isRescheduleRequest) || rescheduledIds.has(lesson.id) ? "rescheduled" :
                   lesson.status === "completed" && lesson.paid === true ? "paid" :
                   lesson.status === "completed" && lesson.paid === false ? "completed" :
                   lesson.status === "cancelled" ? "cancelled" :
                   lesson.pendingApproval ? "pending" : "active"
                 }
-                rescheduled={rescheduledIds.has(lesson.id)}
                 onClick={() => setSelectedLesson(lesson)}
                 footer={lesson.isRescheduleRequest ? (
                   <div className="flex items-center justify-end gap-2 px-4 sm:px-6 py-3 bg-primary rounded-b-xl">

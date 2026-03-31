@@ -241,12 +241,11 @@ export default function LessonsPage() {
                 }
                 status={
                   item.isRescheduleRequest ? "reschedule_request" :
-                  item.originalDate && !item.isRescheduleRequest ? "rescheduled" :
+                  (item.originalDate && !item.isRescheduleRequest) || rescheduledIds.has(item.id) ? "rescheduled" :
                   item.status === "completed" ? "received" :
                   item.status === "cancelled" ? "cancelled" :
                   item.pendingApproval ? "pending" : "active"
                 }
-                rescheduled={rescheduledIds.has(item.id)}
                 onClick={() => setSelectedItem(item)}
                 details={
                   <>
