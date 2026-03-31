@@ -498,6 +498,7 @@ export default function ProviderDashboardPage() {
           ]}
           originalDate={selectedRequest.originalDate}
           originalTime={selectedRequest.originalTime}
+          isRescheduleRequest={selectedRequest.isReschedule}
           showRescheduledBadge={selectedRequest.isReschedule}
           showRescheduleButton
           rescheduleLabel="Suggest New Time"

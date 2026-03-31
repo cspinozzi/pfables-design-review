@@ -82,6 +82,7 @@ export interface ServiceDetailModalProps {
   review?: ReviewData
   originalDate?: string
   originalTime?: string
+  isRescheduleRequest?: boolean
 }
 
 // --- Reschedule helpers ---
@@ -133,6 +134,7 @@ export function ServiceDetailModal({
   customFields,
   originalDate,
   originalTime,
+  isRescheduleRequest = false,
 }: ServiceDetailModalProps) {
   const [currentStatus, setCurrentStatus] = useState<StatusType | undefined>(status)
   const [rescheduling, setRescheduling] = useState(false)
@@ -510,30 +512,72 @@ export function ServiceDetailModal({
       {customFields
         ? customFields
         : fields && fields.length > 0 && (
-        <div className="rounded-lg border p-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {fields.map((field, i) => {
-              const originalValue =
-                field.label === "Date" && originalDate
-                  ? originalDate
-                  : field.label === "Time" && originalTime
-                  ? originalTime
-                  : null
-              return (
+        originalDate && originalTime ? (
+          /* Side-by-side PREVIOUS/CURRENT or CURRENT/NEW layout for rescheduled lessons */
+          <div className="flex items-center gap-3">
+            {/* Left card - PREVIOUS or CURRENT */}
+            <div className="flex-1 rounded-xl bg-secondary/50 p-4">
+              <p className="text-[10px] font-medium text-muted-foreground tracking-wider mb-3">
+                {isRescheduleRequest ? "CURRENT" : "PREVIOUS"}
+              </p>
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 bg-background rounded-lg px-3 py-2">
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <div>
+                    <p className="text-[10px] text-muted-foreground">Date</p>
+                    <p className="text-sm font-medium">{originalDate}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 bg-background rounded-lg px-3 py-2">
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                  <div>
+                    <p className="text-[10px] text-muted-foreground">Time</p>
+                    <p className="text-sm font-medium">{originalTime}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {/* Arrow */}
+            <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
+            {/* Right card - CURRENT or NEW */}
+            <div className="flex-1 rounded-xl bg-primary/10 p-4">
+              <p className="text-[10px] font-medium text-primary tracking-wider mb-3">
+                {isRescheduleRequest ? "NEW" : "CURRENT"}
+              </p>
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 bg-background rounded-lg px-3 py-2">
+                  <Calendar className="h-4 w-4 text-primary" />
+                  <div>
+                    <p className="text-[10px] text-muted-foreground">Date</p>
+                    <p className="text-sm font-medium">{fields.find(f => f.label === "Date")?.value}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 bg-background rounded-lg px-3 py-2">
+                  <Clock className="h-4 w-4 text-primary" />
+                  <div>
+                    <p className="text-[10px] text-muted-foreground">Time</p>
+                    <p className="text-sm font-medium">{fields.find(f => f.label === "Time")?.value}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          /* Standard grid layout for non-rescheduled lessons */
+          <div className="rounded-lg border p-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {fields.map((field, i) => (
                 <div key={i} className="flex items-center gap-2">
                   <span className="text-muted-foreground flex-shrink-0">{field.icon}</span>
                   <div className="min-w-0">
                     <p className="text-xs text-muted-foreground">{field.label}</p>
-                    {originalValue && (
-                      <p className="text-xs text-muted-foreground line-through">{originalValue}</p>
-                    )}
                     <p className="text-sm font-medium truncate">{field.value}</p>
                   </div>
                 </div>
-              )
-            })}
+              ))}
+            </div>
           </div>
-        </div>
+        )
       )}
 
       {/* Price */}

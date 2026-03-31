@@ -448,6 +448,7 @@ function ProviderLessonsContent() {
             ]}
             originalDate={selectedLesson.originalDate}
             originalTime={selectedLesson.originalTime}
+            isRescheduleRequest={selectedLesson.isRescheduleRequest}
             price={`$${selectedLesson.rate}`}
             onMessage={() => {
               handleMessageParent(selectedLesson.parent)
