@@ -80,6 +80,8 @@ export interface ServiceDetailModalProps {
   currentSessionTime?: string
   currentSessionDate?: Date
   review?: ReviewData
+  originalDate?: string
+  originalTime?: string
 }
 
 // --- Reschedule helpers ---
@@ -129,6 +131,8 @@ export function ServiceDetailModal({
   currentSessionDate,
   review,
   customFields,
+  originalDate,
+  originalTime,
 }: ServiceDetailModalProps) {
   const [currentStatus, setCurrentStatus] = useState<StatusType | undefined>(status)
   const [rescheduling, setRescheduling] = useState(false)
@@ -508,15 +512,26 @@ export function ServiceDetailModal({
         : fields && fields.length > 0 && (
         <div className="rounded-lg border p-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {fields.map((field, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <span className="text-muted-foreground flex-shrink-0">{field.icon}</span>
-                <div className="min-w-0">
-                  <p className="text-xs text-muted-foreground">{field.label}</p>
-                  <p className="text-sm font-medium truncate">{field.value}</p>
+            {fields.map((field, i) => {
+              const originalValue =
+                field.label === "Date" && originalDate
+                  ? originalDate
+                  : field.label === "Time" && originalTime
+                  ? originalTime
+                  : null
+              return (
+                <div key={i} className="flex items-center gap-2">
+                  <span className="text-muted-foreground flex-shrink-0">{field.icon}</span>
+                  <div className="min-w-0">
+                    <p className="text-xs text-muted-foreground">{field.label}</p>
+                    {originalValue && (
+                      <p className="text-xs text-muted-foreground line-through">{originalValue}</p>
+                    )}
+                    <p className="text-sm font-medium truncate">{field.value}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       )}

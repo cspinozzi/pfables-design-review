@@ -34,6 +34,8 @@ interface Lesson {
   paid?: boolean
   pendingApproval?: boolean
   review?: ReviewData
+  originalDate?: string
+  originalTime?: string
 }
 
 // Module-scope helpers — evaluated once at bundle time, identical on server and client
@@ -375,6 +377,8 @@ function ProviderLessonsContent() {
               { icon: <MapPin className="h-4 w-4" />, label: "Location", value: selectedLesson.location },
               { icon: <DollarSign className="h-4 w-4" />, label: "Rate", value: `$${selectedLesson.rate}` },
             ]}
+            originalDate={selectedLesson.originalDate}
+            originalTime={selectedLesson.originalTime}
             price={`$${selectedLesson.rate}`}
             onMessage={() => {
               handleMessageParent(selectedLesson.parent)
@@ -390,9 +394,14 @@ function ProviderLessonsContent() {
               const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
               const formatted = `${days[newDate.getDay()]}, ${months[newDate.getMonth()]} ${newDate.getDate()}`
               setLessons((prev) => prev.map((l) =>
-                l.id === lesson.id ? { ...l, date: formatted, dateObj: newDate, time: newTime } : l
+                l.id === lesson.id
+                  ? { ...l, date: formatted, dateObj: newDate, time: newTime, originalDate: l.originalDate ?? l.date, originalTime: l.originalTime ?? l.time }
+                  : l
               ))
-              setSelectedLesson((prev) => prev ? { ...prev, date: formatted, dateObj: newDate, time: newTime } : null)
+              setSelectedLesson((prev) => prev
+                ? { ...prev, date: formatted, dateObj: newDate, time: newTime, originalDate: prev.originalDate ?? prev.date, originalTime: prev.originalTime ?? prev.time }
+                : null
+              )
               addProviderReschedule({
                 id: lesson.id,
                 title: lesson.title,
