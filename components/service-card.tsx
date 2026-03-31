@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { type ReactNode } from "react"
 import { CheckCircle2, XCircle, Clock, RefreshCw } from "lucide-react"
 
-type StatusType = "active" | "completed" | "cancelled" | "received" | "pending" | "paid" | "refund" | "topay" | "waiting" | "done" | "refunded" | "requested"
+type StatusType = "active" | "completed" | "cancelled" | "received" | "pending" | "paid" | "refund" | "topay" | "waiting" | "done" | "refunded" | "requested" | "rescheduled" | "reschedule_request"
 
 interface ServiceCardProps {
   image?: string
@@ -101,6 +101,16 @@ const statusConfig: Record<StatusType, { label: string; bgClass: string; icon: R
     label: "Requested",
     bgClass: "bg-red-50 text-red-700 border-red-200",
     icon: <Clock className="h-3 w-3 text-red-700" />,
+  },
+  rescheduled: {
+    label: "Rescheduled",
+    bgClass: "bg-blue-50 text-blue-700 border-blue-200",
+    icon: <RefreshCw className="h-3 w-3 text-blue-700" />,
+  },
+  reschedule_request: {
+    label: "Reschedule Requested",
+    bgClass: "bg-amber-50 text-amber-700 border-amber-200",
+    icon: <RefreshCw className="h-3 w-3 text-amber-700" />,
   },
 }
 

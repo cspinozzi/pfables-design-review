@@ -36,6 +36,7 @@ interface Lesson {
   review?: ReviewData
   originalDate?: string
   originalTime?: string
+  isRescheduleRequest?: boolean
 }
 
 // Module-scope helpers — evaluated once at bundle time, identical on server and client
@@ -171,6 +172,24 @@ function ProviderLessonsContent() {
       originalDate: fmtDate(_in2d),
       originalTime: "4:00 PM",
     },
+    // Reschedule request — parent requested reschedule, awaiting provider acceptance
+    {
+      id: "lesson-reschedule-request-1",
+      title: "Violin Lesson",
+      student: "Sophia Martinez",
+      studentAvatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop",
+      parent: "Ana Martinez",
+      date: fmtDate(_in6d),
+      dateObj: _in6d,
+      time: "2:00 PM",
+      duration: "60 min",
+      location: "Online",
+      rate: 70,
+      status: "active",
+      isRescheduleRequest: true,
+      originalDate: fmtDate(_in2d),
+      originalTime: "3:30 PM",
+    },
     {
       id: "lesson-c1",
       title: "Piano Lesson",
@@ -305,6 +324,8 @@ function ProviderLessonsContent() {
                     : "text-primary"
                 }
                 status={
+                  lesson.isRescheduleRequest ? "reschedule_request" :
+                  lesson.originalDate && !lesson.isRescheduleRequest ? "rescheduled" :
                   lesson.status === "completed" && lesson.paid === true ? "paid" :
                   lesson.status === "completed" && lesson.paid === false ? "completed" :
                   lesson.status === "cancelled" ? "cancelled" :
@@ -312,7 +333,38 @@ function ProviderLessonsContent() {
                 }
                 rescheduled={rescheduledIds.has(lesson.id)}
                 onClick={() => setSelectedLesson(lesson)}
-                footer={lesson.pendingApproval ? (
+                footer={lesson.isRescheduleRequest ? (
+                  <div className="flex items-center justify-end gap-2 px-4 sm:px-6 py-3 bg-primary rounded-b-xl">
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      className="rounded-full px-5 font-semibold"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        // Accept reschedule — mark as rescheduled (not a request anymore)
+                        setLessons((prev) => prev.map((l) =>
+                          l.id === lesson.id ? { ...l, isRescheduleRequest: false } : l
+                        ))
+                      }}
+                    >
+                      Accept
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="rounded-full px-5 font-semibold text-primary-foreground hover:bg-white/20 hover:text-primary-foreground"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        // Decline reschedule — revert to original date/time
+                        setLessons((prev) => prev.map((l) =>
+                          l.id === lesson.id ? { ...l, isRescheduleRequest: false, date: l.originalDate ?? l.date, time: l.originalTime ?? l.time, originalDate: undefined, originalTime: undefined } : l
+                        ))
+                      }}
+                    >
+                      Decline
+                    </Button>
+                  </div>
+                ) : lesson.pendingApproval ? (
                   <div className="flex items-center justify-end gap-2 px-4 sm:px-6 py-3 bg-primary rounded-b-xl">
                     <Button
                       size="sm"
