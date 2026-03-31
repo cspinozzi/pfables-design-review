@@ -4,7 +4,7 @@ import { useState } from "react"
 import { ServiceCard } from "@/components/service-card"
 import { ServiceDetailModal } from "@/components/service-detail-modal"
 import { useRouter } from "next/navigation"
-import { Calendar, Clock, MapPin, User, DollarSign } from "lucide-react"
+import { Calendar, Clock, MapPin, User, DollarSign, RefreshCw, ArrowRight } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { PaymentModal } from "@/components/payment-modal"
@@ -52,7 +52,8 @@ export default function LessonsPage() {
   const [selectedItem, setSelectedItem] = useState<LessonItem | null>(null)
   const [payingItem, setPayingItem] = useState<LessonItem | null>(null)
   const [reviewingItem, setReviewingItem] = useState<LessonItem | null>(null)
-  const { rescheduledIds, addReschedule } = useReschedule()
+  const [suggestingItem, setSuggestingItem] = useState<LessonItem | null>(null)
+  const { rescheduledIds, addReschedule, providerReschedules, removeProviderReschedule } = useReschedule()
   const { findConversationByParticipantName, sendMessage } = useMessageContext()
 
   const handleMessageProvider = (providerName: string) => {
@@ -242,26 +243,64 @@ export default function LessonsPage() {
                     </span>
                   </>
                 }
-                footer={item.status === "completed" && item.price ? (
-                  item.review ? (
-                    <ReviewDisplay review={item.review} serviceName={item.title} />
-                  ) : (
-                    <div className="flex items-center justify-end px-4 sm:px-6 py-3 bg-primary rounded-b-xl">
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        className="rounded-full px-5 font-semibold"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          setReviewingItem(item)
-                        }}
-                      >
-                        <Star className="h-4 w-4 mr-1.5" />
-                        Review Class
-                      </Button>
-                    </div>
-                  )
-                ) : undefined}
+                footer={(() => {
+                  const providerReschedule = providerReschedules.find((r) => r.id === item.id)
+                  if (providerReschedule && item.status === "active") {
+                    return (
+                      <div className="flex items-center justify-end gap-2 px-4 sm:px-6 py-3 bg-primary rounded-b-xl">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="rounded-full px-5 font-semibold text-primary-foreground hover:bg-white/20 hover:text-primary-foreground"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setSuggestingItem(item)
+                          }}
+                        >
+                          <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
+                          Suggest New Time
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          className="rounded-full px-5 font-semibold"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setItems((prev) => prev.map((i) =>
+                              i.id === item.id
+                                ? { ...i, date: providerReschedule.newDate, time: providerReschedule.newTime }
+                                : i
+                            ))
+                            removeProviderReschedule(item.id)
+                          }}
+                        >
+                          Accept
+                        </Button>
+                      </div>
+                    )
+                  }
+                  if (item.status === "completed" && item.price) {
+                    return item.review ? (
+                      <ReviewDisplay review={item.review} serviceName={item.title} />
+                    ) : (
+                      <div className="flex items-center justify-end px-4 sm:px-6 py-3 bg-primary rounded-b-xl">
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          className="rounded-full px-5 font-semibold"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setReviewingItem(item)
+                          }}
+                        >
+                          <Star className="h-4 w-4 mr-1.5" />
+                          Review Class
+                        </Button>
+                      </div>
+                    )
+                  }
+                  return undefined
+                })()}
               />
             ))}
           </div>
@@ -361,6 +400,116 @@ export default function LessonsPage() {
             providerAvatar={reviewingItem.providerAvatar}
             date={reviewingItem.date}
             studentName={reviewingItem.student || undefined}
+          />
+        )}
+
+        {/* Suggest New Time modal — counter-propose when provider reschedules */}
+        {suggestingItem && (
+          <ServiceDetailModal
+            open={!!suggestingItem}
+            onClose={() => setSuggestingItem(null)}
+            title={suggestingItem.title}
+            status="active"
+            people={[
+              { name: suggestingItem.provider, role: "Music Teacher", avatar: suggestingItem.providerAvatar },
+              ...(suggestingItem.student ? [{ name: suggestingItem.student, role: "Your child" }] : []),
+            ]}
+            customFields={(() => {
+              const pr = providerReschedules.find((r) => r.id === suggestingItem.id)
+              const fmtD = (d: Date) => {
+                const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"]
+                const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+                return `${days[d.getDay()]}, ${months[d.getMonth()]} ${d.getDate()}`
+              }
+              const currentDate = suggestingItem.date instanceof Date ? fmtD(suggestingItem.date) : formatDate(suggestingItem.date)
+              const newDate = pr ? fmtD(pr.newDate) : null
+              return (
+                <div className="flex items-stretch gap-3">
+                  {/* Current */}
+                  <div className="flex-1 rounded-2xl border bg-secondary/40 p-3 space-y-2">
+                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide text-center">Current</p>
+                    <div className="flex items-center gap-2 rounded-xl border bg-background px-3 py-2.5">
+                      <Calendar className="h-3.5 w-3.5 text-primary flex-shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-[10px] text-muted-foreground leading-none mb-0.5">Date</p>
+                        <p className="text-xs font-semibold text-foreground truncate">{currentDate}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 rounded-xl border bg-background px-3 py-2.5">
+                      <Clock className="h-3.5 w-3.5 text-primary flex-shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-[10px] text-muted-foreground leading-none mb-0.5">Time</p>
+                        <p className="text-xs font-semibold text-foreground truncate">{suggestingItem.time}</p>
+                      </div>
+                    </div>
+                  </div>
+                  {/* Arrow */}
+                  <div className="flex items-center justify-center flex-shrink-0">
+                    <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                  {/* New */}
+                  <div className="flex-1 rounded-2xl border bg-primary/10 p-3 space-y-2">
+                    <p className="text-[10px] font-semibold text-primary uppercase tracking-wide text-center">New</p>
+                    <div className="flex items-center gap-2 rounded-xl border bg-background px-3 py-2.5">
+                      <Calendar className="h-3.5 w-3.5 text-primary flex-shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-[10px] text-muted-foreground leading-none mb-0.5">Date</p>
+                        <p className="text-xs font-semibold text-foreground truncate">{newDate ?? "—"}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 rounded-xl border bg-background px-3 py-2.5">
+                      <Clock className="h-3.5 w-3.5 text-primary flex-shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-[10px] text-muted-foreground leading-none mb-0.5">Time</p>
+                        <p className="text-xs font-semibold text-foreground truncate">{pr?.newTime ?? "—"}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )
+            })()}
+            onMessage={() => {
+              handleMessageProvider(suggestingItem.provider)
+              setSuggestingItem(null)
+            }}
+            messageLabel="Message Provider"
+            showRescheduleButton
+            rescheduleLabel="Suggest New Time"
+            currentSessionDate={suggestingItem.date instanceof Date ? suggestingItem.date : undefined}
+            currentSessionTime={suggestingItem.time}
+            onReschedule={(newDate: Date, newTime: string) => {
+              const item = suggestingItem
+              setItems((prev) => prev.map((i) =>
+                i.id === item.id ? { ...i, date: newDate, time: newTime } : i
+              ))
+              addReschedule({
+                id: item.id,
+                title: item.title,
+                parentName: user?.name ?? "Parent",
+                parentAvatar: user?.avatar ?? "/parent-woman.jpg",
+                childName: item.student,
+                newDate,
+                newTime,
+                duration: item.duration,
+                location: item.location,
+                rescheduledAt: new Date(),
+              })
+              removeProviderReschedule(item.id)
+              const conv = findConversationByParticipantName(item.provider, user?.id)
+              if (conv && user) {
+                const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"]
+                const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+                const formatted = `${days[newDate.getDay()]}, ${months[newDate.getMonth()]} ${newDate.getDate()}`
+                sendMessage(
+                  conv.id,
+                  `Hi! I'd like to suggest a different time for our ${item.title} for ${item.student}: ${formatted} at ${newTime}. Please let me know if this works.`,
+                  user.id,
+                  user.name,
+                  user.avatar
+                )
+              }
+              setSuggestingItem(null)
+            }}
           />
         )}
 
