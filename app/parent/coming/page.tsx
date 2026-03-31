@@ -63,12 +63,12 @@ export default function LessonsPage() {
     router.push(conv ? `/messages?conv=${conv.id}` : `/messages`)
   }
 
-  // First lesson is within 24h (reschedule disabled), rest are 2+ days out (reschedule enabled)
-  const in12h = new Date(Date.now() + 12 * 60 * 60 * 1000)
-  const in2days = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000)
-  const in4days = new Date(Date.now() + 4 * 24 * 60 * 60 * 1000)
-  const in6days = new Date(Date.now() + 6 * 24 * 60 * 60 * 1000)
-  const in8days = new Date(Date.now() + 8 * 24 * 60 * 60 * 1000)
+  // Fixed reference dates — stable across server and client (no Date.now())
+  const in12h  = new Date(2026, 2, 31, 16, 0, 0)  // Mar 31 4:00 PM
+  const in2days = new Date(2026, 3,  1, 15, 30, 0) // Apr 1  3:30 PM
+  const in4days = new Date(2026, 3,  3, 16,  0, 0) // Apr 3  4:00 PM
+  const in6days = new Date(2026, 3,  5,  0,  0, 0) // Apr 5
+  const in8days = new Date(2026, 3,  7, 15, 30, 0) // Apr 7  3:30 PM
 
   const [items, setItems] = useState<LessonItem[]>([
     {
@@ -170,7 +170,7 @@ export default function LessonsPage() {
   const formatDate = (date: Date) => {
     const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
     const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-    return `${days[date.getUTCDay()]}, ${months[date.getUTCMonth()]} ${date.getUTCDate()}`
+    return `${days[date.getDay()]}, ${months[date.getMonth()]} ${date.getDate()}`
   }
 
   const filters = [
