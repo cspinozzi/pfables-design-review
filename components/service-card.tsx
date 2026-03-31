@@ -172,13 +172,6 @@ export function ServiceCard({
                   </div>
                 )}
 
-                {rescheduled && (
-                  <span className="flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700">
-                    <RefreshCw className="h-3 w-3" />
-                    Rescheduled
-                  </span>
-                )}
-
                 {status ? (
                   <span className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium ${statusConfig[status].bgClass}`}>
                     {statusConfig[status].icon}
