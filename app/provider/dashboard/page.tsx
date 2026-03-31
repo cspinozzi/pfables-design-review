@@ -43,7 +43,7 @@ export default function ProviderDashboardPage() {
   const { conversations } = useMockMessages()
   const provider = mockProviders.find((p) => p.userId === user?.id)
 
-  const { rescheduledLessons, addProviderReschedule } = useReschedule()
+  const { rescheduledLessons, addProviderReschedule, providerReschedules } = useReschedule()
   const { findConversationByParticipantName, sendMessage } = useMessageContext()
 
   const [selectedLesson, setSelectedLesson] = useState<CalendarLesson | null>(null)
@@ -292,6 +292,143 @@ export default function ProviderDashboardPage() {
             ))}
           </div>
         </div>
+
+        {/* Classes to Reschedule — parent-initiated, waiting for provider to suggest new time */}
+        {rescheduledLessons.length > 0 && (
+          <div className="mb-10">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="font-display text-2xl font-medium">To Reschedule</h2>
+              <Badge variant="secondary" className="text-xs">
+                {rescheduledLessons.length} {rescheduledLessons.length === 1 ? "class" : "classes"}
+              </Badge>
+            </div>
+            <div className="space-y-4">
+              {rescheduledLessons.map((lesson) => {
+                const fmtD = (d: Date) => {
+                  const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"]
+                  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+                  return `${days[d.getDay()]}, ${months[d.getMonth()]} ${d.getDate()}`
+                }
+                return (
+                  <Card key={lesson.id} className="overflow-hidden">
+                    <CardContent className="p-0">
+                      <div className="flex items-center gap-4 p-4">
+                        <div className="relative h-12 w-12 rounded-full overflow-hidden shrink-0">
+                          <img src={lesson.parentAvatar} alt={lesson.parentName} className="h-full w-full object-cover" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-0.5">
+                            <h4 className="font-semibold text-sm truncate">{lesson.title}</h4>
+                            <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-700 shrink-0">
+                              <RefreshCw className="h-2.5 w-2.5" />
+                              Reschedule Requested
+                            </span>
+                          </div>
+                          <p className="text-xs text-muted-foreground truncate">{lesson.parentName} · {lesson.childName}</p>
+                          <div className="flex items-center gap-3 mt-1.5 text-xs text-muted-foreground">
+                            <span className="flex items-center gap-1"><Calendar className="h-3 w-3" />{fmtD(lesson.newDate)}</span>
+                            <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{lesson.newTime}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-end gap-2 px-4 pb-3">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-7 text-xs rounded-full"
+                          onClick={() => handleMessage(lesson.parentName)}
+                        >
+                          <MessageCircle className="h-3 w-3 mr-1" />
+                          Message
+                        </Button>
+                        <Button
+                          size="sm"
+                          className="h-7 text-xs rounded-full"
+                          onClick={() => {
+                            const req: LessonRequest = {
+                              id: lesson.id,
+                              title: lesson.title,
+                              parent: lesson.parentName,
+                              parentId: "",
+                              parentAvatar: lesson.parentAvatar,
+                              child: lesson.childName,
+                              date: (() => { const d=lesson.newDate; const days=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"]; const months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]; return `${days[d.getDay()]}, ${months[d.getMonth()]} ${d.getDate()}` })(),
+                              time: lesson.newTime,
+                              duration: lesson.duration,
+                              location: lesson.location,
+                              isReschedule: true,
+                            }
+                            setSelectedRequest(req)
+                          }}
+                        >
+                          <RefreshCw className="h-3 w-3 mr-1" />
+                          Suggest New Time
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Rescheduled — provider already suggested a new time, awaiting parent confirmation */}
+        {providerReschedules.length > 0 && (
+          <div className="mb-10">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="font-display text-2xl font-medium">Rescheduled</h2>
+              <Badge variant="secondary" className="text-xs">
+                {providerReschedules.length} pending
+              </Badge>
+            </div>
+            <div className="space-y-4">
+              {providerReschedules.map((lesson) => {
+                const fmtD = (d: Date) => {
+                  const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"]
+                  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+                  return `${days[d.getDay()]}, ${months[d.getMonth()]} ${d.getDate()}`
+                }
+                return (
+                  <Card key={lesson.id} className="overflow-hidden">
+                    <CardContent className="p-0">
+                      <div className="flex items-center gap-4 p-4">
+                        <div className="relative h-12 w-12 rounded-full overflow-hidden shrink-0">
+                          <img src={lesson.parentAvatar} alt={lesson.parentName} className="h-full w-full object-cover" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-0.5">
+                            <h4 className="font-semibold text-sm truncate">{lesson.title}</h4>
+                            <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2 py-0.5 text-[10px] font-medium text-muted-foreground shrink-0">
+                              <Clock className="h-2.5 w-2.5" />
+                              Awaiting Confirmation
+                            </span>
+                          </div>
+                          <p className="text-xs text-muted-foreground truncate">{lesson.parentName} · {lesson.childName}</p>
+                          <div className="flex items-center gap-3 mt-1.5 text-xs text-muted-foreground">
+                            <span className="flex items-center gap-1 text-primary font-medium"><Calendar className="h-3 w-3" />{fmtD(lesson.newDate)}</span>
+                            <span className="flex items-center gap-1 text-primary font-medium"><Clock className="h-3 w-3" />{lesson.newTime}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-end gap-2 px-4 pb-3">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-7 text-xs rounded-full"
+                          onClick={() => handleMessage(lesson.parentName)}
+                        >
+                          <MessageCircle className="h-3 w-3 mr-1" />
+                          Message
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Leads / Inquiries */}
         <div className="mb-10">

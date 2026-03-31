@@ -1,7 +1,6 @@
 "use client"
 
 import { Card, CardContent } from "@/components/ui/card"
-import Image from "next/image"
 import { type ReactNode } from "react"
 import { CheckCircle2, XCircle, Clock, RefreshCw } from "lucide-react"
 
@@ -135,12 +134,11 @@ export function ServiceCard({
         >
           {/* Image */}
           <div className={`relative h-32 w-full sm:h-auto sm:w-32 flex-shrink-0 overflow-hidden ${footer ? "rounded-t-2xl sm:rounded-t-none sm:rounded-tl-2xl" : "rounded-t-2xl sm:rounded-t-none sm:rounded-l-2xl"}`}>
-            <Image
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
               src={image || "/placeholder.svg?height=128&width=128"}
               alt={imageAlt || title}
-              fill
-              sizes="128px"
-              className="object-cover"
+              className="absolute inset-0 h-full w-full object-cover"
             />
           </div>
 
