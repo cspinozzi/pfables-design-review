@@ -466,19 +466,21 @@ export function ServiceDetailModal({
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium text-muted-foreground">Status</span>
           <div className="flex items-center gap-1.5">
-            {showRescheduledBadge && (
-              <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700">
+            {/* Show single rescheduled badge (blue) when showRescheduledBadge OR originalDate exists */}
+            {(showRescheduledBadge || originalDate) ? (
+              <span className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700">
                 <RefreshCw className="h-3 w-3" />
                 Rescheduled
               </span>
+            ) : (
+              <span className={cn(
+                "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium",
+                statusStyles[currentStatus]
+              )}>
+                {statusIcons[currentStatus]}
+                {statusLabels[currentStatus]}
+              </span>
             )}
-            <span className={cn(
-              "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium",
-              statusStyles[currentStatus]
-            )}>
-              {statusIcons[currentStatus]}
-              {statusLabels[currentStatus]}
-            </span>
           </div>
         </div>
       )}
