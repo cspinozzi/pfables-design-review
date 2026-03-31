@@ -2,8 +2,9 @@
 
 import { useState } from "react"
 import { Card } from "@/components/ui/card"
+import dynamic from "next/dynamic"
 import { ServiceCard } from "@/components/service-card"
-import { ServiceDetailModal } from "@/components/service-detail-modal"
+const ServiceDetailModal = dynamic(() => import("@/components/service-detail-modal").then(m => ({ default: m.ServiceDetailModal })), { ssr: false })
 import { Button } from "@/components/ui/button"
 import { DollarSign, TrendingUp, Clock, AlertCircle, Landmark, Plus, Calendar, User } from "lucide-react"
 import { PayoutMethodModal } from "@/components/payout-method-modal"

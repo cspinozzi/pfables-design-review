@@ -1,14 +1,16 @@
 "use client"
 
 import { useState } from "react"
+import dynamic from "next/dynamic"
 import { ServiceCard } from "@/components/service-card"
-import { ServiceDetailModal } from "@/components/service-detail-modal"
 import { useRouter } from "next/navigation"
 import { Calendar, Clock, MapPin, User, DollarSign, RefreshCw, ArrowRight } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { PaymentModal } from "@/components/payment-modal"
-import { ReviewModal } from "@/components/review-modal"
+
+const ServiceDetailModal = dynamic(() => import("@/components/service-detail-modal").then(m => ({ default: m.ServiceDetailModal })), { ssr: false })
+const PaymentModal = dynamic(() => import("@/components/payment-modal").then(m => ({ default: m.PaymentModal })), { ssr: false })
+const ReviewModal = dynamic(() => import("@/components/review-modal").then(m => ({ default: m.ReviewModal })), { ssr: false })
 import { ReviewDisplay } from "@/components/review-display"
 import { useMockMessages } from "@/hooks/use-mock-messages"
 import { useAuth } from "@/lib/auth-context"

@@ -1,14 +1,16 @@
 "use client"
 
 import { useState } from "react"
+import dynamic from "next/dynamic"
 import { Card } from "@/components/ui/card"
 import { ServiceCard } from "@/components/service-card"
-import { ServiceDetailModal } from "@/components/service-detail-modal"
 import { Button } from "@/components/ui/button"
 import { CreditCard, Plus, TrendingUp, DollarSign, AlertCircle, CheckCircle2, Calendar, User, AlertTriangle } from "lucide-react"
-import { PaymentModal } from "@/components/payment-modal"
-import { CardModal } from "@/components/card-modal"
-import { RefundModal } from "@/components/refund-modal"
+
+const ServiceDetailModal = dynamic(() => import("@/components/service-detail-modal").then(m => ({ default: m.ServiceDetailModal })), { ssr: false })
+const PaymentModal = dynamic(() => import("@/components/payment-modal").then(m => ({ default: m.PaymentModal })), { ssr: false })
+const CardModal = dynamic(() => import("@/components/card-modal").then(m => ({ default: m.CardModal })), { ssr: false })
+const RefundModal = dynamic(() => import("@/components/refund-modal").then(m => ({ default: m.RefundModal })), { ssr: false })
 import { mockServiceContracts } from "@/lib/mock-data"
 
 type Transaction = {

@@ -7,9 +7,10 @@ import { Badge } from "@/components/ui/badge"
 import { useAuth } from "@/lib/auth-context"
 import { mockProviders, mockSubscriptions } from "@/lib/mock-data"
 import { Check, CreditCard, Calendar, DollarSign, Download, Crown, Star, Zap } from "lucide-react"
-import { SubscriptionModal } from "@/components/subscription-modal"
-import { CancelSubscriptionModal } from "@/components/cancel-subscription-modal"
-import { CardModal } from "@/components/card-modal"
+import dynamic from "next/dynamic"
+const SubscriptionModal = dynamic(() => import("@/components/subscription-modal").then(m => ({ default: m.SubscriptionModal })), { ssr: false })
+const CancelSubscriptionModal = dynamic(() => import("@/components/cancel-subscription-modal").then(m => ({ default: m.CancelSubscriptionModal })), { ssr: false })
+const CardModal = dynamic(() => import("@/components/card-modal").then(m => ({ default: m.CardModal })), { ssr: false })
 
 export default function ProviderSubscriptionPage() {
   const { user } = useAuth()

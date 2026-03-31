@@ -1,8 +1,9 @@
 "use client"
 
 import { useState, Suspense } from "react"
+import dynamic from "next/dynamic"
 import { ServiceCard } from "@/components/service-card"
-import { ServiceDetailModal } from "@/components/service-detail-modal"
+const ServiceDetailModal = dynamic(() => import("@/components/service-detail-modal").then(m => ({ default: m.ServiceDetailModal })), { ssr: false })
 import { ReviewDisplay, type ReviewData } from "@/components/review-display"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Calendar, Clock, MapPin, User, DollarSign } from "lucide-react"

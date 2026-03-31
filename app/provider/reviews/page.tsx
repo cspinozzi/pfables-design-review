@@ -149,7 +149,7 @@ export default function ProviderReviewsPage() {
               <Card key={review.id} className="p-5">
                 <div className="flex items-start gap-4">
                   <div className="relative h-11 w-11 rounded-full overflow-hidden shrink-0">
-                    <Image src={review.parentAvatar} alt={review.parentName} fill className="object-cover" />
+                    <Image src={review.parentAvatar} alt={review.parentName} fill sizes="44px" className="object-cover" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
