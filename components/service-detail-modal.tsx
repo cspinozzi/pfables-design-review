@@ -83,6 +83,8 @@ export interface ServiceDetailModalProps {
   originalDate?: string
   originalTime?: string
   isRescheduleRequest?: boolean
+  onAcceptReschedule?: () => void
+  onDeclineReschedule?: () => void
 }
 
 // --- Reschedule helpers ---
@@ -135,6 +137,8 @@ export function ServiceDetailModal({
   originalDate,
   originalTime,
   isRescheduleRequest = false,
+  onAcceptReschedule,
+  onDeclineReschedule,
 }: ServiceDetailModalProps) {
   const [currentStatus, setCurrentStatus] = useState<StatusType | undefined>(status)
   const [rescheduling, setRescheduling] = useState(false)
@@ -466,8 +470,13 @@ export function ServiceDetailModal({
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium text-muted-foreground">Status</span>
           <div className="flex items-center gap-1.5">
-            {/* Show single rescheduled badge (blue) when showRescheduledBadge OR originalDate exists */}
-            {(showRescheduledBadge || originalDate) ? (
+            {/* Show reschedule request badge (amber) when pending, or rescheduled badge (blue) when confirmed */}
+            {isRescheduleRequest ? (
+              <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700">
+                <RefreshCw className="h-3 w-3" />
+                Reschedule Requested
+              </span>
+            ) : (showRescheduledBadge || originalDate) ? (
               <span className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700">
                 <RefreshCw className="h-3 w-3" />
                 Rescheduled
@@ -661,6 +670,28 @@ export function ServiceDetailModal({
                   This class is too close to reschedule.
                 </p>
               </div>
+            )}
+          </div>
+        )}
+        {/* Accept/Decline buttons for reschedule requests */}
+        {isRescheduleRequest && (onAcceptReschedule || onDeclineReschedule) && (
+          <div className="flex items-center gap-2">
+            {onDeclineReschedule && (
+              <Button
+                className="flex-1 rounded-full"
+                variant="outline"
+                onClick={onDeclineReschedule}
+              >
+                Decline
+              </Button>
+            )}
+            {onAcceptReschedule && (
+              <Button
+                className="flex-1 rounded-full"
+                onClick={onAcceptReschedule}
+              >
+                Accept
+              </Button>
             )}
           </div>
         )}

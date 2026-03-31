@@ -448,6 +448,22 @@ function ProviderLessonsContent() {
             originalDate={selectedLesson.originalDate}
             originalTime={selectedLesson.originalTime}
             isRescheduleRequest={selectedLesson.isRescheduleRequest}
+            onAcceptReschedule={selectedLesson.isRescheduleRequest ? () => {
+              // Accept reschedule — mark as rescheduled (not a request anymore)
+              setLessons((prev) => prev.map((l) =>
+                l.id === selectedLesson.id ? { ...l, isRescheduleRequest: false } : l
+              ))
+              setSelectedLesson((prev) => prev ? { ...prev, isRescheduleRequest: false } : null)
+            } : undefined}
+            onDeclineReschedule={selectedLesson.isRescheduleRequest ? () => {
+              // Decline reschedule — revert to original date/time
+              setLessons((prev) => prev.map((l) =>
+                l.id === selectedLesson.id
+                  ? { ...l, isRescheduleRequest: false, date: l.originalDate ?? l.date, time: l.originalTime ?? l.time, originalDate: undefined, originalTime: undefined }
+                  : l
+              ))
+              setSelectedLesson(null)
+            } : undefined}
             price={`$${selectedLesson.rate}`}
             onMessage={() => {
               handleMessageParent(selectedLesson.parent)

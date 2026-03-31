@@ -406,6 +406,22 @@ export default function LessonsPage() {
             originalDate={selectedItem.originalDate}
             originalTime={selectedItem.originalTime}
             isRescheduleRequest={selectedItem.isRescheduleRequest}
+            onAcceptReschedule={selectedItem.isRescheduleRequest ? () => {
+              // Accept reschedule — mark as rescheduled
+              setItems((prev) => prev.map((i) =>
+                i.id === selectedItem.id ? { ...i, isRescheduleRequest: false } : i
+              ))
+              setSelectedItem((prev) => prev ? { ...prev, isRescheduleRequest: false } : null)
+            } : undefined}
+            onDeclineReschedule={selectedItem.isRescheduleRequest ? () => {
+              // Decline reschedule — revert to original
+              setItems((prev) => prev.map((i) =>
+                i.id === selectedItem.id
+                  ? { ...i, isRescheduleRequest: false, time: i.originalTime ?? i.time, originalDate: undefined, originalTime: undefined }
+                  : i
+              ))
+              setSelectedItem(null)
+            } : undefined}
             currentSessionTime={selectedItem.time}
             currentSessionDate={selectedItem.date instanceof Date ? selectedItem.date : undefined}
             onReschedule={(newDate: Date, newTime: string) => {
