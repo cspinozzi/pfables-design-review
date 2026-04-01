@@ -1,5 +1,5 @@
 "use client"
-
+// Navigation component with scroll-aware styling
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useState, useEffect, useRef, useMemo, useCallback } from "react"
