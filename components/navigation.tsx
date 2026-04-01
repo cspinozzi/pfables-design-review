@@ -164,14 +164,26 @@ export function Navigation() {
   
   const bottomNavLinks = navLinks
 
-  // Wait for localStorage hydration before rendering — prevents avatar flash on load
+  // Wait for localStorage hydration before rendering — show basic nav with logo
   if (isLoading) {
+    const isFullBleed = fullBleedPages.includes(pathname)
     return (
       <>
         <div className="fixed top-0 left-0 right-0 z-50 flex justify-center px-4 pt-4 sm:pt-6">
-          <nav className="flex items-center justify-between w-full max-w-[1100px] px-6 sm:px-8 py-3 rounded-full glass sm:py-2 h-[52px]" />
+          <nav className={cn(
+            "flex items-center justify-between w-full max-w-[900px] px-8 sm:px-10 py-3 sm:py-4 rounded-full transition-all duration-500",
+            isFullBleed ? "glass-dark" : "glass"
+          )}>
+            <Logo size="sm" inverted={isFullBleed} />
+            <div className="flex items-center gap-6 sm:gap-8">
+              <Link href="/providers" className={cn("text-sm font-medium transition-colors", isFullBleed ? "text-white/70" : "text-muted-foreground")}>Providers</Link>
+              <Link href="/repair-services" className={cn("text-sm font-medium transition-colors", isFullBleed ? "text-white/70" : "text-muted-foreground")}>Repairs</Link>
+              <Link href="/browse" className={cn("text-sm font-medium transition-colors", isFullBleed ? "text-white/70" : "text-muted-foreground")}>Explore</Link>
+              <Link href="/login" className={cn("text-sm font-medium transition-colors", isFullBleed ? "text-white/70" : "text-muted-foreground")}>Login</Link>
+            </div>
+          </nav>
         </div>
-        <div className="h-[120px]" />
+        {!isFullBleed && <div className="h-[120px]" />}
       </>
     )
   }
