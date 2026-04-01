@@ -68,6 +68,28 @@ export function Navigation() {
 
   // Track scroll position for transparent navbar effect with throttling
   useEffect(() => {
+    const computeScrollState = () => {
+      const scrollY = window.scrollY
+      const isScrolled = scrollY > 50
+      
+      // Check if we've scrolled past the dark sections (hero)
+      let isPastDarkSections = false
+      const lightSection = document.getElementById('made-for-everyone') || 
+                          document.getElementById('light-section-start')
+      if (lightSection) {
+        const sectionTop = lightSection.getBoundingClientRect().top
+        isPastDarkSections = sectionTop < 100
+      } else {
+        const heroHeight = window.innerHeight * 0.7
+        isPastDarkSections = scrollY > heroHeight
+      }
+
+      const isFullBleed = fullBleedPages.includes(pathname)
+      const useWhiteText = isFullBleed && !isPastDarkSections
+      
+      return { isScrolled, isPastDarkSections, useWhiteText, isFullBleedPage: isFullBleed }
+    }
+    
     const handleScroll = () => {
       // Throttle scroll updates to every 100ms
       if (scrollThrottleRef.current) return
@@ -75,40 +97,26 @@ export function Navigation() {
       scrollThrottleRef.current = window.setTimeout(() => {
         scrollThrottleRef.current = null
         
-        const scrollY = window.scrollY
-        const isScrolled = scrollY > 50
-        
-        // Check if we've scrolled past the dark sections (hero)
-        let isPastDarkSections = false
-        const lightSection = document.getElementById('made-for-everyone') || 
-                            document.getElementById('light-section-start')
-        if (lightSection) {
-          const sectionTop = lightSection.getBoundingClientRect().top
-          isPastDarkSections = sectionTop < 100
-        } else {
-          const heroHeight = window.innerHeight * 0.7
-          isPastDarkSections = scrollY > heroHeight
-        }
-
-        const isFullBleed = fullBleedPages.includes(pathname)
-        const useWhiteText = isFullBleed && !isPastDarkSections
+        const newState = computeScrollState()
         
         // Batch all state updates into single setState call
         setScrollState(prev => {
           // Only update if values changed
-          if (prev.isScrolled === isScrolled && 
-              prev.isPastDarkSections === isPastDarkSections &&
-              prev.useWhiteText === useWhiteText &&
-              prev.isFullBleedPage === isFullBleed) {
+          if (prev.isScrolled === newState.isScrolled && 
+              prev.isPastDarkSections === newState.isPastDarkSections &&
+              prev.useWhiteText === newState.useWhiteText &&
+              prev.isFullBleedPage === newState.isFullBleedPage) {
             return prev
           }
-          return { isScrolled, isPastDarkSections, useWhiteText, isFullBleedPage: isFullBleed }
+          return newState
         })
       }, 100)
     }
 
+    // Set initial state immediately (no throttle delay)
+    setScrollState(computeScrollState())
+    
     window.addEventListener("scroll", handleScroll, { passive: true })
-    handleScroll() // Check initial position
     return () => {
       window.removeEventListener("scroll", handleScroll)
       if (scrollThrottleRef.current) clearTimeout(scrollThrottleRef.current)
