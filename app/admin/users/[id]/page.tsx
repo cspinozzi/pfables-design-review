@@ -7,6 +7,7 @@ import Image from "next/image"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Switch } from "@/components/ui/switch"
 import { useApproval } from "@/lib/approval-context"
@@ -46,6 +47,7 @@ import {
   ZoomIn,
   ZoomOut,
   Download,
+  Percent,
 } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 
@@ -388,6 +390,11 @@ export default function AdminUserDetailPage() {
                   </div>
                 )}
               </Card>
+            )}
+
+            {/* Platform Fee Card - Provider/Repairer with active subscription */}
+            {provider && subscription && subscription.status === "active" && (
+              <PlatformFeeCard provider={provider} />
             )}
 
             {/* Plan info for parents */}
@@ -794,4 +801,87 @@ function generateProviderPayments(
   }
 
   return payments
+}
+
+// Platform Fee Card Component for Providers/Repairers
+function PlatformFeeCard({ provider }: { provider: Provider }) {
+  const [fee, setFee] = useState(provider.platformFee ?? 20)
+  const [isEditing, setIsEditing] = useState(false)
+  const [inputValue, setInputValue] = useState(String(fee))
+  const [saved, setSaved] = useState(false)
+
+  const handleSave = () => {
+    const newFee = Math.min(100, Math.max(0, parseInt(inputValue) || 20))
+    setFee(newFee)
+    setInputValue(String(newFee))
+    setIsEditing(false)
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2000)
+    // In a real app, this would make an API call to update the fee
+  }
+
+  const handleCancel = () => {
+    setInputValue(String(fee))
+    setIsEditing(false)
+  }
+
+  return (
+    <Card className="p-5">
+      <h2 className="font-display text-lg font-medium mb-4 flex items-center gap-2">
+        <Percent className="h-4 w-4 text-primary" />
+        Platform Fee
+      </h2>
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-muted-foreground">Current Fee</span>
+          {isEditing ? (
+            <div className="flex items-center gap-2">
+              <Input
+                type="number"
+                min="0"
+                max="100"
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                className="w-20 h-8 text-sm text-right"
+              />
+              <span className="text-sm">%</span>
+            </div>
+          ) : (
+            <Badge 
+              variant="outline" 
+              className={`text-sm ${fee !== 20 ? 'border-amber-300 bg-amber-50 text-amber-700' : ''}`}
+            >
+              {fee}%
+            </Badge>
+          )}
+        </div>
+        <p className="text-xs text-muted-foreground">
+          This is the percentage fee charged on transactions for this {provider.providerType === "teacher" ? "provider" : "repair service"}.
+          The default rate is 20%.
+        </p>
+        <div className="pt-3 border-t flex gap-2">
+          {isEditing ? (
+            <>
+              <Button size="sm" className="text-xs" onClick={handleSave}>
+                Save Fee
+              </Button>
+              <Button size="sm" variant="outline" className="text-xs bg-transparent" onClick={handleCancel}>
+                Cancel
+              </Button>
+            </>
+          ) : (
+            <Button size="sm" variant="outline" className="text-xs bg-transparent" onClick={() => setIsEditing(true)}>
+              Edit Fee
+            </Button>
+          )}
+          {saved && (
+            <span className="text-xs text-green-600 flex items-center gap-1">
+              <CheckCircle2 className="h-3 w-3" />
+              Saved
+            </span>
+          )}
+        </div>
+      </div>
+    </Card>
+  )
 }

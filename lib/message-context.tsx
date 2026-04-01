@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useContext, useState, useCallback, type ReactNode } from "react"
+import { createContext, useContext, useState, useCallback, useMemo, type ReactNode } from "react"
 import { mockConversations, mockMessages, type Conversation, type Message } from "@/lib/mock-data"
 
 interface MessageContextType {
@@ -71,10 +71,12 @@ export function MessageProvider({ children }: { children: ReactNode }) {
     [conversations]
   )
 
+  const contextValue = useMemo(() => ({
+    conversations, messages, getConversationMessages, sendMessage, injectMessage, findConversationByParticipantName
+  }), [conversations, messages, getConversationMessages, sendMessage, injectMessage, findConversationByParticipantName])
+
   return (
-    <MessageContext.Provider
-      value={{ conversations, messages, getConversationMessages, sendMessage, injectMessage, findConversationByParticipantName }}
-    >
+    <MessageContext.Provider value={contextValue}>
       {children}
     </MessageContext.Provider>
   )

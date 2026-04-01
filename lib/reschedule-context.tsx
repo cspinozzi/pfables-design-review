@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useContext, useState, useCallback, type ReactNode } from "react"
+import { createContext, useContext, useState, useCallback, useMemo, type ReactNode } from "react"
 
 export interface RescheduledLesson {
   id: string
@@ -92,15 +92,16 @@ export function RescheduleProvider({ children }: { children: ReactNode }) {
     [providerReschedules]
   )
 
-  const rescheduledIds = new Set(rescheduledLessons.map((l) => l.id))
+  const rescheduledIds = useMemo(() => new Set(rescheduledLessons.map((l) => l.id)), [rescheduledLessons])
+
+  const contextValue = useMemo(() => ({
+    rescheduledIds, rescheduledLessons, addReschedule, removeReschedule, isRescheduled,
+    providerReschedules, addProviderReschedule, removeProviderReschedule, getProviderReschedule,
+  }), [rescheduledIds, rescheduledLessons, addReschedule, removeReschedule, isRescheduled,
+       providerReschedules, addProviderReschedule, removeProviderReschedule, getProviderReschedule])
 
   return (
-    <RescheduleContext.Provider
-      value={{
-        rescheduledIds, rescheduledLessons, addReschedule, removeReschedule, isRescheduled,
-        providerReschedules, addProviderReschedule, removeProviderReschedule, getProviderReschedule,
-      }}
-    >
+    <RescheduleContext.Provider value={contextValue}>
       {children}
     </RescheduleContext.Provider>
   )

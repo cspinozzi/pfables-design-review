@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { VerificationBadge } from "@/components/verification-badge"
 import { mockProviders, mockUsers } from "@/lib/mock-data"
-import { Search, ExternalLink, Music, Wrench, User, ChevronLeft, ChevronRight, MapPin } from "lucide-react"
+import { Search, ExternalLink, Music, Wrench, User, ChevronLeft, ChevronRight, MapPin, Percent } from "lucide-react"
 
 type TabType = "all" | "parents" | "providers" | "repairers"
 const PAGE_SIZE = 20
@@ -232,6 +232,12 @@ export default function AdminUsersPage() {
                           <span>·</span>
                           <span>{provider.location}</span>
                           <Badge variant="outline" className="text-[11px]">{provider.subscriptionTier}</Badge>
+                          {provider.subscriptionTier !== "free" && (
+                            <Badge variant="outline" className={`text-[11px] ${(provider.platformFee ?? 20) !== 20 ? 'border-amber-300 bg-amber-50 text-amber-700' : ''}`}>
+                              <Percent className="h-3 w-3 mr-0.5" />
+                              {provider.platformFee ?? 20}% fee
+                            </Badge>
+                          )}
                           <Badge variant="secondary" className="text-[11px]">{provider.rating} stars</Badge>
                         </div>
                       </div>
@@ -269,6 +275,12 @@ export default function AdminUsersPage() {
                           <span>·</span>
                           <span>{repairer.location}</span>
                           <Badge variant="outline" className="text-[11px]">{repairer.subscriptionTier}</Badge>
+                          {repairer.subscriptionTier !== "free" && (
+                            <Badge variant="outline" className={`text-[11px] ${(repairer.platformFee ?? 20) !== 20 ? 'border-amber-300 bg-amber-50 text-amber-700' : ''}`}>
+                              <Percent className="h-3 w-3 mr-0.5" />
+                              {repairer.platformFee ?? 20}% fee
+                            </Badge>
+                          )}
                           <Badge variant="secondary" className="text-[11px]">{repairer.rating} stars</Badge>
                         </div>
                       </div>
