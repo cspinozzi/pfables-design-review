@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { createContext, useContext, useState, useEffect } from "react"
+import { createContext, useContext, useState, useEffect, useCallback, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { type User, mockUsers, UserRole } from "./mock-data"
 
@@ -31,7 +31,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(false)
   }, [])
 
-  const login = (email: string, password: string): boolean => {
+  const login = useCallback((email: string, password: string): boolean => {
     const foundUser = mockUsers.find((u) => u.email === email && u.password === password)
 
     if (foundUser) {
@@ -40,9 +40,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return true
     }
     return false
-  }
+  }, [])
 
-  const signup = (name: string, email: string, password: string, role: UserRole): boolean => {
+  const signup = useCallback((name: string, email: string, password: string, role: UserRole): boolean => {
     // Check if email already exists
     if (mockUsers.find((u) => u.email === email)) {
       return false
@@ -61,35 +61,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(newUser)
     localStorage.setItem("promusic-user", JSON.stringify(newUser))
     return true
-  }
+  }, [])
 
-  const updateUser = (updates: Partial<User>) => {
+  const updateUser = useCallback((updates: Partial<User>) => {
     setUser((prev) => {
       if (!prev) return prev
       const updated = { ...prev, ...updates }
       localStorage.setItem("promusic-user", JSON.stringify(updated))
       return updated
     })
-  }
+  }, [])
 
-  const logout = () => {
+  const logout = useCallback(() => {
     setUser(null)
     localStorage.removeItem("promusic-user")
     router.push("/login")
-  }
+  }, [router])
+
+  const contextValue = useMemo(() => ({
+    user,
+    login,
+    signup,
+    logout,
+    updateUser,
+    isAuthenticated: !!user,
+    isLoading,
+  }), [user, login, signup, logout, updateUser, isLoading])
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        login,
-        signup,
-        logout,
-        updateUser,
-        isAuthenticated: !!user,
-        isLoading,
-      }}
-    >
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   )
