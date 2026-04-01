@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useContext, useState, useCallback, type ReactNode } from "react"
+import { createContext, useContext, useState, useCallback, useMemo, type ReactNode } from "react"
 
 interface ApprovalContextType {
   approvedIds: Set<string>
@@ -42,8 +42,12 @@ export function ApprovalProvider({ children }: { children: ReactNode }) {
     [approvedIds, revokedIds],
   )
 
+  const contextValue = useMemo(() => ({
+    approvedIds, approveProvider, revokeApproval, isApproved
+  }), [approvedIds, approveProvider, revokeApproval, isApproved])
+
   return (
-    <ApprovalContext.Provider value={{ approvedIds, approveProvider, revokeApproval, isApproved }}>
+    <ApprovalContext.Provider value={contextValue}>
       {children}
     </ApprovalContext.Provider>
   )

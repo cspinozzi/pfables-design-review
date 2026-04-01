@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useMemo, useCallback } from "react"
 import {
   LogOut,
   User,
@@ -35,13 +35,19 @@ export function Navigation() {
   const pathname = usePathname()
   const router = useRouter()
   const [isCollapsed, setIsCollapsed] = useState(false)
-  const [isScrolled, setIsScrolled] = useState(false)
-  const [isPastDarkSections, setIsPastDarkSections] = useState(false)
-  const [useWhiteText, setUseWhiteText] = useState(false)
-  const fullBleedPages = ["/", "/providers", "/repair-services", "/luthiers"]
-  const [isFullBleedPage, setIsFullBleedPage] = useState(() => fullBleedPages.includes(pathname))
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
   const userMenuRef = useRef<HTMLDivElement>(null)
+  const scrollThrottleRef = useRef<number | null>(null)
+  
+  // Consolidated scroll state to reduce re-renders
+  const [scrollState, setScrollState] = useState({
+    isScrolled: false,
+    isPastDarkSections: false,
+    useWhiteText: false,
+    isFullBleedPage: false,
+  })
+  
+  const fullBleedPages = useMemo(() => ["/", "/providers", "/repair-services", "/luthiers"], [])
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -56,43 +62,60 @@ export function Navigation() {
 
   // Keep isFullBleedPage in sync when pathname changes via client-side navigation
   useEffect(() => {
-    setIsFullBleedPage(fullBleedPages.includes(pathname))
-  }, [pathname])
+    const isFullBleed = fullBleedPages.includes(pathname)
+    setScrollState(prev => ({ ...prev, isFullBleedPage: isFullBleed }))
+  }, [pathname, fullBleedPages])
 
-  // Track scroll position for transparent navbar effect
+  // Track scroll position for transparent navbar effect with throttling
   useEffect(() => {
     const handleScroll = () => {
-      // Consider scrolled after 50px
-      setIsScrolled(window.scrollY > 50)
+      // Throttle scroll updates to every 100ms
+      if (scrollThrottleRef.current) return
       
-      // Check if we've scrolled past the dark sections (hero)
-      // Look for any light section marker
-      const lightSection = document.getElementById('made-for-everyone') || 
-                          document.getElementById('light-section-start')
-      if (lightSection) {
-        const sectionTop = lightSection.getBoundingClientRect().top
-        // Switch to dark navbar when the light section is near the top of viewport
-        setIsPastDarkSections(sectionTop < 100)
-      } else {
-        // If no light section marker, check based on scroll position
-        // Assume hero is about 80vh, so past 70% of viewport height = light section
-        const heroHeight = window.innerHeight * 0.7
-        setIsPastDarkSections(window.scrollY > heroHeight)
-      }
+      scrollThrottleRef.current = window.setTimeout(() => {
+        scrollThrottleRef.current = null
+        
+        const scrollY = window.scrollY
+        const isScrolled = scrollY > 50
+        
+        // Check if we've scrolled past the dark sections (hero)
+        let isPastDarkSections = false
+        const lightSection = document.getElementById('made-for-everyone') || 
+                            document.getElementById('light-section-start')
+        if (lightSection) {
+          const sectionTop = lightSection.getBoundingClientRect().top
+          isPastDarkSections = sectionTop < 100
+        } else {
+          const heroHeight = window.innerHeight * 0.7
+          isPastDarkSections = scrollY > heroHeight
+        }
 
-      // Determine if the navbar should use white text
-      const isFullBleed = fullBleedPages.includes(pathname)
-      setIsFullBleedPage(isFullBleed)
-      setUseWhiteText(isFullBleed && !isPastDarkSections)
+        const isFullBleed = fullBleedPages.includes(pathname)
+        const useWhiteText = isFullBleed && !isPastDarkSections
+        
+        // Batch all state updates into single setState call
+        setScrollState(prev => {
+          // Only update if values changed
+          if (prev.isScrolled === isScrolled && 
+              prev.isPastDarkSections === isPastDarkSections &&
+              prev.useWhiteText === useWhiteText &&
+              prev.isFullBleedPage === isFullBleed) {
+            return prev
+          }
+          return { isScrolled, isPastDarkSections, useWhiteText, isFullBleedPage: isFullBleed }
+        })
+      }, 100)
     }
 
-    // Add scroll listener for all pages with full-bleed heroes
-    window.addEventListener("scroll", handleScroll)
+    window.addEventListener("scroll", handleScroll, { passive: true })
     handleScroll() // Check initial position
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [pathname])
+    return () => {
+      window.removeEventListener("scroll", handleScroll)
+      if (scrollThrottleRef.current) clearTimeout(scrollThrottleRef.current)
+    }
+  }, [pathname, fullBleedPages])
 
-  const getNavLinks = () => {
+  const navLinks = useMemo(() => {
     if (!user) {
       return [
         { href: "/providers", label: "Providers", icon: Users },
@@ -139,9 +162,9 @@ export function Navigation() {
     }
 
     return []
-  }
+  }, [user])
 
-  const getSecondaryLinks = () => {
+  const secondaryLinks = useMemo(() => {
     if (!user) return []
 
     if (user.role === "parent") {
@@ -157,10 +180,7 @@ export function Navigation() {
     }
 
     return []
-  }
-
-  const navLinks = getNavLinks()
-  const secondaryLinks = getSecondaryLinks()
+  }, [user])
   
   const bottomNavLinks = navLinks
 
@@ -199,12 +219,12 @@ export function Navigation() {
           <nav 
             className={cn(
               "flex items-center justify-between w-full max-w-[900px] px-8 sm:px-10 py-3 sm:py-4 rounded-full transition-all duration-500",
-              useWhiteText
+              scrollState.useWhiteText
                 ? "glass-dark"
                 : "glass"
             )}
           >
-            <Logo size="sm" inverted={useWhiteText} />
+            <Logo size="sm" inverted={scrollState.useWhiteText} />
 
             <div className="flex items-center gap-6 sm:gap-8">
               {navLinks.map((link) => {
@@ -215,7 +235,7 @@ export function Navigation() {
                     href={link.href}
                     className={cn(
                       "text-sm transition-colors duration-300",
-                      useWhiteText
+                      scrollState.useWhiteText
                         ? isActive
                           ? "text-white font-bold"
                           : "text-white/70 hover:text-white font-medium"
@@ -232,7 +252,7 @@ export function Navigation() {
           </nav>
         </div>
         {/* Spacer to prevent content from going under fixed navbar - only on pages without full-bleed heroes */}
-        {!isFullBleedPage && <div className="h-[120px]" />}
+        {!scrollState.isFullBleedPage && <div className="h-[120px]" />}
       </>
     )
   }
