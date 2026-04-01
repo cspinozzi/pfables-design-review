@@ -263,7 +263,7 @@ export default function AdminRefundsPage() {
                       <h4 className="font-semibold text-sm">{request.parentName}</h4>
                       <Badge 
                         variant="outline" 
-                        className={`text-[11px] ${
+                        className={`text-xs ${
                           request.status === "pending" 
                             ? "bg-amber-100 text-amber-700 border-amber-300"
                             : request.status === "approved"

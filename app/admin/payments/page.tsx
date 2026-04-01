@@ -154,7 +154,7 @@ export default function AdminPaymentsPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2 mb-1">
                         <h4 className="font-semibold text-sm">{request.parentName}</h4>
-                        <Badge variant="outline" className="text-[11px] bg-amber-100 text-amber-700 border-amber-300">
+                        <Badge variant="outline" className="text-xs bg-amber-100 text-amber-700 border-amber-300">
                           <AlertTriangle className="h-3 w-3 mr-1" />
                           Pending Review
                         </Badge>
@@ -190,18 +190,18 @@ export default function AdminPaymentsPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-0.5">
                         <h4 className="font-semibold text-sm">{provider?.name}</h4>
-                        <Badge variant="outline" className="text-[11px]">
+                        <Badge variant="outline" className="text-xs">
                           {provider?.providerType === "repair" ? "Repairer" : "Provider"}
                         </Badge>
                       </div>
                       <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                        <Badge variant="outline" className="text-[11px]">{subscription.tier}</Badge>
+                        <Badge variant="outline" className="text-xs">{subscription.tier}</Badge>
                         <span>${subscription.price}/mo</span>
                         <span>Next: {subscription.nextBillingDate.toLocaleDateString()}</span>
                       </div>
                     </div>
                     <Badge
-                      className="text-[11px] shrink-0"
+                      className="text-xs shrink-0"
                       variant={subscription.status === "active" ? "default" : "secondary"}
                     >
                       {subscription.status}

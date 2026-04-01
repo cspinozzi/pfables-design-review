@@ -151,7 +151,7 @@ export default function AdminUsersPage() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-0.5">
                           <h4 className="font-semibold text-sm truncate">{parent.name}</h4>
-                          <Badge variant="outline" className="text-[11px]">Parent</Badge>
+                          <Badge variant="outline" className="text-xs">Parent</Badge>
                         </div>
                         <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
                           <span>{parent.email}</span>
@@ -166,7 +166,7 @@ export default function AdminUsersPage() {
                           )}
                         </div>
                       </div>
-                      <Badge variant="secondary" className="text-[11px] shrink-0">Active</Badge>
+                      <Badge variant="secondary" className="text-xs shrink-0">Active</Badge>
                     </div>
                   </Card>
                 </Link>
@@ -231,14 +231,14 @@ export default function AdminUsersPage() {
                           <span>{provider.specialty.join(", ")}</span>
                           <span>·</span>
                           <span>{provider.location}</span>
-                          <Badge variant="outline" className="text-[11px]">{provider.subscriptionTier}</Badge>
+                          <Badge variant="outline" className="text-xs">{provider.subscriptionTier}</Badge>
                           {provider.subscriptionTier !== "free" && (
-                            <Badge variant="outline" className={`text-[11px] ${(provider.platformFee ?? 20) !== 20 ? 'border-amber-300 bg-amber-50 text-amber-700' : ''}`}>
+                            <Badge variant="outline" className={`text-xs ${(provider.platformFee ?? 20) !== 20 ? 'border-amber-300 bg-amber-50 text-amber-700' : ''}`}>
                               <Percent className="h-3 w-3 mr-0.5" />
                               {provider.platformFee ?? 20}% fee
                             </Badge>
                           )}
-                          <Badge variant="secondary" className="text-[11px]">{provider.rating} stars</Badge>
+                          <Badge variant="secondary" className="text-xs">{provider.rating} stars</Badge>
                         </div>
                       </div>
                       <ExternalLink className="h-4 w-4 text-muted-foreground shrink-0" />
@@ -274,14 +274,14 @@ export default function AdminUsersPage() {
                           <span>{repairer.specialty.join(", ")}</span>
                           <span>·</span>
                           <span>{repairer.location}</span>
-                          <Badge variant="outline" className="text-[11px]">{repairer.subscriptionTier}</Badge>
+                          <Badge variant="outline" className="text-xs">{repairer.subscriptionTier}</Badge>
                           {repairer.subscriptionTier !== "free" && (
-                            <Badge variant="outline" className={`text-[11px] ${(repairer.platformFee ?? 20) !== 20 ? 'border-amber-300 bg-amber-50 text-amber-700' : ''}`}>
+                            <Badge variant="outline" className={`text-xs ${(repairer.platformFee ?? 20) !== 20 ? 'border-amber-300 bg-amber-50 text-amber-700' : ''}`}>
                               <Percent className="h-3 w-3 mr-0.5" />
                               {repairer.platformFee ?? 20}% fee
                             </Badge>
                           )}
-                          <Badge variant="secondary" className="text-[11px]">{repairer.rating} stars</Badge>
+                          <Badge variant="secondary" className="text-xs">{repairer.rating} stars</Badge>
                         </div>
                       </div>
                       <ExternalLink className="h-4 w-4 text-muted-foreground shrink-0" />

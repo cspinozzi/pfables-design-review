@@ -342,7 +342,7 @@ export default function ProviderDashboardPage() {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between gap-2 mb-0.5">
                               <h4 className="font-semibold text-sm truncate">{parent?.name}</h4>
-                              <span className="text-[11px] text-muted-foreground whitespace-nowrap">
+                              <span className="text-xs text-muted-foreground whitespace-nowrap">
                                 {formatDistanceToNow(conv.lastMessage.timestamp, { addSuffix: true }).replace("about ", "")}
                               </span>
                             </div>

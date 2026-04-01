@@ -316,7 +316,7 @@ export default function AdminUserDetailPage() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <Badge variant="outline" className="text-[11px] capitalize mb-1">{child.level}</Badge>
+                        <Badge variant="outline" className="text-xs capitalize mb-1">{child.level}</Badge>
                         <p className="text-xs text-muted-foreground">{child.lessonsPerWeek}x/week</p>
                       </div>
                     </div>
@@ -654,7 +654,7 @@ export default function AdminUserDetailPage() {
                         <p className="text-sm font-medium">${payment.amount}</p>
                         <Badge
                           variant={payment.status === "paid" ? "default" : payment.status === "pending" ? "secondary" : "destructive"}
-                          className="text-[11px]"
+                          className="text-xs"
                         >
                           {payment.status}
                         </Badge>
@@ -691,7 +691,7 @@ export default function AdminUserDetailPage() {
                           )}
                         </p>
                       </div>
-                      <Badge variant={contract.status === "active" ? "default" : contract.status === "completed" ? "secondary" : "destructive"} className="text-[11px] capitalize">
+                      <Badge variant={contract.status === "active" ? "default" : contract.status === "completed" ? "secondary" : "destructive"} className="text-xs capitalize">
                         {contract.status}
                       </Badge>
                     </div>

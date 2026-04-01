@@ -166,7 +166,7 @@ export default function AdminDashboardPage() {
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="text-[11px] bg-red-100 text-red-700 border-red-300">
+                      <Badge variant="outline" className="text-xs bg-red-100 text-red-700 border-red-300">
                         <AlertTriangle className="h-3 w-3 mr-1" />
                         {request.reason}
                       </Badge>
@@ -208,7 +208,7 @@ export default function AdminDashboardPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <h4 className="font-semibold text-sm">{provider.name}</h4>
-                        <Badge variant="outline" className="text-[11px]">
+                        <Badge variant="outline" className="text-xs">
                           {provider.providerType === "repair" ? "Repairer" : "Provider"}
                         </Badge>
                       </div>
@@ -217,7 +217,7 @@ export default function AdminDashboardPage() {
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge variant="secondary" className="text-[11px] shrink-0">
+                      <Badge variant="secondary" className="text-xs shrink-0">
                         {provider.backgroundCheckStatus === "pending" && (
                           <Clock className="h-3 w-3 mr-1" />
                         )}
@@ -304,7 +304,7 @@ export default function AdminDashboardPage() {
             <div className="space-y-4">
               {/* Requester Info */}
               <div className="p-4 bg-muted/50 rounded-lg space-y-3">
-                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">Requester</p>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Requester</p>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="relative h-10 w-10 rounded-full overflow-hidden shrink-0">
@@ -324,7 +324,7 @@ export default function AdminDashboardPage() {
 
               {/* Provider Info */}
               <div className="p-4 bg-muted/50 rounded-lg space-y-3">
-                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                   {selectedRefund.providerType === "repairer" ? "Repairer" : "Teacher"}
                 </p>
                 <div className="flex items-center justify-between">
