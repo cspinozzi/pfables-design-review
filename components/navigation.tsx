@@ -527,7 +527,7 @@ export function Navigation() {
       </nav>
 
       {/* Spacer for content - skip on full-bleed pages that sit under the navbar */}
-      {!isFullBleedPage && <div className="h-[120px]" />}
+      {!scrollState.isFullBleedPage && <div className="h-[120px]" />}
       
       {/* Mobile Bottom Spacer */}
       <div className="h-[120px] sm:hidden" />
