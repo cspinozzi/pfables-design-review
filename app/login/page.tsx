@@ -77,7 +77,7 @@ function LoginContent() {
   return (
     <div className="min-h-screen bg-background flex flex-col items-center pt-[12vh] px-4 sm:px-6 pb-12 sm:pt-20">
       <div className="w-full max-w-sm">
-        <div className="flex justify-center mb-6 opacity-10">
+        <div className="flex justify-center mb-10 opacity-10">
           <Image
             src="/icon-light.png"
             alt="ProMusic"
@@ -146,9 +146,9 @@ function LoginContent() {
           </CardContent>
         </Card>
 
-        <div className="mt-10">
-          <p className="text-center text-xs text-muted-foreground mb-3">Demo access</p>
-          <div className="flex flex-row justify-center gap-4">
+        <div className="mt-14">
+          <p className="text-center text-xs text-muted-foreground mb-4">Demo access</p>
+          <div className="flex flex-row justify-center gap-6">
             <Button
               type="button"
               variant="ghost"
