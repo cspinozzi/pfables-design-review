@@ -75,7 +75,7 @@ function LoginContent() {
 
   return (
     <div className="relative min-h-screen bg-background flex flex-col items-center pt-[12vh] px-4 sm:px-6 pb-12 sm:pt-20 overflow-hidden">
-      <div className="pointer-events-none select-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.02] w-[80vw] h-[80vw] max-w-[700px] max-h-[700px]">
+      <div className="pointer-events-none select-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.01] w-[80vw] h-[80vw] max-w-[700px] max-h-[700px]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/icon-logo.svg"
