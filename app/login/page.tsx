@@ -88,11 +88,11 @@ function LoginContent() {
           />
         </div>
         <Card>
-          <CardHeader className="text-center p-5">
+          <CardHeader className="text-center px-8 pt-8 pb-4">
             <CardTitle className="text-xl font-medium">Sign in</CardTitle>
             <CardDescription className="text-sm">Access your ProMusic account</CardDescription>
           </CardHeader>
-          <CardContent className="p-5 pt-0">
+          <CardContent className="px-8 pb-8 pt-0">
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-1.5">
                 <Label htmlFor="email" className="text-sm">
