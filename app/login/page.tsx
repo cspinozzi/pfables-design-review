@@ -77,6 +77,9 @@ function LoginContent() {
   return (
     <div className="min-h-screen bg-background flex flex-col items-center pt-[12vh] px-4 sm:px-6 pb-12 sm:pt-20">
       <div className="w-full max-w-sm">
+        <div className="flex justify-center mb-6 opacity-50">
+          <Logo size="lg" href={undefined} />
+        </div>
         <Card>
           <CardHeader className="text-center p-5">
             <CardTitle className="text-xl font-medium">Sign in</CardTitle>
