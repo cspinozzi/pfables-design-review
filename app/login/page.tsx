@@ -75,12 +75,12 @@ function LoginContent() {
 
   return (
     <div className="relative min-h-screen bg-background flex flex-col items-center justify-center px-4 sm:px-6 overflow-hidden -mt-28">
-      <div className="pointer-events-none select-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.01] w-[100vw] h-[100vw]">
+      <div className="pointer-events-none select-none absolute inset-0 opacity-[0.01]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/icon-logo.svg"
           alt=""
-          className="w-full h-full object-contain"
+          className="w-full h-full object-cover"
         />
       </div>
       <div className="w-full max-w-sm">
