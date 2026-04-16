@@ -74,7 +74,7 @@ function LoginContent() {
   }
 
   return (
-    <div className="relative min-h-screen bg-background flex flex-col items-center justify-center px-4 sm:px-6 overflow-hidden -mt-16">
+    <div className="relative min-h-screen bg-background flex flex-col items-center justify-center px-4 sm:px-6 overflow-hidden -mt-28">
       <div className="pointer-events-none select-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.01] w-[160vw] h-[160vw] max-w-[1400px] max-h-[1400px]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
