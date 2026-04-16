@@ -75,18 +75,18 @@ function LoginContent() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center pt-[12vh] px-4 sm:px-6 pb-12 sm:pt-20">
+    <div className="relative min-h-screen bg-background flex flex-col items-center pt-[12vh] px-4 sm:px-6 pb-12 sm:pt-20 overflow-hidden">
+      <div className="pointer-events-none select-none absolute -bottom-32 -right-40 opacity-[0.02]">
+        <Image
+          src="/icon-light.png"
+          alt=""
+          width={700}
+          height={700}
+          className="h-auto object-contain"
+          priority
+        />
+      </div>
       <div className="w-full max-w-sm">
-        <div className="flex justify-center mb-10 opacity-[0.05]">
-          <Image
-            src="/icon-light.png"
-            alt="ProMusic"
-            width={120}
-            height={120}
-            className="h-auto object-contain"
-            priority
-          />
-        </div>
         <Card>
           <CardHeader className="text-center px-8 pt-8 pb-4">
             <CardTitle className="text-xl font-medium">Sign in</CardTitle>
