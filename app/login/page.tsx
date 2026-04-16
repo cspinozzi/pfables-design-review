@@ -141,46 +141,46 @@ function LoginContent() {
 
         <div className="mt-10">
           <p className="text-center text-xs text-muted-foreground mb-3">Demo access</p>
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-row justify-center gap-4">
             <Button
               type="button"
               variant="ghost"
               size="sm"
-              className="w-full justify-center text-muted-foreground hover:text-foreground"
+              className="flex flex-col items-center gap-1 h-auto py-2 px-3 text-muted-foreground hover:text-foreground"
               onClick={() => handleQuickLogin("parent")}
             >
-              <User className="mr-2 h-4 w-4" />
-              Continue demo as a Parent
+              <User className="h-4 w-4" />
+              <span className="text-xs">Parent</span>
             </Button>
             <Button
               type="button"
               variant="ghost"
               size="sm"
-              className="w-full justify-center text-muted-foreground hover:text-foreground"
+              className="flex flex-col items-center gap-1 h-auto py-2 px-3 text-muted-foreground hover:text-foreground"
               onClick={() => handleQuickLogin("provider")}
             >
-              <Briefcase className="mr-2 h-4 w-4" />
-              Continue demo as a Provider
+              <Briefcase className="h-4 w-4" />
+              <span className="text-xs">Provider</span>
             </Button>
             <Button
               type="button"
               variant="ghost"
               size="sm"
-              className="w-full justify-center text-muted-foreground hover:text-foreground"
+              className="flex flex-col items-center gap-1 h-auto py-2 px-3 text-muted-foreground hover:text-foreground"
               onClick={() => handleQuickLogin("repair")}
             >
-              <Shield className="mr-2 h-4 w-4" />
-              Continue demo as Repair Service
+              <Shield className="h-4 w-4" />
+              <span className="text-xs">Repair</span>
             </Button>
             <Button
               type="button"
               variant="ghost"
               size="sm"
-              className="w-full justify-center text-muted-foreground hover:text-foreground"
+              className="flex flex-col items-center gap-1 h-auto py-2 px-3 text-muted-foreground hover:text-foreground"
               onClick={() => handleQuickLogin("admin")}
             >
-              <ShieldCheck className="mr-2 h-4 w-4" />
-              Continue demo as Admin
+              <ShieldCheck className="h-4 w-4" />
+              <span className="text-xs">Admin</span>
             </Button>
           </div>
         </div>
