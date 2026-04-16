@@ -77,7 +77,7 @@ function LoginContent() {
   return (
     <div className="min-h-screen bg-background flex flex-col items-center pt-[12vh] px-4 sm:px-6 pb-12 sm:pt-20">
       <div className="w-full max-w-sm">
-        <div className="flex justify-center mb-10 opacity-10">
+        <div className="flex justify-center mb-10 opacity-[0.05]">
           <Image
             src="/icon-light.png"
             alt="ProMusic"
