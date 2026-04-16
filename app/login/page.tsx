@@ -5,7 +5,7 @@ import { useState, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Mail, Lock, User, Briefcase, Shield, ShieldCheck } from "lucide-react"
-import { Logo } from "@/components/logo"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -77,8 +77,15 @@ function LoginContent() {
   return (
     <div className="min-h-screen bg-background flex flex-col items-center pt-[12vh] px-4 sm:px-6 pb-12 sm:pt-20">
       <div className="w-full max-w-sm">
-        <div className="flex justify-center mb-6 opacity-50">
-          <Logo size="lg" href={undefined} />
+        <div className="flex justify-center mb-6 opacity-10">
+          <Image
+            src="/icon-light.png"
+            alt="ProMusic"
+            width={120}
+            height={120}
+            className="h-auto object-contain"
+            priority
+          />
         </div>
         <Card>
           <CardHeader className="text-center p-5">
