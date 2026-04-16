@@ -93,8 +93,8 @@ function LoginContent() {
             <CardDescription className="text-sm">Access your ProMusic account</CardDescription>
           </CardHeader>
           <CardContent className="px-8 pb-8 pt-0">
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div className="space-y-1.5">
+            <form onSubmit={handleLogin} className="space-y-6">
+              <div className="space-y-2">
                 <Label htmlFor="email" className="text-sm">
                   Email
                 </Label>
@@ -112,7 +112,7 @@ function LoginContent() {
                 </div>
               </div>
 
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 <Label htmlFor="password" className="text-sm">
                   Password
                 </Label>
