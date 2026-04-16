@@ -76,13 +76,12 @@ function LoginContent() {
 
   return (
     <div className="relative min-h-screen bg-background flex flex-col items-center pt-[12vh] px-4 sm:px-6 pb-12 sm:pt-20 overflow-hidden">
-      <div className="pointer-events-none select-none absolute -bottom-32 -right-40 opacity-[0.02]">
+      <div className="pointer-events-none select-none absolute -bottom-[10vw] -right-[10vw] opacity-[0.06] w-[80vw] h-[80vw]">
         <Image
           src="/icon-light.png"
           alt=""
-          width={700}
-          height={700}
-          className="h-auto object-contain"
+          fill
+          className="object-contain"
           priority
         />
       </div>
