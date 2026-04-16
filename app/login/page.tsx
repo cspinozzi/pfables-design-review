@@ -5,7 +5,6 @@ import { useState, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Mail, Lock, User, Briefcase, Shield, ShieldCheck } from "lucide-react"
-import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -76,13 +75,12 @@ function LoginContent() {
 
   return (
     <div className="relative min-h-screen bg-background flex flex-col items-center pt-[12vh] px-4 sm:px-6 pb-12 sm:pt-20 overflow-hidden">
-      <div className="pointer-events-none select-none absolute -bottom-[10vw] -right-[10vw] opacity-[0.06] w-[80vw] h-[80vw]">
-        <Image
-          src="/icon-light.png"
+      <div className="pointer-events-none select-none absolute -bottom-[15vw] -right-[15vw] opacity-[0.08] w-[90vw] h-[90vw] max-w-[900px] max-h-[900px]">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/icon-logo.svg"
           alt=""
-          fill
-          className="object-contain"
-          priority
+          className="w-full h-full object-contain"
         />
       </div>
       <div className="w-full max-w-sm">
