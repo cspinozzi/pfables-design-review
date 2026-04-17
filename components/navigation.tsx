@@ -369,6 +369,14 @@ export function Navigation() {
                         Profile
                       </Link>
                       <Link
+                        href="/parent/lessons/history"
+                        onClick={() => setIsUserMenuOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-muted transition-colors"
+                      >
+                        <BookOpen className="h-4 w-4 text-muted-foreground" />
+                        History
+                      </Link>
+                      <Link
                         href="/parent/favorites"
                         onClick={() => setIsUserMenuOpen(false)}
                         className="flex items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-muted transition-colors"
@@ -387,6 +395,14 @@ export function Navigation() {
                       >
                         <UserCircle className="h-4 w-4 text-muted-foreground" />
                         Profile
+                      </Link>
+                      <Link
+                        href="/provider/lessons/history"
+                        onClick={() => setIsUserMenuOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-muted transition-colors"
+                      >
+                        <BookOpen className="h-4 w-4 text-muted-foreground" />
+                        History
                       </Link>
                       <Link
                         href="/provider/verification"
