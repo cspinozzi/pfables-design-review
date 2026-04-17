@@ -4,32 +4,32 @@ import type React from "react"
 import { useState, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
-import { Mail, Lock, User, Briefcase, Shield, ShieldCheck } from "lucide-react"
+import { Mail, Lock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { useAuth } from "@/lib/auth-context"
-import { mockUsers } from "@/lib/mock-data"
+import { mockUsers, type UserRole } from "@/lib/mock-data"
+import { AUTH_ROLES, ROLE_CONFIG, getRoleRedirectPath } from "@/lib/auth-roles"
+import { AuthLayout } from "@/components/shared/auth-layout"
+import { IconInput } from "@/components/shared/icon-input"
 
 function LoginContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { login } = useAuth()
 
-  const roleParam = searchParams.get("role") as "parent" | "provider" | "repair" | null
+  const roleParam = searchParams.get("role") as UserRole | null
 
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
 
   useEffect(() => {
-    if (roleParam) {
-      const user = mockUsers.find((u) => u.role === roleParam)
-      if (user) {
-        setEmail(user.email)
-        setPassword(user.password)
-      }
+    if (!roleParam) return
+    const user = mockUsers.find((u) => u.role === roleParam)
+    if (user) {
+      setEmail(user.email)
+      setPassword(user.password)
     }
   }, [roleParam])
 
@@ -38,164 +38,116 @@ function LoginContent() {
     setError("")
 
     const success = login(email, password)
-
-    if (success) {
-      const user = mockUsers.find((u) => u.email === email)
-      if (user?.role === "parent") {
-        router.push("/browse")
-      } else if (user?.role === "provider") {
-        router.push("/provider/dashboard")
-      } else if (user?.role === "repair") {
-        router.push("/repairer/dashboard")
-      } else if (user?.role === "admin") {
-        router.push("/admin/dashboard")
-      }
-    } else {
+    if (!success) {
       setError("Invalid email or password")
+      return
     }
+    const user = mockUsers.find((u) => u.email === email)
+    if (user) router.push(getRoleRedirectPath(user.role))
   }
 
-  const handleQuickLogin = (role: "parent" | "provider" | "repair" | "admin") => {
+  const handleQuickLogin = (role: UserRole) => {
     const user = mockUsers.find((u) => u.role === role)
-    if (user) {
-      const success = login(user.email, user.password)
-      if (success) {
-        if (role === "parent") {
-          router.push("/browse")
-        } else if (role === "provider") {
-          router.push("/provider/dashboard")
-        } else if (role === "repair") {
-          router.push("/repairer/dashboard")
-        } else if (role === "admin") {
-          router.push("/admin/dashboard")
-        }
-      }
-    }
+    if (!user) return
+    const success = login(user.email, user.password)
+    if (success) router.push(getRoleRedirectPath(role))
   }
 
   return (
-    <div className="relative min-h-screen bg-background flex flex-col items-center justify-center px-4 sm:px-6 overflow-hidden -mt-28">
-      <div className="pointer-events-none select-none absolute inset-0 opacity-[0.01]">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/icon-logo.svg"
-          alt=""
-          className="w-full h-full object-cover"
-        />
-      </div>
-      <div className="w-full max-w-sm">
-        <Card>
-          <CardHeader className="text-center px-8 pt-8 pb-4">
-            <CardTitle className="text-xl font-medium">Sign in</CardTitle>
-            <CardDescription className="text-sm">Access your ProMusic account</CardDescription>
-          </CardHeader>
-          <CardContent className="px-8 pb-8 pt-0">
-            <form onSubmit={handleLogin} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm">
-                  Email
-                </Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground pointer-events-none" />
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="Enter your email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="pl-9 h-9"
-                    required
-                  />
-                </div>
-              </div>
+    <AuthLayout>
+      <Card>
+        <CardHeader className="text-center px-8 pt-8 pb-4">
+          <CardTitle className="text-xl font-medium">Sign in</CardTitle>
+          <CardDescription className="text-sm">Access your ProMusic account</CardDescription>
+        </CardHeader>
+        <CardContent className="px-8 pb-8 pt-0">
+          <form onSubmit={handleLogin} className="space-y-6">
+            <IconInput
+              id="email"
+              label="Email"
+              icon={Mail}
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+            <IconInput
+              id="password"
+              label="Password"
+              icon={Lock}
+              type="password"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
 
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-sm">
-                  Password
-                </Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground pointer-events-none" />
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="Enter your password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="pl-9 h-9"
-                    required
-                  />
-                </div>
-              </div>
+            {error && <p className="text-sm text-destructive">{error}</p>}
 
-              {error && <p className="text-sm text-destructive">{error}</p>}
+            <Button type="submit" className="w-full">
+              Sign in
+            </Button>
 
-              <Button type="submit" className="w-full">
-                Sign in
+            <p className="text-center text-sm text-muted-foreground">
+              {"Don't have an account? "}
+              <Link href="/signup" className="text-primary font-medium hover:underline">
+                Sign up
+              </Link>
+            </p>
+          </form>
+        </CardContent>
+      </Card>
+
+      <div className="mt-14">
+        <p className="text-center text-xs text-muted-foreground mb-4">Demo access</p>
+        <div className="flex flex-row justify-center gap-6">
+          {AUTH_ROLES.map((role) => {
+            const config = ROLE_CONFIG[role]
+            const Icon = config.icon
+            return (
+              <Button
+                key={role}
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="flex flex-col items-center gap-1 h-auto py-2 px-3 text-muted-foreground hover:text-foreground"
+                onClick={() => handleQuickLogin(role)}
+              >
+                <Icon className="h-4 w-4" />
+                <span className="text-xs">{config.shortLabel}</span>
               </Button>
-
-              <p className="text-center text-sm text-muted-foreground">
-                {"Don't have an account? "}
-                <Link href="/signup" className="text-primary font-medium hover:underline">
-                  Sign up
-                </Link>
-              </p>
-            </form>
-          </CardContent>
-        </Card>
-
-        <div className="mt-14">
-          <p className="text-center text-xs text-muted-foreground mb-4">Demo access</p>
-          <div className="flex flex-row justify-center gap-6">
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="flex flex-col items-center gap-1 h-auto py-2 px-3 text-muted-foreground hover:text-foreground"
-              onClick={() => handleQuickLogin("parent")}
-            >
-              <User className="h-4 w-4" />
-              <span className="text-xs">Parent</span>
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="flex flex-col items-center gap-1 h-auto py-2 px-3 text-muted-foreground hover:text-foreground"
-              onClick={() => handleQuickLogin("provider")}
-            >
-              <Briefcase className="h-4 w-4" />
-              <span className="text-xs">Provider</span>
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="flex flex-col items-center gap-1 h-auto py-2 px-3 text-muted-foreground hover:text-foreground"
-              onClick={() => handleQuickLogin("repair")}
-            >
-              <Shield className="h-4 w-4" />
-              <span className="text-xs">Repair</span>
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="flex flex-col items-center gap-1 h-auto py-2 px-3 text-muted-foreground hover:text-foreground"
-              onClick={() => handleQuickLogin("admin")}
-            >
-              <ShieldCheck className="h-4 w-4" />
-              <span className="text-xs">Admin</span>
-            </Button>
-          </div>
+            )
+          })}
         </div>
       </div>
-    </div>
+    </AuthLayout>
+  )
+}
+
+function LoginFallback() {
+  return (
+    <AuthLayout>
+      <Card>
+        <CardHeader className="text-center px-8 pt-8 pb-4">
+          <div className="h-6 w-24 bg-muted rounded mx-auto animate-pulse" />
+          <div className="h-4 w-40 bg-muted/60 rounded mx-auto mt-2 animate-pulse" />
+        </CardHeader>
+        <CardContent className="px-8 pb-8 pt-0">
+          <div className="space-y-6">
+            <div className="h-9 bg-muted/60 rounded animate-pulse" />
+            <div className="h-9 bg-muted/60 rounded animate-pulse" />
+            <div className="h-9 bg-muted rounded animate-pulse" />
+          </div>
+        </CardContent>
+      </Card>
+    </AuthLayout>
   )
 }
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<LoginFallback />}>
       <LoginContent />
     </Suspense>
   )
