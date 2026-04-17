@@ -400,7 +400,7 @@ function ProviderLessonsContent() {
                 status={
                   lesson.isRescheduleRequest ? "reschedule_request" :
                   (lesson.originalDate && !lesson.isRescheduleRequest) || rescheduledIds.has(lesson.id) ? "rescheduled" :
-                  lesson.status === "completed" && lesson.paid === true ? "paid" :
+                  lesson.status === "completed" && lesson.paid === true ? "received" :
                   lesson.status === "completed" && lesson.paid === false ? "completed" :
                   lesson.status === "cancelled" ? "cancelled" :
                   lesson.pendingApproval ? "pending" : "active"
