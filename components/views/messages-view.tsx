@@ -103,9 +103,20 @@ export function MessagesView({ desktopSubtitle, emptyListDescription, counterpar
     }
   }, [searchParams, userConversations])
 
-  // If the currently selected conversation is no longer in the visible list (archived or filtered out), clear it.
+  // Keep the selected conversation in sync with the visible list.
+  // On desktop, auto-select the first visible conversation if none is selected or the current
+  // one was filtered out. On mobile, just clear it so the user returns to the list view.
   useEffect(() => {
-    if (selectedConversation && !userConversations.some((c) => c.id === selectedConversation)) {
+    const currentIsVisible =
+      selectedConversation && userConversations.some((c) => c.id === selectedConversation)
+    if (currentIsVisible) return
+
+    const isDesktop =
+      typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches
+
+    if (isDesktop && userConversations.length > 0) {
+      setSelectedConversation(userConversations[0].id)
+    } else if (selectedConversation) {
       setSelectedConversation(null)
     }
   }, [selectedConversation, userConversations])

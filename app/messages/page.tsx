@@ -60,7 +60,16 @@ export default function MessagesPage() {
   }, [searchParams, visibleConversations])
 
   useEffect(() => {
-    if (selectedConversation && !visibleConversations.some((c) => c.id === selectedConversation)) {
+    const currentIsVisible =
+      selectedConversation && visibleConversations.some((c) => c.id === selectedConversation)
+    if (currentIsVisible) return
+
+    const isDesktop =
+      typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches
+
+    if (isDesktop && visibleConversations.length > 0) {
+      setSelectedConversation(visibleConversations[0].id)
+    } else if (selectedConversation) {
       setSelectedConversation(null)
     }
   }, [selectedConversation, visibleConversations])
