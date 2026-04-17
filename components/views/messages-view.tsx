@@ -60,8 +60,8 @@ export function MessagesView({ desktopSubtitle, emptyListDescription, counterpar
   const { conversations, getConversationMessages, sendMessage } = useMockMessages()
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null)
   const [newMessage, setNewMessage] = useState("")
-  const [archivedIds, setArchivedIds] = useState<Set<string>>(new Set())
-  const [reportedIds, setReportedIds] = useState<Set<string>>(new Set())
+  const [archivedIds, setArchivedIds] = useState<Map<string, number>>(new Map())
+  const [reportedIds, setReportedIds] = useState<Map<string, number>>(new Map())
   const [reportConvId, setReportConvId] = useState<string | null>(null)
   const [reportReason, setReportReason] = useState<ReportReason>("spam")
   const [reportNote, setReportNote] = useState("")
@@ -143,9 +143,10 @@ export function MessagesView({ desktopSubtitle, emptyListDescription, counterpar
   }
 
   const handleArchive = (convId: string) => {
+    const now = Date.now()
     setArchivedIds((prev) => {
-      const next = new Set(prev)
-      next.add(convId)
+      const next = new Map(prev)
+      next.set(convId, now)
       return next
     })
     toast("Conversation archived", {
@@ -154,7 +155,7 @@ export function MessagesView({ desktopSubtitle, emptyListDescription, counterpar
         label: "Undo",
         onClick: () =>
           setArchivedIds((prev) => {
-            const next = new Set(prev)
+            const next = new Map(prev)
             next.delete(convId)
             return next
           }),
@@ -164,7 +165,7 @@ export function MessagesView({ desktopSubtitle, emptyListDescription, counterpar
 
   const handleUnarchive = (convId: string) => {
     setArchivedIds((prev) => {
-      const next = new Set(prev)
+      const next = new Map(prev)
       next.delete(convId)
       return next
     })
@@ -177,6 +178,15 @@ export function MessagesView({ desktopSubtitle, emptyListDescription, counterpar
   const isSelectedReported = selectedConversation ? reportedIds.has(selectedConversation) : false
   const isSelectedDisabled = isSelectedArchived || isSelectedReported
   const isConvDisabled = (id: string) => archivedIds.has(id) || reportedIds.has(id)
+  const selectedArchivedAt = selectedConversation ? archivedIds.get(selectedConversation) : undefined
+  const selectedReportedAt = selectedConversation ? reportedIds.get(selectedConversation) : undefined
+  const disabledTimestamp = isSelectedArchived
+    ? selectedArchivedAt
+      ? `Archived ${formatDistanceToNow(selectedArchivedAt, { addSuffix: true })}`
+      : "Archived"
+    : selectedReportedAt
+      ? `Reported ${formatDistanceToNow(selectedReportedAt, { addSuffix: true })}`
+      : "Reported"
 
   const openReport = (convId: string) => {
     setReportConvId(convId)
@@ -186,9 +196,11 @@ export function MessagesView({ desktopSubtitle, emptyListDescription, counterpar
 
   const submitReport = () => {
     if (reportConvId) {
+      const now = Date.now()
+      const id = reportConvId
       setReportedIds((prev) => {
-        const next = new Set(prev)
-        next.add(reportConvId)
+        const next = new Map(prev)
+        next.set(id, now)
         return next
       })
     }
@@ -405,10 +417,13 @@ export function MessagesView({ desktopSubtitle, emptyListDescription, counterpar
 
                 <div className="border-t bg-background p-3 safe-bottom flex-shrink-0">
                   {isSelectedDisabled ? (
-                    <div className="rounded-full border-2 border-dashed border-muted bg-muted/40 px-4 py-2.5 text-center text-sm text-muted-foreground">
-                      {isSelectedArchived
-                        ? "This conversation is archived. Unarchive to reply."
-                        : "This conversation was reported and is no longer active."}
+                    <div className="rounded-2xl border-2 border-dashed border-muted bg-muted/40 px-4 py-2.5 text-center text-sm text-muted-foreground">
+                      <p>
+                        {isSelectedArchived
+                          ? "This conversation is archived. Unarchive to reply."
+                          : "This conversation was reported and is no longer active."}
+                      </p>
+                      <p className="mt-0.5 text-xs text-muted-foreground/80">{disabledTimestamp}</p>
                     </div>
                   ) : (
                     <div className="flex gap-2 items-end">
@@ -596,9 +611,12 @@ export function MessagesView({ desktopSubtitle, emptyListDescription, counterpar
                   <div className="border-t p-4 sm:p-5 flex-shrink-0">
                     {isSelectedDisabled ? (
                       <div className="rounded-md border border-dashed bg-muted/40 px-4 py-3 text-center text-sm text-muted-foreground">
-                        {isSelectedArchived
-                          ? "This conversation is archived. Unarchive to reply and receive notifications."
-                          : "This conversation was reported and is no longer active. You can't send or receive new messages."}
+                        <p>
+                          {isSelectedArchived
+                            ? "This conversation is archived. Unarchive to reply and receive notifications."
+                            : "This conversation was reported and is no longer active. You can't send or receive new messages."}
+                        </p>
+                        <p className="mt-1 text-xs text-muted-foreground/80">{disabledTimestamp}</p>
                       </div>
                     ) : (
                       <div className="flex gap-2">
