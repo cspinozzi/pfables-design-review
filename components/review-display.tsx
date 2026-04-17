@@ -67,7 +67,7 @@ export function ReviewDisplay({ review, serviceName, rightAction }: ReviewDispla
         {/* View Review button on the right */}
         <div className="flex items-center gap-2 shrink-0">
           <button
-            className="flex items-center rounded-full bg-secondary text-secondary-foreground px-4 py-1.5 text-sm font-semibold transition-colors hover:bg-secondary/80"
+            className="flex items-center rounded-full bg-background text-foreground border border-border px-4 py-1.5 text-sm font-semibold transition-colors hover:bg-muted"
             tabIndex={-1}
           >
             View Review
