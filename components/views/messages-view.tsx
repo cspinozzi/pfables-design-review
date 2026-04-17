@@ -31,6 +31,9 @@ import { Archive, ArrowLeft, Flag, MoreVertical, Send, User } from "lucide-react
 import { useMockMessages } from "@/hooks/use-mock-messages"
 import { useAuth } from "@/lib/auth-context"
 import { mockProviders } from "@/lib/mock-data"
+import { FilterPills } from "@/components/shared/filter-pills"
+
+type InboxFilter = "all" | "reported" | "archived"
 
 export interface MessagesViewProps {
   /** Subtitle used on the desktop header. */
@@ -58,17 +61,40 @@ export function MessagesView({ desktopSubtitle, emptyListDescription, counterpar
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null)
   const [newMessage, setNewMessage] = useState("")
   const [archivedIds, setArchivedIds] = useState<Set<string>>(new Set())
+  const [reportedIds, setReportedIds] = useState<Set<string>>(new Set())
   const [reportConvId, setReportConvId] = useState<string | null>(null)
   const [reportReason, setReportReason] = useState<ReportReason>("spam")
   const [reportNote, setReportNote] = useState("")
+  const [filter, setFilter] = useState<InboxFilter>("all")
 
-  const userConversations = useMemo(
-    () =>
-      conversations.filter(
-        (conv) => conv.participants.some((p) => p.id === user?.id) && !archivedIds.has(conv.id),
-      ),
-    [conversations, user?.id, archivedIds],
+  const myConversations = useMemo(
+    () => conversations.filter((conv) => conv.participants.some((p) => p.id === user?.id)),
+    [conversations, user?.id],
   )
+
+  const filterCounts = useMemo(() => {
+    let all = 0
+    let reported = 0
+    let archived = 0
+    for (const c of myConversations) {
+      const isArchived = archivedIds.has(c.id)
+      const isReported = reportedIds.has(c.id)
+      if (isArchived) archived++
+      else if (isReported) reported++
+      else all++
+    }
+    return { all, reported, archived }
+  }, [myConversations, archivedIds, reportedIds])
+
+  const userConversations = useMemo(() => {
+    return myConversations.filter((c) => {
+      const isArchived = archivedIds.has(c.id)
+      const isReported = reportedIds.has(c.id)
+      if (filter === "archived") return isArchived
+      if (filter === "reported") return isReported && !isArchived
+      return !isArchived && !isReported
+    })
+  }, [myConversations, archivedIds, reportedIds, filter])
 
   useEffect(() => {
     const convParam = searchParams.get("conv")
@@ -77,12 +103,12 @@ export function MessagesView({ desktopSubtitle, emptyListDescription, counterpar
     }
   }, [searchParams, userConversations])
 
-  // If the currently selected conversation gets archived, clear it.
+  // If the currently selected conversation is no longer in the visible list (archived or filtered out), clear it.
   useEffect(() => {
-    if (selectedConversation && archivedIds.has(selectedConversation)) {
+    if (selectedConversation && !userConversations.some((c) => c.id === selectedConversation)) {
       setSelectedConversation(null)
     }
-  }, [selectedConversation, archivedIds])
+  }, [selectedConversation, userConversations])
 
   const selectedConv = userConversations.find((c) => c.id === selectedConversation)
   const messages = selectedConversation ? getConversationMessages(selectedConversation) : []
@@ -132,6 +158,13 @@ export function MessagesView({ desktopSubtitle, emptyListDescription, counterpar
   }
 
   const submitReport = () => {
+    if (reportConvId) {
+      setReportedIds((prev) => {
+        const next = new Set(prev)
+        next.add(reportConvId)
+        return next
+      })
+    }
     setReportConvId(null)
     toast("Report submitted", {
       description: "Our team will review this conversation shortly.",
@@ -181,11 +214,22 @@ export function MessagesView({ desktopSubtitle, emptyListDescription, counterpar
       <div className="md:hidden h-full">
         {!selectedConversation ? (
           <div className="h-full flex flex-col bg-background">
-            <div className="border-b bg-background px-4 py-4 flex items-center justify-between">
-              <h1 className="text-xl font-bold">Chats</h1>
-              <div className="text-sm text-muted-foreground">
-                {userConversations.length} {userConversations.length === 1 ? "conversation" : "conversations"}
+            <div className="border-b bg-background px-4 pt-4 pb-3 space-y-3">
+              <div className="flex items-center justify-between">
+                <h1 className="text-xl font-bold">Chats</h1>
+                <div className="text-sm text-muted-foreground">
+                  {userConversations.length} {userConversations.length === 1 ? "conversation" : "conversations"}
+                </div>
               </div>
+              <FilterPills<InboxFilter>
+                value={filter}
+                onChange={setFilter}
+                options={[
+                  { value: "all", label: "All", count: filterCounts.all },
+                  { value: "reported", label: "Reported", count: filterCounts.reported },
+                  { value: "archived", label: "Archived", count: filterCounts.archived },
+                ]}
+              />
             </div>
             <div className="flex-1 overflow-y-auto">
               {userConversations.length === 0 ? (
@@ -193,8 +237,20 @@ export function MessagesView({ desktopSubtitle, emptyListDescription, counterpar
                   <div className="mb-4 rounded-full bg-secondary p-6">
                     <Send className="h-8 w-8 text-muted-foreground" />
                   </div>
-                  <h3 className="mb-2 font-semibold text-lg">No messages yet</h3>
-                  <p className="text-sm text-muted-foreground max-w-sm">{emptyListDescription}</p>
+                  <h3 className="mb-2 font-semibold text-lg">
+                    {filter === "archived"
+                      ? "No archived chats"
+                      : filter === "reported"
+                        ? "No reported chats"
+                        : "No messages yet"}
+                  </h3>
+                  <p className="text-sm text-muted-foreground max-w-sm">
+                    {filter === "archived"
+                      ? "Archived conversations will appear here."
+                      : filter === "reported"
+                        ? "Conversations you report will appear here."
+                        : emptyListDescription}
+                  </p>
                 </div>
               ) : (
                 <div className="divide-y">
@@ -352,12 +408,27 @@ export function MessagesView({ desktopSubtitle, emptyListDescription, counterpar
         <div className="grid gap-4 sm:gap-6 lg:grid-cols-3 h-[calc(100vh-320px)]">
           <Card className="lg:col-span-1 flex flex-col">
             <CardContent className="p-0 flex-1 flex flex-col">
-              <div className="p-4 border-b">
+              <div className="p-4 border-b space-y-3">
                 <h2 className="font-semibold text-sm text-muted-foreground">Conversations</h2>
+                <FilterPills<InboxFilter>
+                  value={filter}
+                  onChange={setFilter}
+                  options={[
+                    { value: "all", label: "All", count: filterCounts.all },
+                    { value: "reported", label: "Reported", count: filterCounts.reported },
+                    { value: "archived", label: "Archived", count: filterCounts.archived },
+                  ]}
+                />
               </div>
               <div className="divide-y flex-1 overflow-y-auto">
                 {userConversations.length === 0 ? (
-                  <div className="p-8 text-center text-sm text-muted-foreground">No conversations yet</div>
+                  <div className="p-8 text-center text-sm text-muted-foreground">
+                    {filter === "archived"
+                      ? "No archived conversations"
+                      : filter === "reported"
+                        ? "No reported conversations"
+                        : "No conversations yet"}
+                  </div>
                 ) : (
                   userConversations.map((conv) => {
                     const other = conv.participants.find((p) => p.id !== user?.id)

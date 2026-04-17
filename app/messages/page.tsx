@@ -12,7 +12,10 @@ import { useMockMessages } from "@/hooks/use-mock-messages"
 import { useAuth } from "@/lib/auth-context"
 import { mockProviders } from "@/lib/mock-data"
 import { ConversationMenu } from "@/components/shared/conversation-menu"
+import { FilterPills } from "@/components/shared/filter-pills"
 import { formatDistanceToNow } from "date-fns"
+
+type InboxFilter = "all" | "reported" | "archived"
 
 
 export default function MessagesPage() {
@@ -22,11 +25,32 @@ export default function MessagesPage() {
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null)
   const [newMessage, setNewMessage] = useState("")
   const [archivedIds, setArchivedIds] = useState<Set<string>>(new Set())
+  const [reportedIds, setReportedIds] = useState<Set<string>>(new Set())
+  const [filter, setFilter] = useState<InboxFilter>("all")
 
-  const visibleConversations = useMemo(
-    () => conversations.filter((c) => !archivedIds.has(c.id)),
-    [conversations, archivedIds],
-  )
+  const filterCounts = useMemo(() => {
+    let all = 0
+    let reported = 0
+    let archived = 0
+    for (const c of conversations) {
+      const isArchived = archivedIds.has(c.id)
+      const isReported = reportedIds.has(c.id)
+      if (isArchived) archived++
+      else if (isReported) reported++
+      else all++
+    }
+    return { all, reported, archived }
+  }, [conversations, archivedIds, reportedIds])
+
+  const visibleConversations = useMemo(() => {
+    return conversations.filter((c) => {
+      const isArchived = archivedIds.has(c.id)
+      const isReported = reportedIds.has(c.id)
+      if (filter === "archived") return isArchived
+      if (filter === "reported") return isReported && !isArchived
+      return !isArchived && !isReported
+    })
+  }, [conversations, archivedIds, reportedIds, filter])
 
   useEffect(() => {
     const convParam = searchParams.get("conv")
@@ -36,10 +60,10 @@ export default function MessagesPage() {
   }, [searchParams, visibleConversations])
 
   useEffect(() => {
-    if (selectedConversation && archivedIds.has(selectedConversation)) {
+    if (selectedConversation && !visibleConversations.some((c) => c.id === selectedConversation)) {
       setSelectedConversation(null)
     }
-  }, [selectedConversation, archivedIds])
+  }, [selectedConversation, visibleConversations])
 
   const selectedConv = visibleConversations.find((c) => c.id === selectedConversation)
   const messages = selectedConversation ? getConversationMessages(selectedConversation) : []
@@ -61,6 +85,14 @@ export default function MessagesPage() {
             return next
           }),
       },
+    })
+  }
+
+  const handleReport = (convId: string) => {
+    setReportedIds((prev) => {
+      const next = new Set(prev)
+      next.add(convId)
+      return next
     })
   }
 
@@ -91,11 +123,23 @@ export default function MessagesPage() {
       <div className="md:hidden h-full">
         {!selectedConversation ? (
           <div className="h-full flex flex-col bg-background">
-            <div className="border-b bg-background px-4 py-4 flex items-center justify-between">
-              <h1 className="text-xl font-bold">Chats</h1>
-              <div className="text-sm text-muted-foreground">
-                {visibleConversations.length} {visibleConversations.length === 1 ? "conversation" : "conversations"}
+            <div className="border-b bg-background px-4 pt-4 pb-3 space-y-3">
+              <div className="flex items-center justify-between">
+                <h1 className="text-xl font-bold">Chats</h1>
+                <div className="text-sm text-muted-foreground">
+                  {visibleConversations.length}{" "}
+                  {visibleConversations.length === 1 ? "conversation" : "conversations"}
+                </div>
               </div>
+              <FilterPills<InboxFilter>
+                value={filter}
+                onChange={setFilter}
+                options={[
+                  { value: "all", label: "All", count: filterCounts.all },
+                  { value: "reported", label: "Reported", count: filterCounts.reported },
+                  { value: "archived", label: "Archived", count: filterCounts.archived },
+                ]}
+              />
             </div>
             <div className="flex-1 overflow-y-auto">
               {visibleConversations.length === 0 ? (
@@ -103,9 +147,19 @@ export default function MessagesPage() {
                   <div className="mb-4 rounded-full bg-secondary p-6">
                     <Send className="h-8 w-8 text-muted-foreground" />
                   </div>
-                  <h3 className="mb-2 font-semibold text-lg">No messages yet</h3>
+                  <h3 className="mb-2 font-semibold text-lg">
+                    {filter === "archived"
+                      ? "No archived chats"
+                      : filter === "reported"
+                        ? "No reported chats"
+                        : "No messages yet"}
+                  </h3>
                   <p className="text-sm text-muted-foreground max-w-sm">
-                    Start a conversation with a music teacher to get started
+                    {filter === "archived"
+                      ? "Archived conversations will appear here."
+                      : filter === "reported"
+                        ? "Conversations you report will appear here."
+                        : "Start a conversation with a music teacher to get started"}
                   </p>
                 </div>
               ) : (
@@ -181,6 +235,7 @@ export default function MessagesPage() {
                           profileHref={profileHrefFor(other)}
                           participantName={other?.name ?? "this user"}
                           onArchive={() => handleArchive(selectedConv.id)}
+                          onReport={() => handleReport(selectedConv.id)}
                           buttonClassName="h-10 w-10"
                         />
                       )
@@ -264,12 +319,27 @@ export default function MessagesPage() {
         <div className="grid gap-4 sm:gap-6 lg:grid-cols-3 h-[calc(100vh-320px)]">
           <Card className="lg:col-span-1 flex flex-col">
             <CardContent className="p-0 flex-1 flex flex-col">
-              <div className="p-4 border-b">
+              <div className="p-4 border-b space-y-3">
                 <h2 className="font-semibold text-sm text-muted-foreground">Conversations</h2>
+                <FilterPills<InboxFilter>
+                  value={filter}
+                  onChange={setFilter}
+                  options={[
+                    { value: "all", label: "All", count: filterCounts.all },
+                    { value: "reported", label: "Reported", count: filterCounts.reported },
+                    { value: "archived", label: "Archived", count: filterCounts.archived },
+                  ]}
+                />
               </div>
               <div className="divide-y flex-1 overflow-y-auto">
                 {visibleConversations.length === 0 ? (
-                  <div className="p-8 text-center text-sm text-muted-foreground">No conversations yet</div>
+                  <div className="p-8 text-center text-sm text-muted-foreground">
+                    {filter === "archived"
+                      ? "No archived conversations"
+                      : filter === "reported"
+                        ? "No reported conversations"
+                        : "No conversations yet"}
+                  </div>
                 ) : (
                   visibleConversations.map((conv) => {
                     const otherParticipant = conv.participants.find((p) => p.id !== user?.id)
@@ -347,6 +417,7 @@ export default function MessagesPage() {
                             profileHref={profileHrefFor(other)}
                             participantName={other?.name ?? "this user"}
                             onArchive={() => handleArchive(selectedConv.id)}
+                            onReport={() => handleReport(selectedConv.id)}
                           />
                         )
                       })()}

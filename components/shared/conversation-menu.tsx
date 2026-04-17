@@ -35,6 +35,7 @@ type ConversationMenuProps = {
   profileHref?: string
   participantName: string
   onArchive: () => void
+  onReport?: () => void
   buttonClassName?: string
   iconClassName?: string
 }
@@ -43,6 +44,7 @@ export function ConversationMenu({
   profileHref,
   participantName,
   onArchive,
+  onReport,
   buttonClassName,
   iconClassName,
 }: ConversationMenuProps) {
@@ -57,6 +59,7 @@ export function ConversationMenu({
 
   const handleSubmitReport = () => {
     setReportOpen(false)
+    onReport?.()
     toast.success("Report submitted", {
       description: "Our team will review this conversation.",
     })
