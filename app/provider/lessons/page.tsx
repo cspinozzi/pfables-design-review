@@ -289,6 +289,43 @@ function ProviderLessonsContent() {
   topic: "Introduction to arpeggios and hand coordination",
   },
     {
+      id: "lesson-c4",
+      title: "Violin Lesson",
+      student: "Oliver Chen",
+      studentAvatar: "https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=100&h=100&fit=crop",
+      parent: "Mei Chen",
+      parentAvatar: "/avatars/amanda-martinez.jpg",
+      date: "Tue, Jan 27",
+      time: "5:30 PM",
+      duration: "45 min",
+      location: "Aurora, IL",
+      rate: 70,
+      status: "completed",
+      paid: true,
+      review: {
+        id: "review-4",
+        rating: 5,
+        comment: "Oliver loved the lesson and can't wait for the next one!",
+        reviewerName: "Mei Chen",
+        reviewerAvatar: "/avatars/amanda-martinez.jpg",
+        date: new Date(2026, 0, 27),
+      },
+    },
+    {
+      id: "lesson-c5",
+      title: "Drum Lesson",
+      student: "Noah Brooks",
+      studentAvatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop",
+      parent: "Rachel Brooks",
+      date: "Mon, Jan 26",
+      time: "6:00 PM",
+      duration: "45 min",
+      location: "Naperville, IL",
+      rate: 60,
+      status: "completed",
+      paid: true,
+    },
+    {
       id: "lesson-x1",
       title: "Guitar Lesson",
       student: "Liam Parker",
@@ -432,8 +469,10 @@ function ProviderLessonsContent() {
                 ) : lesson.status === "completed" ? (() => {
                   const completion = getCompletion(lesson.id)
                   const topic = completion?.topic ?? lesson.topic
+                  const review = lesson.review
 
-                  // Has a topic — show topic + review footer (no Complete button).
+                  // Has topic → fully completed. Show topic on the left and review (or
+                  // "No review yet" placeholder) on the right. No Complete button.
                   if (topic) {
                     const topicNode = (
                       <div className="flex items-center gap-2 text-sm min-w-0">
@@ -444,10 +483,10 @@ function ProviderLessonsContent() {
                         </span>
                       </div>
                     )
-                    if (lesson.review) {
+                    if (review) {
                       return (
                         <ReviewDisplay
-                          review={lesson.review}
+                          review={review}
                           serviceName={lesson.title}
                           leftContent={topicNode}
                         />
@@ -461,20 +500,41 @@ function ProviderLessonsContent() {
                     )
                   }
 
-                  // No topic yet — fallback: let the provider mark it complete.
+                  // Topic missing → provider still needs to log it. Show the Complete
+                  // button, plus the review on the right if the parent already left one.
+                  const completeBtn = (
+                    <Button
+                      size="sm"
+                      className="rounded-full px-4 py-1.5 h-auto text-sm font-semibold gap-1.5"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setCompletingLesson(lesson)
+                      }}
+                    >
+                      <CheckCircle2 className="h-4 w-4" />
+                      Complete
+                    </Button>
+                  )
+                  const topicHint = (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground min-w-0">
+                      <BookOpen className="h-4 w-4 shrink-0" />
+                      <span className="truncate">Add lesson topic to finish this session</span>
+                    </div>
+                  )
+                  if (review) {
+                    return (
+                      <ReviewDisplay
+                        review={review}
+                        serviceName={lesson.title}
+                        leftContent={topicHint}
+                        rightAction={completeBtn}
+                      />
+                    )
+                  }
                   return (
-                    <div className="flex items-center justify-end gap-2 px-4 sm:px-6 py-3 bg-primary/10 rounded-b-xl">
-                      <Button
-                        size="sm"
-                        className="rounded-full px-4 py-1.5 h-auto text-sm font-semibold gap-1.5"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          setCompletingLesson(lesson)
-                        }}
-                      >
-                        <CheckCircle2 className="h-4 w-4" />
-                        Complete
-                      </Button>
+                    <div className="flex items-center justify-between gap-3 px-4 sm:px-6 py-3 bg-primary/10 rounded-b-xl">
+                      <div className="flex-1 min-w-0">{topicHint}</div>
+                      {completeBtn}
                     </div>
                   )
                 })() : undefined}
