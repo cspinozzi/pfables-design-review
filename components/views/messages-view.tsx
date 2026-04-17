@@ -1,14 +1,33 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import Link from "next/link"
+import { useEffect, useMemo, useState } from "react"
 import { useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { formatDistanceToNow } from "date-fns"
+import { toast } from "sonner"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { ArrowLeft, MoreVertical, Send, User } from "lucide-react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Archive, ArrowLeft, Flag, MoreVertical, Send, User } from "lucide-react"
 import { useMockMessages } from "@/hooks/use-mock-messages"
 import { useAuth } from "@/lib/auth-context"
 import { mockProviders } from "@/lib/mock-data"
@@ -22,14 +41,34 @@ export interface MessagesViewProps {
   counterpartRoleLabel: string
 }
 
+type ReportReason = "spam" | "harassment" | "inappropriate" | "other"
+
+const REPORT_REASONS: { value: ReportReason; label: string; description: string }[] = [
+  { value: "spam", label: "Spam", description: "Unwanted promotional content or repetitive messages" },
+  { value: "harassment", label: "Harassment", description: "Bullying, threats, or targeted abuse" },
+  { value: "inappropriate", label: "Inappropriate content", description: "Offensive, explicit, or harmful material" },
+  { value: "other", label: "Other", description: "Something else worth reviewing" },
+]
+
 export function MessagesView({ desktopSubtitle, emptyListDescription, counterpartRoleLabel }: MessagesViewProps) {
   const { user } = useAuth()
+  const router = useRouter()
   const searchParams = useSearchParams()
   const { conversations, getConversationMessages, sendMessage } = useMockMessages()
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null)
   const [newMessage, setNewMessage] = useState("")
+  const [archivedIds, setArchivedIds] = useState<Set<string>>(new Set())
+  const [reportConvId, setReportConvId] = useState<string | null>(null)
+  const [reportReason, setReportReason] = useState<ReportReason>("spam")
+  const [reportNote, setReportNote] = useState("")
 
-  const userConversations = conversations.filter((conv) => conv.participants.some((p) => p.id === user?.id))
+  const userConversations = useMemo(
+    () =>
+      conversations.filter(
+        (conv) => conv.participants.some((p) => p.id === user?.id) && !archivedIds.has(conv.id),
+      ),
+    [conversations, user?.id, archivedIds],
+  )
 
   useEffect(() => {
     const convParam = searchParams.get("conv")
@@ -37,6 +76,13 @@ export function MessagesView({ desktopSubtitle, emptyListDescription, counterpar
       setSelectedConversation(convParam)
     }
   }, [searchParams, userConversations])
+
+  // If the currently selected conversation gets archived, clear it.
+  useEffect(() => {
+    if (selectedConversation && archivedIds.has(selectedConversation)) {
+      setSelectedConversation(null)
+    }
+  }, [selectedConversation, archivedIds])
 
   const selectedConv = userConversations.find((c) => c.id === selectedConversation)
   const messages = selectedConversation ? getConversationMessages(selectedConversation) : []
@@ -54,6 +100,80 @@ export function MessagesView({ desktopSubtitle, emptyListDescription, counterpar
     const prov = mockProviders.find((p) => p.id === other.id) || mockProviders.find((p) => p.userId === other.id)
     return prov ? `/browse/${prov.id}` : `/browse/${other.id}`
   }
+
+  const goToProfile = (other: { id: string; role: string } | undefined) => {
+    router.push(profileHrefFor(other))
+  }
+
+  const handleArchive = (convId: string) => {
+    setArchivedIds((prev) => {
+      const next = new Set(prev)
+      next.add(convId)
+      return next
+    })
+    toast("Conversation archived", {
+      description: "It will no longer appear in your inbox.",
+      action: {
+        label: "Undo",
+        onClick: () =>
+          setArchivedIds((prev) => {
+            const next = new Set(prev)
+            next.delete(convId)
+            return next
+          }),
+      },
+    })
+  }
+
+  const openReport = (convId: string) => {
+    setReportConvId(convId)
+    setReportReason("spam")
+    setReportNote("")
+  }
+
+  const submitReport = () => {
+    setReportConvId(null)
+    toast("Report submitted", {
+      description: "Our team will review this conversation shortly.",
+    })
+  }
+
+  const renderConversationMenu = (
+    convId: string,
+    other: { id: string; role: string } | undefined,
+    variant: "mobile" | "desktop",
+  ) => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className={variant === "mobile" ? "h-10 w-10" : "h-9 w-9"}
+          aria-label="Conversation options"
+        >
+          <MoreVertical className="h-5 w-5" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-52">
+        <DropdownMenuItem className="gap-2 cursor-pointer" onClick={() => goToProfile(other)}>
+          <User className="h-4 w-4" />
+          View Profile
+        </DropdownMenuItem>
+        <DropdownMenuItem className="gap-2 cursor-pointer" onClick={() => openReport(convId)}>
+          <Flag className="h-4 w-4" />
+          Report Conversation
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          className="gap-2 cursor-pointer text-destructive focus:text-destructive"
+          onClick={() => handleArchive(convId)}
+        >
+          <Archive className="h-4 w-4" />
+          Archive Chat
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
 
   return (
     <div className="min-h-screen bg-background pb-20 sm:pb-0">
@@ -147,9 +267,11 @@ export function MessagesView({ desktopSubtitle, emptyListDescription, counterpar
                         {selectedConv.participants.find((p) => p.id !== user?.id)?.role || counterpartRoleLabel}
                       </p>
                     </div>
-                    <Button variant="ghost" size="icon" className="h-10 w-10">
-                      <MoreVertical className="h-5 w-5" />
-                    </Button>
+                    {renderConversationMenu(
+                      selectedConv.id,
+                      selectedConv.participants.find((p) => p.id !== user?.id),
+                      "mobile",
+                    )}
                   </div>
                 </div>
 
@@ -310,13 +432,11 @@ export function MessagesView({ desktopSubtitle, emptyListDescription, counterpar
                           {selectedConv.participants.find((p) => p.id !== user?.id)?.name}
                         </h3>
                       </div>
-                      <Link
-                        href={profileHrefFor(selectedConv.participants.find((p) => p.id !== user?.id))}
-                        className="inline-flex items-center gap-1.5 text-xs text-muted-foreground px-3 py-1.5 rounded-md hover:bg-primary hover:text-primary-foreground transition-colors"
-                      >
-                        <User className="h-3.5 w-3.5" />
-                        View Profile
-                      </Link>
+                      {renderConversationMenu(
+                        selectedConv.id,
+                        selectedConv.participants.find((p) => p.id !== user?.id),
+                        "desktop",
+                      )}
                     </div>
                   </div>
 
@@ -387,6 +507,65 @@ export function MessagesView({ desktopSubtitle, emptyListDescription, counterpar
           </Card>
         </div>
       </div>
+
+      {/* Report Dialog */}
+      <Dialog open={reportConvId !== null} onOpenChange={(open) => !open && setReportConvId(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Report Conversation</DialogTitle>
+            <DialogDescription>
+              Help us keep the community safe. Tell us what&apos;s wrong and our team will review it shortly.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-5 py-2">
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">Reason</Label>
+              <RadioGroup
+                value={reportReason}
+                onValueChange={(v) => setReportReason(v as ReportReason)}
+                className="gap-2"
+              >
+                {REPORT_REASONS.map((r) => (
+                  <Label
+                    key={r.value}
+                    htmlFor={`report-${r.value}`}
+                    className="flex items-start gap-3 rounded-md border p-3 cursor-pointer hover:bg-secondary/50 has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/5 transition-colors"
+                  >
+                    <RadioGroupItem id={`report-${r.value}`} value={r.value} className="mt-0.5" />
+                    <div className="space-y-0.5">
+                      <div className="text-sm font-medium leading-none">{r.label}</div>
+                      <p className="text-xs text-muted-foreground">{r.description}</p>
+                    </div>
+                  </Label>
+                ))}
+              </RadioGroup>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="report-note" className="text-sm font-medium">
+                Additional details <span className="font-normal text-muted-foreground">(optional)</span>
+              </Label>
+              <Textarea
+                id="report-note"
+                placeholder="Share any context that will help our team understand what happened..."
+                value={reportNote}
+                onChange={(e) => setReportNote(e.target.value)}
+                rows={4}
+                maxLength={500}
+              />
+              <p className="text-xs text-muted-foreground text-right">{reportNote.length}/500</p>
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setReportConvId(null)}>
+              Cancel
+            </Button>
+            <Button onClick={submitReport}>Submit Report</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
