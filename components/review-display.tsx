@@ -19,9 +19,11 @@ interface ReviewDisplayProps {
   serviceName: string
   /** Optional action rendered after the "View Review" button (e.g. a Complete button). */
   rightAction?: ReactNode
+  /** Optional content rendered to the left of the stars (replaces the comment preview). */
+  leftContent?: ReactNode
 }
 
-export function ReviewDisplay({ review, serviceName, rightAction }: ReviewDisplayProps) {
+export function ReviewDisplay({ review, serviceName, rightAction, leftContent }: ReviewDisplayProps) {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
@@ -41,7 +43,10 @@ export function ReviewDisplay({ review, serviceName, rightAction }: ReviewDispla
           }
         }}
       >
-        {/* Stars on the left */}
+        {/* Optional topic/left content — takes the flex space when provided */}
+        {leftContent && <div className="flex-1 min-w-0">{leftContent}</div>}
+
+        {/* Stars */}
         <div className="flex items-center gap-0.5 shrink-0">
           {[1, 2, 3, 4, 5].map((star) => (
             <Star
@@ -55,9 +60,9 @@ export function ReviewDisplay({ review, serviceName, rightAction }: ReviewDispla
           ))}
         </div>
 
-        {/* Comment preview in the middle */}
-        {review.comment && (
-          <div className="flex-1 min-w-0 ml-2">
+        {/* Comment preview — only when no leftContent is provided */}
+        {!leftContent && review.comment && (
+          <div className="flex-1 min-w-0 ml-2 hidden sm:block">
             <p className="text-xs text-muted-foreground truncate">
               "{review.comment.substring(0, 40)}{review.comment.length > 40 ? "..." : ""}"
             </p>

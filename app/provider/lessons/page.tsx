@@ -6,7 +6,7 @@ import { ServiceCard } from "@/components/service-card"
 const ServiceDetailModal = dynamic(() => import("@/components/service-detail-modal").then(m => ({ default: m.ServiceDetailModal })), { ssr: false })
 import { ReviewDisplay, type ReviewData } from "@/components/review-display"
 import { useRouter, useSearchParams } from "next/navigation"
-import { Calendar, CheckCircle2, Clock, MapPin, User, DollarSign } from "lucide-react"
+import { BookOpen, Calendar, CheckCircle2, Clock, MapPin, User, DollarSign } from "lucide-react"
 import { toast } from "sonner"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -37,6 +37,8 @@ interface Lesson {
   paid?: boolean
   pendingApproval?: boolean
   review?: ReviewData
+  /** Topic covered during the lesson — populated for completed lessons. */
+  topic?: string
   originalDate?: string
   originalTime?: string
   isRescheduleRequest?: boolean
@@ -72,7 +74,7 @@ function ProviderLessonsContent() {
   const { conversations } = useMockMessages()
   const { rescheduledIds, addProviderReschedule } = useReschedule()
   const { findConversationByParticipantName, sendMessage } = useMessageContext()
-  const { completeLesson, isCompleted } = useLessonCompletion()
+  const { completeLesson, getCompletion } = useLessonCompletion()
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null)
   const [completingLesson, setCompletingLesson] = useState<Lesson | null>(null)
 
@@ -233,18 +235,19 @@ function ProviderLessonsContent() {
       time: "4:00 PM",
       duration: "45 min",
       location: "Naperville, IL",
-      rate: 65,
-      status: "completed",
-      paid: true,
-      review: {
-        id: "review-1",
-        rating: 5,
-        comment: "Emma had an amazing lesson! The teacher was patient and really helped her understand the new piece.",
-        reviewerName: "Sarah Thompson",
-        reviewerAvatar: "/parent-woman.jpg",
-        date: new Date(2026, 0, 31),
-      },
-    },
+  rate: 65,
+  status: "completed",
+  paid: true,
+  topic: "Major scales and sight-reading basics",
+  review: {
+  id: "review-1",
+  rating: 5,
+  comment: "Emma had an amazing lesson! The teacher was patient and really helped her understand the new piece.",
+  reviewerName: "Sarah Thompson",
+  reviewerAvatar: "/parent-woman.jpg",
+  date: new Date(2026, 0, 31),
+  },
+  },
     {
       id: "lesson-c2",
       title: "Music Theory Session",
@@ -256,18 +259,19 @@ function ProviderLessonsContent() {
       time: "5:00 PM",
       duration: "30 min",
       location: "Online",
-      rate: 45,
-      status: "completed",
-      paid: true,
-      review: {
-        id: "review-2",
-        rating: 4,
-        comment: "Great session! Jake really enjoyed learning about chord progressions.",
-        reviewerName: "Lisa Wilson",
-        reviewerAvatar: "/avatars/jennifer-wilson.jpg",
-        date: new Date(2026, 0, 30),
-      },
-    },
+  rate: 45,
+  status: "completed",
+  paid: true,
+  topic: "Chord progressions and circle of fifths",
+  review: {
+  id: "review-2",
+  rating: 4,
+  comment: "Great session! Jake really enjoyed learning about chord progressions.",
+  reviewerName: "Lisa Wilson",
+  reviewerAvatar: "/avatars/jennifer-wilson.jpg",
+  date: new Date(2026, 0, 30),
+  },
+  },
     {
       id: "lesson-c3",
       title: "Piano Lesson",
@@ -279,10 +283,11 @@ function ProviderLessonsContent() {
       time: "3:30 PM",
       duration: "60 min",
       location: "Downers Grove, IL",
-      rate: 75,
-      status: "completed",
-      paid: false,
-    },
+  rate: 75,
+  status: "completed",
+  paid: false,
+  topic: "Introduction to arpeggios and hand coordination",
+  },
     {
       id: "lesson-x1",
       title: "Guitar Lesson",
@@ -425,34 +430,51 @@ function ProviderLessonsContent() {
                     </Button>
                   </div>
                 ) : lesson.status === "completed" ? (() => {
-                  const showComplete = !isCompleted(lesson.id)
-                  const completeBtn = showComplete ? (
-                    <Button
-                      size="sm"
-                      className="rounded-full px-4 py-1.5 h-auto text-sm font-semibold gap-1.5"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        setCompletingLesson(lesson)
-                      }}
-                    >
-                      <CheckCircle2 className="h-4 w-4" />
-                      Complete
-                    </Button>
-                  ) : null
+                  const completion = getCompletion(lesson.id)
+                  const topic = completion?.topic ?? lesson.topic
 
-                  if (lesson.review) {
+                  // Has a topic — show topic + review footer (no Complete button).
+                  if (topic) {
+                    const topicNode = (
+                      <div className="flex items-center gap-2 text-sm min-w-0">
+                        <BookOpen className="h-4 w-4 shrink-0 text-muted-foreground" />
+                        <span className="truncate">
+                          <span className="text-muted-foreground">Topic: </span>
+                          <span className="font-medium text-foreground">{topic}</span>
+                        </span>
+                      </div>
+                    )
+                    if (lesson.review) {
+                      return (
+                        <ReviewDisplay
+                          review={lesson.review}
+                          serviceName={lesson.title}
+                          leftContent={topicNode}
+                        />
+                      )
+                    }
                     return (
-                      <ReviewDisplay
-                        review={lesson.review}
-                        serviceName={lesson.title}
-                        rightAction={completeBtn}
-                      />
+                      <div className="flex items-center justify-between gap-3 px-4 sm:px-6 py-3 bg-primary/10 rounded-b-xl">
+                        <div className="flex-1 min-w-0">{topicNode}</div>
+                        <span className="text-xs text-muted-foreground italic shrink-0">No review yet</span>
+                      </div>
                     )
                   }
-                  if (!showComplete) return undefined
+
+                  // No topic yet — fallback: let the provider mark it complete.
                   return (
                     <div className="flex items-center justify-end gap-2 px-4 sm:px-6 py-3 bg-primary/10 rounded-b-xl">
-                      {completeBtn}
+                      <Button
+                        size="sm"
+                        className="rounded-full px-4 py-1.5 h-auto text-sm font-semibold gap-1.5"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setCompletingLesson(lesson)
+                        }}
+                      >
+                        <CheckCircle2 className="h-4 w-4" />
+                        Complete
+                      </Button>
                     </div>
                   )
                 })() : undefined}
