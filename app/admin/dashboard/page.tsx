@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Textarea } from "@/components/ui/textarea"
 import { mockProviders, mockBackgroundChecks, mockUsers } from "@/lib/mock-data"
 import { useApproval } from "@/lib/approval-context"
+import { PageHeader } from "@/components/shared/page-header"
 
 type RefundRequest = {
   id: string
@@ -100,10 +101,8 @@ export default function AdminDashboardPage() {
   return (
     <div className="min-h-screen bg-background pb-20 sm:pb-12">
       <div className="page-container pt-6">
-        {/* Header */}
         <div className="mb-10">
-          <h1 className="mb-1 font-display text-2xl font-medium">Admin Dashboard</h1>
-          <p className="text-sm text-muted-foreground">Platform operations and management</p>
+          <PageHeader title="Admin Dashboard" subtitle="Platform operations and management" />
 
           {/* KPI Cards */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6">

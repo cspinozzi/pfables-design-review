@@ -6,11 +6,11 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { CheckCircle, Clock, Calendar, Shield, Users, ShieldCheck, FileCheck } from "lucide-react"
-import { ProfileAvatarUpload } from "@/components/profile-avatar-upload"
+import { ProfileHeader } from "@/components/shared/profile-header"
 import { mockProviders, mockBackgroundChecks, mockUsers } from "@/lib/mock-data"
 
 export default function AdminProfilePage() {
-  const { user, logout, updateUser } = useAuth()
+  const { user, logout } = useAuth()
 
   const [formData, setFormData] = useState({
     name: user?.name || "",
@@ -31,20 +31,7 @@ export default function AdminProfilePage() {
   return (
     <div className="min-h-screen bg-background pb-20 sm:pb-12">
       <div className="page-container pt-6">
-        {/* Header */}
-        <div className="mb-6 flex items-center gap-5">
-          <ProfileAvatarUpload
-            src={user?.avatar}
-            name={user?.name || ""}
-            size="lg"
-            editable
-            onAvatarChange={(dataUrl) => updateUser({ avatar: dataUrl })}
-          />
-          <div>
-            <h1 className="mb-1 font-display text-2xl font-medium text-foreground">Admin Profile</h1>
-            <p className="text-sm text-muted-foreground">Manage your administrator account</p>
-          </div>
-        </div>
+        <ProfileHeader title="Admin Profile" subtitle="Manage your administrator account" />
 
         {/* Two Column Layout */}
         <div className="grid gap-6 md:grid-cols-2">

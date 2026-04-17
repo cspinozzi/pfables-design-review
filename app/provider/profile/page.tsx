@@ -27,10 +27,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Plus, ChevronRight, AlertCircle, Briefcase, Star, CheckCircle, Calendar, FileText, Upload, Eye, Trash2, X, GraduationCap, MoreVertical, KeyRound, LogOut, Trash } from "lucide-react"
-import { ProfileAvatarUpload } from "@/components/profile-avatar-upload"
+import { ProfileHeader } from "@/components/shared/profile-header"
 
 export default function ProviderProfilePage() {
-  const { user, updateUser, logout } = useAuth()
+  const { user, logout } = useAuth()
   const provider = mockProviders.find((p) => p.userId === user?.id)
   const locations = getAllLocations()
 
@@ -162,49 +162,41 @@ export default function ProviderProfilePage() {
     <div className="min-h-screen bg-background pb-20 sm:pb-12">
       <div className="page-container pt-6">
         {/* Header */}
-        <div className="mb-8 flex items-center justify-between">
-          <div className="flex items-center gap-5">
-            <ProfileAvatarUpload
-              src={user?.avatar || provider?.avatar}
-              name={user?.name || provider?.name || ""}
-              size="lg"
-              editable
-              onAvatarChange={(dataUrl) => updateUser({ avatar: dataUrl })}
-            />
-            <div>
-              <h1 className="mb-1 font-display text-2xl font-medium text-foreground">Provider Profile</h1>
-              <p className="text-sm text-muted-foreground">Manage your provider information</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button onClick={handleSave} className="shrink-0" disabled={!isDirty}>
-              Save Changes
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full">
-                  <MoreVertical className="h-5 w-5" />
-                  <span className="sr-only">Account options</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem className="gap-2 cursor-pointer">
-                  <KeyRound className="h-4 w-4" />
-                  Change Password
-                </DropdownMenuItem>
-                <DropdownMenuItem className="gap-2 cursor-pointer" onClick={logout}>
-                  <LogOut className="h-4 w-4" />
-                  Sign Out
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="gap-2 cursor-pointer text-destructive focus:text-destructive">
-                  <Trash className="h-4 w-4" />
-                  Delete Account
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
+        <ProfileHeader
+          className="mb-8"
+          title="Provider Profile"
+          subtitle="Manage your provider information"
+          actions={
+            <>
+              <Button onClick={handleSave} className="shrink-0" disabled={!isDirty}>
+                Save Changes
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full">
+                    <MoreVertical className="h-5 w-5" />
+                    <span className="sr-only">Account options</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem className="gap-2 cursor-pointer">
+                    <KeyRound className="h-4 w-4" />
+                    Change Password
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="gap-2 cursor-pointer" onClick={logout}>
+                    <LogOut className="h-4 w-4" />
+                    Sign Out
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="gap-2 cursor-pointer text-destructive focus:text-destructive">
+                    <Trash className="h-4 w-4" />
+                    Delete Account
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </>
+          }
+        />
 
         {/* Two Column Layout */}
         <div className="grid gap-6 md:grid-cols-2">
