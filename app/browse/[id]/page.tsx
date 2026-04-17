@@ -1,5 +1,5 @@
 "use client"
-import { useState } from "react"
+import { use, useState } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { MapPin, Star, Phone, Mail, Clock, Award, CheckCircle2, MessageCircle, ArrowLeft, Heart, Calendar, CalendarDays, User, XCircle, AlertCircle, DollarSign, BookOpen, CreditCard, Send, X, ChevronLeft, ChevronRight, ZoomIn } from "lucide-react"
@@ -17,9 +17,10 @@ import { mockProviders, mockUsers, mockConversations } from "@/lib/mock-data"
 const ServiceDetailModal = dynamic(() => import("@/components/service-detail-modal").then(m => ({ default: m.ServiceDetailModal })), { ssr: false })
 const BookingModal = dynamic(() => import("@/components/booking-modal").then(m => ({ default: m.BookingModal })), { ssr: false })
 
-export default function ProviderDetailPage({ params }: { params: { id: string } }) {
+export default function ProviderDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params)
   const router = useRouter()
-  const provider = mockProviders.find((p) => p.id === params.id) || mockProviders.find((p) => p.userId === params.id)
+  const provider = mockProviders.find((p) => p.id === id) || mockProviders.find((p) => p.userId === id)
   const [activeTab, setActiveTab] = useState<"reviews" | "services" | "about" | "credentials">("reviews")
   const [isFavorited, setIsFavorited] = useState(false)
   const [bookingOpen, setBookingOpen] = useState(false)
@@ -80,7 +81,7 @@ export default function ProviderDetailPage({ params }: { params: { id: string } 
 
   // If no provider found, check if it's a parent user
   if (!provider) {
-    const parentUser = mockUsers.find((u) => u.id === params.id)
+    const parentUser = mockUsers.find((u) => u.id === id)
     if (parentUser) {
       return <ParentProfileView parentUser={parentUser} router={router} />
     }
@@ -552,9 +553,9 @@ function ParentProfileView({ parentUser, router }: ParentProfileViewProps) {
     { id: "l-1", title: "Piano Lesson", provider: "Emily Carter", providerAvatar: "/music-teacher-woman-piano.jpg", student: "Emma", date: new Date("2026-02-10"), time: "4:00 PM", duration: "45 min", location: "Naperville, IL", rate: 65, status: "active" as const },
     { id: "l-2", title: "Piano Lesson", provider: "Emily Carter", providerAvatar: "/music-teacher-woman-piano.jpg", student: "Emma", date: new Date("2026-02-17"), time: "4:00 PM", duration: "45 min", location: "Naperville, IL", rate: 65, status: "active" as const },
     { id: "l-3", title: "Drum Lesson", provider: "Marcus Rivera", providerAvatar: "/avatars/marcus-rivera.jpg", student: "Liam", date: new Date("2026-02-12"), time: "5:00 PM", duration: "30 min", location: "Naperville, IL", rate: 55, status: "active" as const },
-    { id: "l-4", title: "Piano Lesson", provider: "Emily Carter", providerAvatar: "/music-teacher-woman-piano.jpg", student: "Emma", date: new Date("2026-01-30"), time: "4:00 PM", duration: "45 min", location: "Naperville, IL", rate: 65, status: "completed" as const },
-    { id: "l-5", title: "Piano Lesson", provider: "Emily Carter", providerAvatar: "/music-teacher-woman-piano.jpg", student: "Emma", date: new Date("2026-01-23"), time: "4:00 PM", duration: "45 min", location: "Naperville, IL", rate: 65, status: "completed" as const },
-    { id: "l-6", title: "Music Theory", provider: "Emily Carter", providerAvatar: "/music-teacher-woman-piano.jpg", student: "Emma", date: new Date("2026-01-16"), time: "3:00 PM", duration: "30 min", location: "Online", rate: 45, status: "completed" as const },
+    { id: "l-4", title: "Piano Lesson", provider: "Emily Carter", providerAvatar: "/music-teacher-woman-piano.jpg", student: "Emma", date: new Date("2026-01-30"), time: "4:00 PM", duration: "45 min", location: "Naperville, IL", rate: 65, status: "completed" as const, topic: "Legato technique and pedaling", review: 5 },
+    { id: "l-5", title: "Piano Lesson", provider: "Emily Carter", providerAvatar: "/music-teacher-woman-piano.jpg", student: "Emma", date: new Date("2026-01-23"), time: "4:00 PM", duration: "45 min", location: "Naperville, IL", rate: 65, status: "completed" as const, topic: "Major scales and sight-reading basics", review: 4 },
+    { id: "l-6", title: "Music Theory", provider: "Emily Carter", providerAvatar: "/music-teacher-woman-piano.jpg", student: "Emma", date: new Date("2026-01-16"), time: "3:00 PM", duration: "30 min", location: "Online", rate: 45, status: "completed" as const, topic: "Note values and time signatures", review: 5 },
     { id: "l-7", title: "Drum Lesson", provider: "Marcus Rivera", providerAvatar: "/avatars/marcus-rivera.jpg", student: "Liam", date: new Date("2026-01-20"), time: "5:00 PM", duration: "30 min", location: "Naperville, IL", rate: 55, status: "cancelled" as const },
   ])
 
@@ -753,26 +754,45 @@ function ParentProfileView({ parentUser, router }: ParentProfileViewProps) {
               <div>
                 <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">Completed & Cancelled</h3>
                 <div className="space-y-3">
-                  {completedLessons.map((lesson) => (
-                    <ServiceCard
-                      key={lesson.id}
-                      image={lesson.providerAvatar}
-                      imageAlt={lesson.provider}
-                      title={lesson.title}
-                      subtitle={lesson.provider}
-                      price={`$${lesson.rate}`}
-                      status={lesson.status}
-                      hideStatusFor={["completed"]}
-                      onClick={() => setSelectedItem({ title: lesson.title, subtitle: lesson.provider, status: lesson.status, price: `$${lesson.rate}`, student: lesson.student, date: lesson.date, time: lesson.time, duration: lesson.duration, location: lesson.location, provider: lesson.provider, providerAvatar: lesson.providerAvatar })}
-                      details={
-                        <>
-                          <span className="flex items-center gap-1"><User className="h-3.5 w-3.5" />{lesson.student}</span>
-                          <span className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5" />{formatDate(lesson.date)}</span>
-                          <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" />{lesson.time} ({lesson.duration})</span>
-                        </>
-                      }
-                    />
-                  ))}
+                  {completedLessons.map((lesson) => {
+                    // For completed lessons that already have a review, replace the big
+                    // "Completed" status chip with a tiny, discreet star + rating in the corner.
+                    const showRatingBadge = lesson.status === "completed" && typeof lesson.review === "number"
+                    return (
+                      <ServiceCard
+                        key={lesson.id}
+                        image={lesson.providerAvatar}
+                        imageAlt={lesson.provider}
+                        title={lesson.title}
+                        subtitle={lesson.provider}
+                        price={`$${lesson.rate}`}
+                        status={showRatingBadge ? undefined : lesson.status}
+                        badge={
+                          showRatingBadge
+                            ? {
+                                label: String(lesson.review),
+                                icon: <Star className="h-3 w-3 fill-accent text-accent" />,
+                                variant: "muted",
+                              }
+                            : undefined
+                        }
+                        onClick={() => setSelectedItem({ title: lesson.title, subtitle: lesson.provider, status: lesson.status, price: `$${lesson.rate}`, student: lesson.student, date: lesson.date, time: lesson.time, duration: lesson.duration, location: lesson.location, provider: lesson.provider, providerAvatar: lesson.providerAvatar })}
+                        details={
+                          <>
+                            <span className="flex items-center gap-1"><User className="h-3.5 w-3.5" />{lesson.student}</span>
+                            <span className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5" />{formatDate(lesson.date)}</span>
+                            <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" />{lesson.time} ({lesson.duration})</span>
+                            {lesson.topic && (
+                              <span className="flex items-center gap-1 basis-full sm:basis-auto">
+                                <BookOpen className="h-3.5 w-3.5" />
+                                <span className="text-foreground">{lesson.topic}</span>
+                              </span>
+                            )}
+                          </>
+                        }
+                      />
+                    )
+                  })}
                 </div>
               </div>
             )}
