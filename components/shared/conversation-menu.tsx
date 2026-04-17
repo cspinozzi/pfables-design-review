@@ -38,6 +38,7 @@ type ConversationMenuProps = {
   onReport?: () => void
   onUnarchive?: () => void
   isArchived?: boolean
+  isReported?: boolean
   buttonClassName?: string
   iconClassName?: string
 }
@@ -49,6 +50,7 @@ export function ConversationMenu({
   onReport,
   onUnarchive,
   isArchived = false,
+  isReported = false,
   buttonClassName,
   iconClassName,
 }: ConversationMenuProps) {
@@ -91,10 +93,12 @@ export function ConversationMenu({
               View Profile
             </DropdownMenuItem>
           )}
-          <DropdownMenuItem onClick={() => setReportOpen(true)} className="gap-2 cursor-pointer">
-            <Flag className="h-4 w-4" />
-            Report Conversation
-          </DropdownMenuItem>
+          {!isReported && (
+            <DropdownMenuItem onClick={() => setReportOpen(true)} className="gap-2 cursor-pointer">
+              <Flag className="h-4 w-4" />
+              Report Conversation
+            </DropdownMenuItem>
+          )}
           <DropdownMenuSeparator />
           {isArchived ? (
             <DropdownMenuItem onClick={onUnarchive} className="gap-2 cursor-pointer">

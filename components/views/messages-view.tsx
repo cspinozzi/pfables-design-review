@@ -205,10 +205,12 @@ export function MessagesView({ desktopSubtitle, emptyListDescription, counterpar
           <User className="h-4 w-4" />
           View Profile
         </DropdownMenuItem>
-        <DropdownMenuItem className="gap-2 cursor-pointer" onClick={() => openReport(convId)}>
-          <Flag className="h-4 w-4" />
-          Report Conversation
-        </DropdownMenuItem>
+        {!reportedIds.has(convId) && (
+          <DropdownMenuItem className="gap-2 cursor-pointer" onClick={() => openReport(convId)}>
+            <Flag className="h-4 w-4" />
+            Report Conversation
+          </DropdownMenuItem>
+        )}
         <DropdownMenuSeparator />
         {archivedIds.has(convId) ? (
           <DropdownMenuItem className="gap-2 cursor-pointer" onClick={() => handleUnarchive(convId)}>

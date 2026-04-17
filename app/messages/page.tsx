@@ -108,6 +108,7 @@ export default function MessagesPage() {
   }
 
   const isSelectedArchived = selectedConversation ? archivedIds.has(selectedConversation) : false
+  const isSelectedReported = selectedConversation ? reportedIds.has(selectedConversation) : false
 
   const profileHrefFor = (other: { id: string; role?: string } | undefined) => {
     if (!other) return undefined
@@ -251,6 +252,7 @@ export default function MessagesPage() {
                           onReport={() => handleReport(selectedConv.id)}
                           onUnarchive={() => handleUnarchive(selectedConv.id)}
                           isArchived={isSelectedArchived}
+                          isReported={isSelectedReported}
                           buttonClassName="h-10 w-10"
                         />
                       )
@@ -443,6 +445,7 @@ export default function MessagesPage() {
                             onReport={() => handleReport(selectedConv.id)}
                             onUnarchive={() => handleUnarchive(selectedConv.id)}
                             isArchived={isSelectedArchived}
+                            isReported={isSelectedReported}
                           />
                         )
                       })()}
