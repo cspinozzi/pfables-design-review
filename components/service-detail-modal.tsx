@@ -9,7 +9,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Calendar, Clock, MapPin, User, DollarSign, MessageCircle, Wrench, CheckCircle2, Circle, XCircle, Star, RefreshCw, ChevronLeft, ChevronRight, CalendarCheck, AlertCircle, ArrowRight, Hourglass } from "lucide-react"
+import { BookOpen, Calendar, Clock, MapPin, User, DollarSign, MessageCircle, MessageSquare, Wrench, CheckCircle2, Circle, XCircle, Star, RefreshCw, ChevronLeft, ChevronRight, CalendarCheck, AlertCircle, ArrowRight, Hourglass } from "lucide-react"
 import Image from "next/image"
 import { cn } from "@/lib/utils"
 import type { ReviewData } from "@/components/review-display"
@@ -80,6 +80,10 @@ export interface ServiceDetailModalProps {
   currentSessionTime?: string
   currentSessionDate?: Date
   review?: ReviewData
+  /** Topic covered during the lesson (populated once the provider marks it complete). */
+  topic?: string
+  /** Optional note/comment the provider left when completing the lesson. */
+  providerNote?: string
   originalDate?: string
   originalTime?: string
   isRescheduleRequest?: boolean
@@ -133,6 +137,8 @@ export function ServiceDetailModal({
   currentSessionTime,
   currentSessionDate,
   review,
+  topic,
+  providerNote,
   customFields,
   originalDate,
   originalTime,
@@ -596,6 +602,35 @@ export function ServiceDetailModal({
         <div className="rounded-lg border p-4 flex items-center justify-between">
           <span className="text-sm text-muted-foreground">Amount</span>
           <span className="text-lg font-semibold text-primary">{price}</span>
+        </div>
+      )}
+
+      {/* Lesson summary — topic covered + optional provider note */}
+      {(topic || providerNote) && (
+        <div className="rounded-lg border p-4 space-y-3">
+          <p className="text-sm font-medium">Lesson summary</p>
+          {topic && (
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 h-7 w-7 rounded-full bg-muted flex items-center justify-center shrink-0">
+                <BookOpen className="h-3.5 w-3.5 text-muted-foreground" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-muted-foreground">Topic covered</p>
+                <p className="text-sm text-foreground mt-0.5 leading-relaxed">{topic}</p>
+              </div>
+            </div>
+          )}
+          {providerNote && (
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 h-7 w-7 rounded-full bg-muted flex items-center justify-center shrink-0">
+                <MessageSquare className="h-3.5 w-3.5 text-muted-foreground" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-muted-foreground">Provider notes</p>
+                <p className="text-sm text-foreground mt-0.5 leading-relaxed">{providerNote}</p>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

@@ -543,7 +543,7 @@ interface ParentProfileViewProps {
 
 function ParentProfileView({ parentUser, router }: ParentProfileViewProps) {
   const [activeSection, setActiveSection] = useState<"account" | "lessons" | "payments">("account")
-  const [selectedItem, setSelectedItem] = useState<{ title: string; subtitle?: string; status: string; price?: string; student?: string; date: Date; time?: string; duration?: string; location?: string; provider?: string; providerAvatar?: string } | null>(null)
+    const [selectedItem, setSelectedItem] = useState<{ title: string; subtitle?: string; status: string; price?: string; student?: string; date: Date; time?: string; duration?: string; location?: string; provider?: string; providerAvatar?: string; topic?: string } | null>(null)
 
   const formatDate = (d: Date) =>
     d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
@@ -735,7 +735,7 @@ function ParentProfileView({ parentUser, router }: ParentProfileViewProps) {
                       price={`$${lesson.rate}`}
                       status={lesson.status}
                       hideStatusFor={["active"]}
-                      onClick={() => setSelectedItem({ title: lesson.title, subtitle: lesson.provider, status: lesson.status, price: `$${lesson.rate}`, student: lesson.student, date: lesson.date, time: lesson.time, duration: lesson.duration, location: lesson.location, provider: lesson.provider, providerAvatar: lesson.providerAvatar })}
+                      onClick={() => setSelectedItem({ title: lesson.title, subtitle: lesson.provider, status: lesson.status, price: `${lesson.rate}`, student: lesson.student, date: lesson.date, time: lesson.time, duration: lesson.duration, location: lesson.location, provider: lesson.provider, providerAvatar: lesson.providerAvatar, topic: (lesson as { topic?: string }).topic })}
                       details={
                         <>
                           <span className="flex items-center gap-1"><User className="h-3.5 w-3.5" />{lesson.student}</span>
@@ -776,7 +776,7 @@ function ParentProfileView({ parentUser, router }: ParentProfileViewProps) {
                               }
                             : undefined
                         }
-                        onClick={() => setSelectedItem({ title: lesson.title, subtitle: lesson.provider, status: lesson.status, price: `$${lesson.rate}`, student: lesson.student, date: lesson.date, time: lesson.time, duration: lesson.duration, location: lesson.location, provider: lesson.provider, providerAvatar: lesson.providerAvatar })}
+                        onClick={() => setSelectedItem({ title: lesson.title, subtitle: lesson.provider, status: lesson.status, price: `${lesson.rate}`, student: lesson.student, date: lesson.date, time: lesson.time, duration: lesson.duration, location: lesson.location, provider: lesson.provider, providerAvatar: lesson.providerAvatar, topic: (lesson as { topic?: string }).topic })}
                         details={
                           <>
                             <span className="flex items-center gap-1"><User className="h-3.5 w-3.5" />{lesson.student}</span>
@@ -926,6 +926,7 @@ function ParentProfileView({ parentUser, router }: ParentProfileViewProps) {
               ...(selectedItem.location ? [{ icon: <MapPin className="h-4 w-4" />, label: "Location", value: selectedItem.location }] : []),
             ]}
             price={selectedItem.price}
+            topic={selectedItem.topic}
           />
         )}
       </div>

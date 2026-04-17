@@ -667,6 +667,8 @@ function ProviderLessonsContent() {
               }
             }}
             review={selectedLesson.review}
+            topic={getCompletion(selectedLesson.id)?.topic ?? selectedLesson.topic}
+            providerNote={getCompletion(selectedLesson.id)?.comment}
           />
         )}
 
