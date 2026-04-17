@@ -311,25 +311,27 @@ export default function MessagesPage() {
 
       <div className="hidden md:block page-container py-8 sm:py-10 lg:py-12">
         {/* Page Header */}
-        <div className="mb-8">
+        <div className="mb-6">
           <h1 className="font-display text-2xl sm:text-3xl font-medium text-foreground">Messages</h1>
           <p className="text-muted-foreground mt-1">Your conversations with teachers</p>
+          <div className="mt-5">
+            <FilterPills<InboxFilter>
+              value={filter}
+              onChange={setFilter}
+              options={[
+                { value: "all", label: "All", count: filterCounts.all },
+                { value: "reported", label: "Reported", count: filterCounts.reported },
+                { value: "archived", label: "Archived", count: filterCounts.archived },
+              ]}
+            />
+          </div>
         </div>
 
         <div className="grid gap-4 sm:gap-6 lg:grid-cols-3 h-[calc(100vh-320px)]">
           <Card className="lg:col-span-1 flex flex-col">
             <CardContent className="p-0 flex-1 flex flex-col">
-              <div className="p-4 border-b space-y-3">
+              <div className="p-4 border-b">
                 <h2 className="font-semibold text-sm text-muted-foreground">Conversations</h2>
-                <FilterPills<InboxFilter>
-                  value={filter}
-                  onChange={setFilter}
-                  options={[
-                    { value: "all", label: "All", count: filterCounts.all },
-                    { value: "reported", label: "Reported", count: filterCounts.reported },
-                    { value: "archived", label: "Archived", count: filterCounts.archived },
-                  ]}
-                />
               </div>
               <div className="divide-y flex-1 overflow-y-auto">
                 {visibleConversations.length === 0 ? (
