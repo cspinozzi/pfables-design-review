@@ -4,7 +4,7 @@ import { useState } from "react"
 import dynamic from "next/dynamic"
 import { ServiceCard } from "@/components/service-card"
 import { useRouter } from "next/navigation"
-import { Calendar, Clock, MapPin, User, DollarSign, RefreshCw, ArrowRight } from "lucide-react"
+import { BookOpen, Calendar, Clock, MapPin, User, DollarSign, RefreshCw, ArrowRight } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 
@@ -204,9 +204,20 @@ export default function LessonsPage() {
   return (
     <div className="min-h-screen bg-background pb-24 sm:pb-12">
       <div className="page-container pt-6">
-        <div className="mb-6">
-          <h1 className="mb-1 font-display text-2xl font-medium text-foreground">Lessons</h1>
-          <p className="text-sm text-muted-foreground">Your scheduled classes and services</p>
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+          <div>
+            <h1 className="mb-1 font-display text-2xl font-medium text-foreground">Lessons</h1>
+            <p className="text-sm text-muted-foreground">Your scheduled classes and services</p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="rounded-full gap-1.5 self-start"
+            onClick={() => router.push("/parent/lessons/history")}
+          >
+            <BookOpen className="h-4 w-4" />
+            View History
+          </Button>
         </div>
 
         <div className="flex items-center gap-2 mb-6">
