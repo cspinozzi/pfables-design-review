@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { MoreVertical, User, Flag, Archive } from "lucide-react"
+import { MoreVertical, User, Flag, Archive, ArchiveRestore } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -36,6 +36,8 @@ type ConversationMenuProps = {
   participantName: string
   onArchive: () => void
   onReport?: () => void
+  onUnarchive?: () => void
+  isArchived?: boolean
   buttonClassName?: string
   iconClassName?: string
 }
@@ -45,6 +47,8 @@ export function ConversationMenu({
   participantName,
   onArchive,
   onReport,
+  onUnarchive,
+  isArchived = false,
   buttonClassName,
   iconClassName,
 }: ConversationMenuProps) {
@@ -92,10 +96,17 @@ export function ConversationMenu({
             Report Conversation
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={onArchive} className="gap-2 cursor-pointer">
-            <Archive className="h-4 w-4" />
-            Archive Chat
-          </DropdownMenuItem>
+          {isArchived ? (
+            <DropdownMenuItem onClick={onUnarchive} className="gap-2 cursor-pointer">
+              <ArchiveRestore className="h-4 w-4" />
+              Unarchive Chat
+            </DropdownMenuItem>
+          ) : (
+            <DropdownMenuItem onClick={onArchive} className="gap-2 cursor-pointer">
+              <Archive className="h-4 w-4" />
+              Archive Chat
+            </DropdownMenuItem>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
 

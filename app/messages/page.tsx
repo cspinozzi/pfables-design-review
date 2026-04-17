@@ -96,6 +96,19 @@ export default function MessagesPage() {
     })
   }
 
+  const handleUnarchive = (convId: string) => {
+    setArchivedIds((prev) => {
+      const next = new Set(prev)
+      next.delete(convId)
+      return next
+    })
+    toast.success("Conversation unarchived", {
+      description: "It's back in your inbox.",
+    })
+  }
+
+  const isSelectedArchived = selectedConversation ? archivedIds.has(selectedConversation) : false
+
   const profileHrefFor = (other: { id: string; role?: string } | undefined) => {
     if (!other) return undefined
     if (other.role === "parent") return `/browse/${other.id}`
@@ -174,17 +187,17 @@ export default function MessagesPage() {
                       >
                         <div className="flex items-start gap-3">
                           <div className="relative">
-                            <Avatar className="h-14 w-14">
+                            <Avatar className={`h-14 w-14 ${archivedIds.has(conv.id) ? "opacity-60" : ""}`}>
                               <AvatarImage src={otherParticipant?.avatar || "/placeholder.svg"} />
                               <AvatarFallback className="text-base">{otherParticipant?.name.charAt(0)}</AvatarFallback>
                             </Avatar>
-                            {conv.unreadCount > 0 && (
+                            {conv.unreadCount > 0 && !archivedIds.has(conv.id) && (
                               <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
                                 {conv.unreadCount}
                               </div>
                             )}
                           </div>
-                          <div className="flex-1 min-w-0">
+                          <div className={`flex-1 min-w-0 ${archivedIds.has(conv.id) ? "opacity-60" : ""}`}>
                             <div className="mb-1 flex items-baseline justify-between gap-2">
                               <h3 className="font-semibold text-base truncate">{otherParticipant?.name}</h3>
                               <p className="text-xs text-muted-foreground flex-shrink-0">
@@ -236,6 +249,8 @@ export default function MessagesPage() {
                           participantName={other?.name ?? "this user"}
                           onArchive={() => handleArchive(selectedConv.id)}
                           onReport={() => handleReport(selectedConv.id)}
+                          onUnarchive={() => handleUnarchive(selectedConv.id)}
+                          isArchived={isSelectedArchived}
                           buttonClassName="h-10 w-10"
                         />
                       )
@@ -280,28 +295,34 @@ export default function MessagesPage() {
                 </div>
 
                 <div className="border-t bg-background p-3 safe-bottom flex-shrink-0">
-                  <div className="flex gap-2 items-end">
-                    <Input
-                      placeholder="Message..."
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && !e.shiftKey) {
-                          e.preventDefault()
-                          handleSend()
-                        }
-                      }}
-                      className="h-11 text-base rounded-full border-2 flex-1"
-                    />
-                    <Button
-                      onClick={handleSend}
-                      size="icon"
-                      className="h-11 w-11 rounded-full flex-shrink-0"
-                      disabled={!newMessage.trim()}
-                    >
-                      <Send className="h-5 w-5" />
-                    </Button>
-                  </div>
+                  {isSelectedArchived ? (
+                    <div className="rounded-full border-2 border-dashed border-muted bg-muted/40 px-4 py-2.5 text-center text-sm text-muted-foreground">
+                      This conversation is archived. Unarchive to reply.
+                    </div>
+                  ) : (
+                    <div className="flex gap-2 items-end">
+                      <Input
+                        placeholder="Message..."
+                        value={newMessage}
+                        onChange={(e) => setNewMessage(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && !e.shiftKey) {
+                            e.preventDefault()
+                            handleSend()
+                          }
+                        }}
+                        className="h-11 text-base rounded-full border-2 flex-1"
+                      />
+                      <Button
+                        onClick={handleSend}
+                        size="icon"
+                        className="h-11 w-11 rounded-full flex-shrink-0"
+                        disabled={!newMessage.trim()}
+                      >
+                        <Send className="h-5 w-5" />
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </>
             )}
@@ -355,17 +376,17 @@ export default function MessagesPage() {
                       >
                         <div className="flex items-center gap-2.5">
                           <div className="relative flex-shrink-0">
-                            <Avatar className="h-9 w-9">
+                            <Avatar className={`h-9 w-9 ${archivedIds.has(conv.id) ? "opacity-60" : ""}`}>
                               <AvatarImage src={otherParticipant?.avatar || "/placeholder.svg"} />
                               <AvatarFallback className="text-xs">{otherParticipant?.name.charAt(0)}</AvatarFallback>
                             </Avatar>
-                            {conv.unreadCount > 0 && (
+                            {conv.unreadCount > 0 && !archivedIds.has(conv.id) && (
                               <div className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-semibold text-primary-foreground">
                                 {conv.unreadCount}
                               </div>
                             )}
                           </div>
-                          <div className="flex-1 min-w-0">
+                          <div className={`flex-1 min-w-0 ${archivedIds.has(conv.id) ? "opacity-60" : ""}`}>
                             <div className="flex items-center justify-between gap-2">
                               <h3 className="text-sm font-medium truncate">{otherParticipant?.name}</h3>
                               <p className="text-xs text-muted-foreground flex-shrink-0">
@@ -420,6 +441,8 @@ export default function MessagesPage() {
                             participantName={other?.name ?? "this user"}
                             onArchive={() => handleArchive(selectedConv.id)}
                             onReport={() => handleReport(selectedConv.id)}
+                            onUnarchive={() => handleUnarchive(selectedConv.id)}
+                            isArchived={isSelectedArchived}
                           />
                         )
                       })()}
@@ -463,28 +486,34 @@ export default function MessagesPage() {
                   </div>
 
                   <div className="border-t p-4 sm:p-5 flex-shrink-0">
-                    <div className="flex gap-2">
-                      <Input
-                        placeholder="Type a message..."
-                        value={newMessage}
-                        onChange={(e) => setNewMessage(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" && !e.shiftKey) {
-                            e.preventDefault()
-                            handleSend()
-                          }
-                        }}
-                        className="h-12 text-base"
-                      />
-                      <Button
-                        onClick={handleSend}
-                        size="icon"
-                        className="h-12 w-12 flex-shrink-0"
-                        disabled={!newMessage.trim()}
-                      >
-                        <Send className="h-5 w-5" />
-                      </Button>
-                    </div>
+                    {isSelectedArchived ? (
+                      <div className="rounded-md border border-dashed bg-muted/40 px-4 py-3 text-center text-sm text-muted-foreground">
+                        This conversation is archived. Unarchive to reply and receive notifications.
+                      </div>
+                    ) : (
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="Type a message..."
+                          value={newMessage}
+                          onChange={(e) => setNewMessage(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" && !e.shiftKey) {
+                              e.preventDefault()
+                              handleSend()
+                            }
+                          }}
+                          className="h-12 text-base"
+                        />
+                        <Button
+                          onClick={handleSend}
+                          size="icon"
+                          className="h-12 w-12 flex-shrink-0"
+                          disabled={!newMessage.trim()}
+                        >
+                          <Send className="h-5 w-5" />
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </>
               )}
