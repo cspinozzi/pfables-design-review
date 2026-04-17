@@ -6,13 +6,16 @@ import { ServiceCard } from "@/components/service-card"
 const ServiceDetailModal = dynamic(() => import("@/components/service-detail-modal").then(m => ({ default: m.ServiceDetailModal })), { ssr: false })
 import { ReviewDisplay, type ReviewData } from "@/components/review-display"
 import { useRouter, useSearchParams } from "next/navigation"
-import { Calendar, Clock, MapPin, User, DollarSign } from "lucide-react"
+import { Calendar, CheckCircle2, Clock, MapPin, User, DollarSign } from "lucide-react"
+import { toast } from "sonner"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { CompleteLessonDialog } from "@/components/provider/complete-lesson-dialog"
 import { useMockMessages } from "@/hooks/use-mock-messages"
 import { useAuth } from "@/lib/auth-context"
 import { useReschedule } from "@/lib/reschedule-context"
 import { useMessageContext } from "@/lib/message-context"
+import { useLessonCompletion } from "@/lib/lesson-completion-context"
 
 type LessonStatus = "active" | "completed" | "cancelled"
 type FilterKey = "active" | "received"
@@ -69,7 +72,42 @@ function ProviderLessonsContent() {
   const { conversations } = useMockMessages()
   const { rescheduledIds, addProviderReschedule } = useReschedule()
   const { findConversationByParticipantName, sendMessage } = useMessageContext()
+  const { completeLesson } = useLessonCompletion()
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null)
+  const [completingLesson, setCompletingLesson] = useState<Lesson | null>(null)
+
+  const handleCompleteSubmit = ({ topic, comment }: { topic: string; comment: string }) => {
+    const lesson = completingLesson
+    if (!lesson) return
+
+    completeLesson({
+      id: lesson.id,
+      title: lesson.title,
+      student: lesson.student,
+      studentAvatar: lesson.studentAvatar,
+      parent: lesson.parent,
+      parentAvatar: lesson.parentAvatar,
+      rate: lesson.rate,
+      duration: lesson.duration,
+      location: lesson.location,
+      originalDate: lesson.date,
+      topic,
+      comment: comment || undefined,
+      completedAt: new Date(),
+    })
+
+    setLessons((prev) =>
+      prev.map((l) => (l.id === lesson.id ? { ...l, status: "completed", paid: false } : l))
+    )
+    if (selectedLesson?.id === lesson.id) {
+      setSelectedLesson((prev) => (prev ? { ...prev, status: "completed", paid: false } : null))
+    }
+    setCompletingLesson(null)
+
+    toast.success("Lesson marked as complete", {
+      description: "Payment moved to Waiting Payment.",
+    })
+  }
 
   const initialTab = searchParams.get("tab")
   const [filter, setFilter] = useState<FilterKey>(
@@ -394,6 +432,20 @@ function ProviderLessonsContent() {
                   </div>
                 ) : lesson.review ? (
                   <ReviewDisplay review={lesson.review} serviceName={lesson.title} />
+                ) : lesson.status === "active" ? (
+                  <div className="flex items-center justify-end gap-2 px-4 sm:px-6 py-3 border-t bg-muted/30 rounded-b-xl">
+                    <Button
+                      size="sm"
+                      className="rounded-full px-5 font-semibold gap-1.5"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setCompletingLesson(lesson)
+                      }}
+                    >
+                      <CheckCircle2 className="h-4 w-4" />
+                      Complete
+                    </Button>
+                  </div>
                 ) : undefined}
                 details={
                   <>
@@ -526,6 +578,14 @@ function ProviderLessonsContent() {
             review={selectedLesson.review}
           />
         )}
+
+        <CompleteLessonDialog
+          open={!!completingLesson}
+          onClose={() => setCompletingLesson(null)}
+          lessonTitle={completingLesson?.title}
+          studentName={completingLesson?.student}
+          onSubmit={handleCompleteSubmit}
+        />
       </div>
     </div>
   )

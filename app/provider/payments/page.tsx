@@ -1,6 +1,9 @@
 "use client"
 
+import { useMemo } from "react"
+import { Calendar, DollarSign, FileText, MessageSquare } from "lucide-react"
 import { PaymentsView, type PaymentItem } from "@/components/views/payments-view"
+import { useLessonCompletion } from "@/lib/lesson-completion-context"
 
 const AVATARS = {
   sarah: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop",
@@ -47,6 +50,35 @@ const PAYMENTS: PaymentItem[] = [
 ]
 
 export default function ProviderPaymentsPage() {
+  const { completedLessons } = useLessonCompletion()
+
+  const extraPayments = useMemo<PaymentItem[]>(
+    () =>
+      completedLessons.map((l) => ({
+        id: `pay-${l.id}`,
+        avatar: l.parentAvatar || l.studentAvatar,
+        avatarAlt: l.parent,
+        title: l.title,
+        subtitle: `${l.student} (${l.parent})`,
+        amount: l.rate,
+        date: l.completedAt,
+        status: "waiting" as const,
+        modalPeople: [
+          { name: l.parent, role: "Parent", avatar: l.parentAvatar },
+          { name: l.student, role: "Student" },
+        ],
+        modalFields: [
+          { icon: <Calendar className="h-4 w-4" />, label: "Lesson date", value: l.originalDate },
+          { icon: <DollarSign className="h-4 w-4" />, label: "Rate", value: `$${l.rate}` },
+          { icon: <FileText className="h-4 w-4" />, label: "Topic", value: l.topic },
+          ...(l.comment
+            ? [{ icon: <MessageSquare className="h-4 w-4" />, label: "Notes", value: l.comment }]
+            : []),
+        ],
+      })),
+    [completedLessons],
+  )
+
   return (
     <PaymentsView
       noun="lesson"
@@ -60,6 +92,7 @@ export default function ProviderPaymentsPage() {
         isDefault: true,
       }}
       initialPayments={PAYMENTS}
+      extraPayments={extraPayments}
     />
   )
 }

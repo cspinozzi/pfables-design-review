@@ -51,6 +51,9 @@ export interface PaymentsViewProps {
   initialPayoutMethod: PayoutMethod
   /** Initial payments for the role, already normalized to the shared shape. */
   initialPayments: PaymentItem[]
+  /** Extra payments sourced from outside state (e.g. lessons just marked complete).
+   *  Merged alongside the internal state in totals and filter lists. */
+  extraPayments?: PaymentItem[]
 }
 
 export function PaymentsView({
@@ -59,6 +62,7 @@ export function PaymentsView({
   waitingEmptyText,
   initialPayoutMethod,
   initialPayments,
+  extraPayments = [],
 }: PaymentsViewProps) {
   const [filter, setFilter] = useState<"waiting" | "done" | "refunded">("waiting")
   const [selectedPayment, setSelectedPayment] = useState<PaymentItem | null>(null)
@@ -95,21 +99,26 @@ export function PaymentsView({
     setPayoutModalOpen(false)
   }
 
-  const waiting = payments.filter((p) => p.status === "waiting")
-  const done = payments.filter((p) => p.status === "done")
-  const refundRelated = payments.filter((p) => p.status === "requested" || p.status === "refunded")
+  // Items that only exist in extraPayments (not yet promoted into internal state).
+  // We dedupe by id so consumers can safely pass overlapping lists.
+  const extraOnly = extraPayments.filter((e) => !payments.some((p) => p.id === e.id))
+  const allPayments = [...extraOnly, ...payments]
+
+  const waiting = allPayments.filter((p) => p.status === "waiting")
+  const done = allPayments.filter((p) => p.status === "done")
+  const refundRelated = allPayments.filter((p) => p.status === "requested" || p.status === "refunded")
   const totalWaiting = waiting.reduce((sum, p) => sum + p.amount, 0)
   const totalDone = done.reduce((sum, p) => sum + p.amount, 0)
 
   const now = new Date()
-  const thisMonthTotal = payments
+  const thisMonthTotal = allPayments
     .filter((p) => p.date.getMonth() === now.getMonth() && p.date.getFullYear() === now.getFullYear())
     .reduce((sum, p) => sum + p.amount, 0)
 
   const filteredPayments =
     filter === "refunded"
-      ? payments.filter((p) => p.status === "requested" || p.status === "refunded")
-      : payments.filter((p) => p.status === filter)
+      ? allPayments.filter((p) => p.status === "requested" || p.status === "refunded")
+      : allPayments.filter((p) => p.status === filter)
 
   return (
     <div className="min-h-screen bg-background pb-24 sm:pb-12">
