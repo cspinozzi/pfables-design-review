@@ -1,16 +1,17 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { useSearchParams } from "next/navigation"
+import { toast } from "sonner"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Send, ArrowLeft, MoreVertical, User } from "lucide-react"
+import { Send, ArrowLeft } from "lucide-react"
 import { useMockMessages } from "@/hooks/use-mock-messages"
 import { useAuth } from "@/lib/auth-context"
 import { mockProviders } from "@/lib/mock-data"
-import Link from "next/link"
+import { ConversationMenu } from "@/components/shared/conversation-menu"
 import { formatDistanceToNow } from "date-fns"
 
 
@@ -20,16 +21,55 @@ export default function MessagesPage() {
   const { conversations, getConversationMessages, sendMessage } = useMockMessages()
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null)
   const [newMessage, setNewMessage] = useState("")
+  const [archivedIds, setArchivedIds] = useState<Set<string>>(new Set())
+
+  const visibleConversations = useMemo(
+    () => conversations.filter((c) => !archivedIds.has(c.id)),
+    [conversations, archivedIds],
+  )
 
   useEffect(() => {
     const convParam = searchParams.get("conv")
-    if (convParam && conversations.some((c) => c.id === convParam)) {
+    if (convParam && visibleConversations.some((c) => c.id === convParam)) {
       setSelectedConversation(convParam)
     }
-  }, [searchParams, conversations])
+  }, [searchParams, visibleConversations])
 
-  const selectedConv = conversations.find((c) => c.id === selectedConversation)
+  useEffect(() => {
+    if (selectedConversation && archivedIds.has(selectedConversation)) {
+      setSelectedConversation(null)
+    }
+  }, [selectedConversation, archivedIds])
+
+  const selectedConv = visibleConversations.find((c) => c.id === selectedConversation)
   const messages = selectedConversation ? getConversationMessages(selectedConversation) : []
+
+  const handleArchive = (convId: string) => {
+    setArchivedIds((prev) => {
+      const next = new Set(prev)
+      next.add(convId)
+      return next
+    })
+    toast.success("Conversation archived", {
+      description: "It will no longer appear in your inbox.",
+      action: {
+        label: "Undo",
+        onClick: () =>
+          setArchivedIds((prev) => {
+            const next = new Set(prev)
+            next.delete(convId)
+            return next
+          }),
+      },
+    })
+  }
+
+  const profileHrefFor = (other: { id: string; role?: string } | undefined) => {
+    if (!other) return undefined
+    if (other.role === "parent") return `/browse/${other.id}`
+    const prov = mockProviders.find((p) => p.id === other.id) || mockProviders.find((p) => p.userId === other.id)
+    return prov ? `/browse/${prov.id}` : `/browse/${other.id}`
+  }
 
   const handleSend = () => {
     if (newMessage.trim() && selectedConversation && user) {
@@ -54,11 +94,11 @@ export default function MessagesPage() {
             <div className="border-b bg-background px-4 py-4 flex items-center justify-between">
               <h1 className="text-xl font-bold">Chats</h1>
               <div className="text-sm text-muted-foreground">
-                {conversations.length} {conversations.length === 1 ? "conversation" : "conversations"}
+                {visibleConversations.length} {visibleConversations.length === 1 ? "conversation" : "conversations"}
               </div>
             </div>
             <div className="flex-1 overflow-y-auto">
-              {conversations.length === 0 ? (
+              {visibleConversations.length === 0 ? (
                 <div className="flex flex-col items-center justify-center p-8 text-center h-full">
                   <div className="mb-4 rounded-full bg-secondary p-6">
                     <Send className="h-8 w-8 text-muted-foreground" />
@@ -70,7 +110,7 @@ export default function MessagesPage() {
                 </div>
               ) : (
                 <div className="divide-y">
-                  {conversations.map((conv) => {
+                  {visibleConversations.map((conv) => {
                     const otherParticipant = conv.participants.find((p) => p.id !== user?.id)
                     return (
                       <button
@@ -134,9 +174,17 @@ export default function MessagesPage() {
                         {selectedConv.participants.find((p) => p.id !== user?.id)?.role}
                       </p>
                     </div>
-                    <Button variant="ghost" size="icon" className="h-10 w-10">
-                      <MoreVertical className="h-5 w-5" />
-                    </Button>
+                    {(() => {
+                      const other = selectedConv.participants.find((p) => p.id !== user?.id)
+                      return (
+                        <ConversationMenu
+                          profileHref={profileHrefFor(other)}
+                          participantName={other?.name ?? "this user"}
+                          onArchive={() => handleArchive(selectedConv.id)}
+                          buttonClassName="h-10 w-10"
+                        />
+                      )
+                    })()}
                   </div>
                 </div>
 
@@ -220,10 +268,10 @@ export default function MessagesPage() {
                 <h2 className="font-semibold text-sm text-muted-foreground">Conversations</h2>
               </div>
               <div className="divide-y flex-1 overflow-y-auto">
-                {conversations.length === 0 ? (
+                {visibleConversations.length === 0 ? (
                   <div className="p-8 text-center text-sm text-muted-foreground">No conversations yet</div>
                 ) : (
-                  conversations.map((conv) => {
+                  visibleConversations.map((conv) => {
                     const otherParticipant = conv.participants.find((p) => p.id !== user?.id)
                     return (
                       <button
@@ -294,20 +342,12 @@ export default function MessagesPage() {
                       </div>
                       {(() => {
                         const other = selectedConv.participants.find((p) => p.id !== user?.id)
-                        if (!other) return null
-                        let profileHref = `/browse/${other.id}`
-                        if (other.role !== "parent") {
-                          const prov = mockProviders.find((p) => p.id === other.id) || mockProviders.find((p) => p.userId === other.id)
-                          if (prov) profileHref = `/browse/${prov.id}`
-                        }
                         return (
-                          <Link
-                            href={profileHref}
-                            className="inline-flex items-center gap-1.5 text-xs text-muted-foreground px-3 py-1.5 rounded-md hover:bg-primary hover:text-primary-foreground transition-colors"
-                          >
-                            <User className="h-3.5 w-3.5" />
-                            View Profile
-                          </Link>
+                          <ConversationMenu
+                            profileHref={profileHrefFor(other)}
+                            participantName={other?.name ?? "this user"}
+                            onArchive={() => handleArchive(selectedConv.id)}
+                          />
                         )
                       })()}
                     </div>
