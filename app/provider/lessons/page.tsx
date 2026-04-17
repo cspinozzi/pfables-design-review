@@ -72,7 +72,7 @@ function ProviderLessonsContent() {
   const { conversations } = useMockMessages()
   const { rescheduledIds, addProviderReschedule } = useReschedule()
   const { findConversationByParticipantName, sendMessage } = useMessageContext()
-  const { completeLesson } = useLessonCompletion()
+  const { completeLesson, isCompleted } = useLessonCompletion()
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null)
   const [completingLesson, setCompletingLesson] = useState<Lesson | null>(null)
 
@@ -96,12 +96,6 @@ function ProviderLessonsContent() {
       completedAt: new Date(),
     })
 
-    setLessons((prev) =>
-      prev.map((l) => (l.id === lesson.id ? { ...l, status: "completed", paid: false } : l))
-    )
-    if (selectedLesson?.id === lesson.id) {
-      setSelectedLesson((prev) => (prev ? { ...prev, status: "completed", paid: false } : null))
-    }
     setCompletingLesson(null)
 
     toast.success("Lesson marked as complete", {
@@ -430,13 +424,12 @@ function ProviderLessonsContent() {
                       Decline
                     </Button>
                   </div>
-                ) : lesson.review ? (
-                  <ReviewDisplay review={lesson.review} serviceName={lesson.title} />
-                ) : lesson.status === "active" ? (
-                  <div className="flex items-center justify-end gap-2 px-4 sm:px-6 py-3 border-t bg-muted/30 rounded-b-xl">
+                ) : lesson.status === "completed" ? (() => {
+                  const showComplete = !isCompleted(lesson.id)
+                  const completeBtn = showComplete ? (
                     <Button
                       size="sm"
-                      className="rounded-full px-5 font-semibold gap-1.5"
+                      className="rounded-full px-4 py-1.5 h-auto text-sm font-semibold gap-1.5"
                       onClick={(e) => {
                         e.stopPropagation()
                         setCompletingLesson(lesson)
@@ -445,8 +438,24 @@ function ProviderLessonsContent() {
                       <CheckCircle2 className="h-4 w-4" />
                       Complete
                     </Button>
-                  </div>
-                ) : undefined}
+                  ) : null
+
+                  if (lesson.review) {
+                    return (
+                      <ReviewDisplay
+                        review={lesson.review}
+                        serviceName={lesson.title}
+                        rightAction={completeBtn}
+                      />
+                    )
+                  }
+                  if (!showComplete) return undefined
+                  return (
+                    <div className="flex items-center justify-end gap-2 px-4 sm:px-6 py-3 bg-primary/10 rounded-b-xl">
+                      {completeBtn}
+                    </div>
+                  )
+                })() : undefined}
                 details={
                   <>
                     <span className="flex items-center gap-1">

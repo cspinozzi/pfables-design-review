@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, type ReactNode } from "react"
 import { Star } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import Image from "next/image"
@@ -17,9 +17,11 @@ export interface ReviewData {
 interface ReviewDisplayProps {
   review: ReviewData
   serviceName: string
+  /** Optional action rendered after the "View Review" button (e.g. a Complete button). */
+  rightAction?: ReactNode
 }
 
-export function ReviewDisplay({ review, serviceName }: ReviewDisplayProps) {
+export function ReviewDisplay({ review, serviceName, rightAction }: ReviewDisplayProps) {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
@@ -63,12 +65,15 @@ export function ReviewDisplay({ review, serviceName }: ReviewDisplayProps) {
         )}
 
         {/* View Review button on the right */}
-        <button
-          className="flex items-center rounded-full bg-secondary text-secondary-foreground px-4 py-1.5 text-sm font-semibold transition-colors hover:bg-secondary/80 shrink-0"
-          tabIndex={-1}
-        >
-          View Review
-        </button>
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            className="flex items-center rounded-full bg-secondary text-secondary-foreground px-4 py-1.5 text-sm font-semibold transition-colors hover:bg-secondary/80"
+            tabIndex={-1}
+          >
+            View Review
+          </button>
+          {rightAction}
+        </div>
       </div>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
